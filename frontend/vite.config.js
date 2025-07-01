@@ -42,7 +42,5 @@ export default defineConfig({
   },
   define: {
     global: 'globalThis',
-    'import.meta.env.VITE_API_BASE_URL': JSON.stringify(process.env.VITE_API_URL),
-    'import.meta.env.VITE_SSE_ENDPOINT': JSON.stringify(process.env.VITE_SSE_ENDPOINT),
   },
 })
