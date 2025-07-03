@@ -29,24 +29,11 @@ const NotificationContainer = ({ isLoggedIn = false }) => {
         notificationService.createTestNotifications();
       } else if (data.status === 'failed' || data.status === 'error') {
         console.error('❌ SSE 연결 실패 - 실시간 알림 불가');
-        // 연결 실패 시 오프라인 알림
-        addNotification({
-          id: `offline_${Date.now()}`,
-          type: 'warning',
-          title: '연결 끊김',
-          message: '실시간 알림 서비스와의 연결이 끊어졌습니다.',
-          timestamp: new Date().toISOString(),
-          actions: [
-            {
-              label: '다시 연결',
-              type: 'primary',
-              onClick: () => {
-                console.log('수동 재연결 시도');
-                notificationService.connect();
-              }
-            }
-          ]
-        });
+        // 연결 실패 시 오프라인 알림은 표시하지 않음 (너무 많은 알림 방지)
+      } else if (data.status === 'disabled') {
+        console.log('🔕 SSE가 비활성화됨 - 실시간 알림 없음');
+      } else if (data.status === 'endpoint_not_ready') {
+        console.warn('⚠️ SSE 엔드포인트가 준비되지 않음 - 백엔드 확인 필요');
       } else if (data.status === 'disconnected') {
         console.log('🔌 SSE 연결 해제됨');
       }

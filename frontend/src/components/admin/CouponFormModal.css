@@ -276,19 +276,17 @@ input::-webkit-inner-spin-button {
 
 /* 버튼 컨테이너 */
 .modal-actions {
-  padding: 24px 0 0 0;
-  background: none;
+  padding: 16px 32px 20px 32px;
+  background: #FBF9EF;
   border-top: 1px solid #e2e8f0;
   display: flex;
   justify-content: flex-end;
   gap: 16px;
-  margin: 24px 0 0 0;
-  padding-left: 32px;
-  padding-right: 32px;
+  margin: 16px 0 0 0;
 }
 
 [data-theme="dark"] .modal-actions {
-  background: none;
+  background: #FBF9EF;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -395,6 +393,7 @@ input::-webkit-inner-spin-button {
   .modal-actions {
     padding: 20px 24px 24px 24px;
     flex-direction: column-reverse;
+    background: #FBF9EF;
   }
   
   .modal-actions button {

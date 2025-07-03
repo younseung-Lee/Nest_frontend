@@ -149,7 +149,19 @@ const CouponManagement = ({ isDarkMode }) => {
           <p>할인 쿠폰을 생성하고 관리합니다</p>
         </div>
         <div className="header-actions">
-          <button className="btn-secondary" onClick={loadCoupons}>
+          <button 
+            className="btn-secondary" 
+            onClick={loadCoupons}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px 20px',
+              fontSize: '14px',
+              fontWeight: '600',
+              minWidth: 'auto'
+            }}
+          >
             <RefreshCw size={18} className={loading ? 'spinning' : ''} />
             새로고침
           </button>
@@ -159,6 +171,15 @@ const CouponManagement = ({ isDarkMode }) => {
               setSelectedCoupon(null);
               setShowCreateModal(true);
             }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px 20px',
+              fontSize: '14px',
+              fontWeight: '600',
+              minWidth: 'auto'
+            }}
           >
             <Plus size={18} />
             쿠폰 추가
@@ -167,8 +188,20 @@ const CouponManagement = ({ isDarkMode }) => {
       </div>
 
 
-      <div className="content-table">
-        <div className="table-header">
+      <div className="content-table" style={{
+        gridTemplateColumns: '1.5fr 1fr 1.2fr 1.5fr 120px'
+      }}>
+        <div className="table-header" style={{
+          background: 'linear-gradient(135deg, #ffb300 0%, #ff8f00 100%)',
+          color: 'white',
+          fontWeight: '700',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+          fontSize: '13px',
+          textShadow: '0 1px 3px rgba(0, 0, 0, 0.2)',
+          padding: '24px 32px',
+          boxShadow: '0 4px 20px rgba(255, 179, 0, 0.3)'
+        }}>
           <div className="table-cell">쿠폰 정보</div>
           <div className="table-cell">할인</div>
           <div className="table-cell">사용률</div>
@@ -194,53 +227,146 @@ const CouponManagement = ({ isDarkMode }) => {
             );
           } else {
             return coupons.map((coupon) => (
-            <div key={coupon.id} className="table-row">
-              <div className="table-cell">
-                <div className="cell-content">
-                  <Gift size={16} />
+            <div key={coupon.id} className="table-row" style={{
+              background: 'rgb(251, 249, 239)',
+              borderBottom: '1px solid rgba(255, 179, 0, 0.2)',
+              padding: '20px 32px',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(145deg, #fff3c4, #fff8e1)';
+              e.currentTarget.style.transform = 'translateX(4px)';
+              e.currentTarget.style.boxShadow = '0 4px 20px rgba(255, 179, 0, 0.15)';
+              e.currentTarget.style.borderLeft = '4px solid #ffb300';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgb(251, 249, 239)';
+              e.currentTarget.style.transform = 'translateX(0)';
+              e.currentTarget.style.boxShadow = 'none';
+              e.currentTarget.style.borderLeft = 'none';
+            }}>
+              <div className="table-cell" style={{
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#6d4c41',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                <div className="cell-content" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <Gift size={16} style={{ color: '#ffb300' }} />
                   <div>
-                    <strong>{coupon.name || coupon.couponName || '이름 없음'}</strong>
+                    <strong style={{ color: '#e65100', fontWeight: '700' }}>{coupon.name || coupon.couponName || '이름 없음'}</strong>
                   </div>
                 </div>
               </div>
-              <div className="table-cell">
-                <div className="cell-content">
+              <div className="table-cell" style={{
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#6d4c41',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                <div className="cell-content" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
                   <div>
-                    <div>₩{(coupon.discountAmount || 0).toLocaleString()}</div>
+                    <div style={{ color: '#e65100', fontWeight: '600' }}>₩{(coupon.discountAmount || 0).toLocaleString()}</div>
                   </div>
                 </div>
               </div>
-              <div className="table-cell">
-                <div className="cell-content">
-                  <Users size={16} />
+              <div className="table-cell" style={{
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#6d4c41',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                <div className="cell-content" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <Users size={16} style={{ color: '#ffb300' }} />
                   <div>
-                    <div>{coupon.issuedQuantity || 0} / {coupon.totalQuantity || 0}</div>
-                    <div className="usage-bar">
+                    <div style={{ color: '#6d4c41', fontWeight: '500' }}>{coupon.issuedQuantity || 0} / {coupon.totalQuantity || 0}</div>
+                    <div className="usage-bar" style={{
+                      width: '100%',
+                      height: '6px',
+                      background: 'rgba(255, 179, 0, 0.2)',
+                      borderRadius: '3px',
+                      overflow: 'hidden',
+                      marginTop: '4px'
+                    }}>
                       <div 
                         className="usage-fill"
                         style={{ 
-                          width: `${((coupon.issuedQuantity || 0) / (coupon.totalQuantity || 1)) * 100}%` 
+                          width: `${((coupon.issuedQuantity || 0) / (coupon.totalQuantity || 1)) * 100}%`,
+                          height: '100%',
+                          background: 'linear-gradient(135deg, #ffb300, #ff8f00)',
+                          borderRadius: '3px',
+                          transition: 'width 0.3s ease'
                         }}
                       ></div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="table-cell">
-                <div className="cell-content">
-                  <Calendar size={16} />
-                  <div>
-                    <div>{(coupon.validFrom || '시작일 없음').replace('T', ' ').substring(0, 16)}</div>
-                    ~ {(coupon.validTo || '종료일 없음').replace('T', ' ').substring(0, 16)}
+              <div className="table-cell" style={{
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#6d4c41',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                <div className="cell-content" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <Calendar size={16} style={{ color: '#ffb300' }} />
+                  <div style={{ fontSize: '12px' }}>
+                    <div style={{ color: '#6d4c41' }}>{(coupon.validFrom || '시작일 없음').replace('T', ' ').substring(0, 16)}</div>
+                    <div style={{ color: '#6d4c41' }}>~ {(coupon.validTo || '종료일 없음').replace('T', ' ').substring(0, 16)}</div>
                   </div>
                 </div>
               </div>
-              <div className="table-cell">
+              <div className="table-cell" style={{
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#6d4c41',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
                 <div className="table-actions">
                   <button 
                     className="action-btn edit"
                     onClick={() => handleEdit(coupon)}
                     title="수정"
+                    style={{
+                      padding: '10px',
+                      borderRadius: '12px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.15))',
+                      color: '#3b82f6',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      backdropFilter: 'blur(10px)',
+                      marginRight: '8px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.1)';
+                      e.currentTarget.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                   >
                     <Edit3 size={16} />
                   </button>
@@ -248,6 +374,24 @@ const CouponManagement = ({ isDarkMode }) => {
                     className="action-btn delete"
                     onClick={() => handleDelete(coupon.id)}
                     title="삭제"
+                    style={{
+                      padding: '10px',
+                      borderRadius: '12px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15))',
+                      color: '#ef4444',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      backdropFilter: 'blur(10px)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.1)';
+                      e.currentTarget.style.boxShadow = '0 8px 24px rgba(239, 68, 68, 0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                   >
                     <Trash2 size={16} />
                   </button>

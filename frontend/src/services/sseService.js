@@ -37,30 +37,40 @@ class SSEService {
       headers['Last-Event-Id'] = lastEventId;
     }
 
-    const sseUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}${import.meta.env.VITE_SSE_ENDPOINT || '/sse/notifications/subscribe'}`;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    const endpoint = import.meta.env.VITE_SSE_ENDPOINT || '/sse/notifications/subscribe';
+    const sseUrl = `${baseUrl}${endpoint}`;
+
+    console.log('🔗 SSE 연결 시도 중...');
+    console.log('📍 URL:', sseUrl);
+    console.log('🔑 Headers:', headers);
+    console.log('🎯 Base URL:', baseUrl);
+    console.log('🎯 Endpoint:', endpoint);
 
     try {
       this.eventSource = new EventSourcePolyfill(sseUrl, {
         headers: headers,
-        heartbeatTimeout: 3600000 // 30초 heartbeat
+        heartbeatTimeout: 3600000, // 1시간
+        withCredentials: true // CORS 인증 정보 포함
       });
 
       // 연결 성공
       this.eventSource.onopen = (event) => {
-        console.log('SSE 연결 성공');
+        console.log('✅ SSE 연결 성공!');
+        console.log('📊 연결 상태:', this.eventSource.readyState);
         this.reconnectAttempts = 0; // 재연결 시도 횟수 초기화
         if (onOpen) onOpen(event);
       };
 
       // 메시지 수신 (기본 message 이벤트)
       this.eventSource.onmessage = (event) => {
-        console.log('SSE 메시지 수신:', event);
+        console.log('📨 SSE 메시지 수신:', event);
         if (onMessage) onMessage(event);
       };
 
       // 채팅 종료 알림 전용 이벤트 리스너
       this.eventSource.addEventListener('chat-termination', (event) => {
-        console.log('채팅 종료 알림 수신:', event);
+        console.log('🔥 채팅 종료 알림 수신:', event);
         try {
           const data = JSON.parse(event.data);
           console.log('파싱된 채팅 종료 데이터:', data);
@@ -73,7 +83,7 @@ class SSEService {
 
       // 채팅 시작 알림 전용 이벤트 리스너
       this.eventSource.addEventListener('chat-open', (event) => {
-        console.log('채팅 시작 알림 수신:', event);
+        console.log('🚀 채팅 시작 알림 수신:', event);
         try {
           const data = JSON.parse(event.data);
           console.log('파싱된 채팅 시작 데이터:', data);
@@ -86,24 +96,50 @@ class SSEService {
 
       // 에러 처리
       this.eventSource.onerror = (event) => {
-        console.error('SSE 연결 오류:', event);
+        console.error('❌ SSE 연결 오류 발생!');
+        console.error('📊 EventSource readyState:', this.eventSource.readyState);
+        console.error('📊 EventSource States: CONNECTING=0, OPEN=1, CLOSED=2');
+        console.error('🔍 에러 이벤트 상세:', {
+          type: event.type,
+          target: event.target,
+          readyState: event.target?.readyState,
+          url: event.target?.url
+        });
+        
+        // 연결 상태별 에러 메시지
+        switch (this.eventSource.readyState) {
+          case EventSource.CONNECTING:
+            console.warn('⏳ 연결 시도 중 에러 발생 (CONNECTING)');
+            break;
+          case EventSource.OPEN:
+            console.warn('📡 연결된 상태에서 에러 발생 (OPEN)');
+            break;
+          case EventSource.CLOSED:
+            console.warn('🚫 연결이 닫힌 상태 (CLOSED)');
+            break;
+          default:
+            console.warn('❓ 알 수 없는 연결 상태:', this.eventSource.readyState);
+        }
         
         if (!this.isManualClose && this.reconnectAttempts < this.maxReconnectAttempts) {
           this.reconnectAttempts++;
-          console.log(`SSE 재연결 시도 ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
+          console.log(`🔄 SSE 재연결 시도 ${this.reconnectAttempts}/${this.maxReconnectAttempts} (${this.reconnectInterval}ms 후)`);
           
           setTimeout(() => {
             if (!this.isManualClose) {
               this.connect(token, onMessage, onError, onOpen, lastEventId);
             }
           }, this.reconnectInterval);
+        } else if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+          console.error('❌ 최대 재연결 시도 횟수 초과. 재연결을 중단합니다.');
         }
         
         if (onError) onError(event);
       };
 
     } catch (error) {
-      console.error('SSE 연결 생성 실패:', error);
+      console.error('❌ SSE 연결 생성 실패:', error);
+      console.error('❌ 에러 스택:', error.stack);
       if (onError) onError(error);
     }
   }

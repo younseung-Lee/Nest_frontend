@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Star, Search, ArrowLeft } from 'lucide-react';
+import React, {useState, useEffect} from 'react';
+import {Star, Search, ArrowLeft} from 'lucide-react';
 import './MentorList.css';
-import { profileAPI, categoryAPI } from '../services/api';
+import {profileAPI, categoryAPI} from '../services/api';
+import {
+  preloadMentorImages,
+  getMentorGradientClass,
+  handleImageError,
+  handleImageLoad
+} from '../utils/imageUtils';
 
-const MentorList = ({ category, onBack, onMentorSelect }) => {
+const MentorList = ({category, onBack, onMentorSelect}) => {
   const [mentors, setMentors] = useState([]);
   const [filteredMentors, setFilteredMentors] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,6 +35,8 @@ const MentorList = ({ category, onBack, onMentorSelect }) => {
   useEffect(() => {
     profileAPI.searchMentors()
     .then(res => {
+      console.log('✅ 검색 멘토 API 응답 성공, 멘토 수:', res.data?.data?.length);
+
       const allMentors = res?.data?.data || [];
 
       const filtered = selectedCategory
@@ -37,6 +45,11 @@ const MentorList = ({ category, onBack, onMentorSelect }) => {
 
       setMentors(filtered);
       setFilteredMentors(filtered);
+
+      // 🚀 이미지 프리로드 (성능 최적화)
+      preloadMentorImages(filtered)
+      .then(() => console.log('✅ 멘토 이미지 프리로드 완료'))
+      .catch(err => console.warn('⚠️ 이미지 프리로드 중 일부 실패:', err));
     })
     .catch(err => {
       console.error('멘토 목록 불러오기 실패:', err);
@@ -74,7 +87,7 @@ const MentorList = ({ category, onBack, onMentorSelect }) => {
       <div className="mentor-list-container">
         <div className="mentor-list-header">
           <button className="mentor-list-back-button" onClick={onBack}>
-            <ArrowLeft className="icon" />
+            <ArrowLeft className="icon"/>
             뒤로가기
           </button>
           <h1 className="mentor-list-title">
@@ -85,7 +98,7 @@ const MentorList = ({ category, onBack, onMentorSelect }) => {
         <div className="mentor-list-controls">
           <div className="mentor-list-search-section">
             <div className="mentor-list-search-input-wrapper">
-              <Search className="search-icon" />
+              <Search className="search-icon"/>
               <input
                   type="text"
                   placeholder="키워드로 검색"
@@ -130,20 +143,41 @@ const MentorList = ({ category, onBack, onMentorSelect }) => {
                   onClick={() => onMentorSelect?.(mentor)}
               >
                 <div className="mentor-card-header">
-                  <div className="mentor-avatar">{mentor.title?.[0]}</div>
+                  <div className="mentor-avatar">
+                    {mentor.imgUrl ? (
+                        <img
+                            src={mentor.imgUrl}
+                            alt={mentor.name}
+                            loading="lazy"
+                            onLoad={(e) => handleImageLoad(e)}
+                            onError={(e) => handleImageError(e, mentor.name)}
+                            style={{
+                              opacity: '0',
+                              transition: 'opacity 0.3s ease'
+                            }}
+                        />
+                    ) : null}
+                    <div
+                        className={`mentor-avatar-text ${!mentor.imgUrl
+                            ? getMentorGradientClass(mentor.id, 10) : ''}`}
+                        style={{display: mentor.imgUrl ? 'none' : 'flex'}}
+                    >
+                      {mentor.title?.[0] || mentor.name?.[0] || 'M'}
+                    </div>
+                  </div>
                   <div className="mentor-basic-info">
                     <h3 className="mentor-name">{mentor.name}</h3>
                     <p className="mentor-role">{mentor.title}</p>
                     <p className="mentor-company">{mentor.category}</p>
                   </div>
-
                 </div>
 
                 <div className="mentor-card-body">
                   <p className="mentor-description">{mentor.introduction}</p>
                   <div className="mentor-stats-row">
                     <div className="stat-item">
-                      <span>{new Date(mentor.createdAt).toLocaleDateString()}</span>
+                      <span>{new Date(
+                          mentor.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, Bell, X } from 'lucide-react';
 import notificationService from '../services/notificationService';
+import NotificationHistoryModal from './NotificationHistoryModal';
 import './Header.css';
 import logo from '../image/cool.png';
-import { categoryAPI, authAPI } from '../services/api';
+import { categoryAPI, authAPI, notificationAPI } from '../services/api';
 import { accessTokenUtils, refreshTokenUtils } from '../utils/tokenUtils';
 import {decodeToken} from "../utils/authUtils.js";
 import { useNavigate } from 'react-router-dom';
@@ -21,7 +22,8 @@ const Header = ({
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
-  const [hasNotifications, setHasNotifications] = useState(true); // 알림 상태
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0); // 알림 개수
   const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
 
@@ -38,9 +40,47 @@ const Header = ({
     }
   }, [isNavOpen, isCategoryOpen]);
 
+  // 로그인된 사용자의 알림 개수 조회
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchNotificationCount();
+    }
+  }, [isLoggedIn]);
+
+  const fetchNotificationCount = async () => {
+    try {
+      // 첫 페이지만 가져와서 총 개수 확인
+      const params = {
+        page: 0,
+        size: 1, // 개수만 확인하므로 1개만 가져오기
+        sort: 'createdAt,desc'
+      };
+      const response = await notificationAPI.getNotifications(params);
+      if (response.data && response.data.data) {
+        setNotificationCount(response.data.data.totalElements || 0);
+      }
+    } catch (error) {
+      console.error('알림 개수 조회 실패:', error);
+    }
+  };
+
   const toggleSidebar = () => setIsNavOpen(!isNavOpen);
   const toggleCategory = () => setIsCategoryOpen(!isCategoryOpen);
   const toggleInquiry = () => setIsInquiryOpen(!isInquiryOpen);
+
+  // 알림 버튼 클릭 핸들러
+  const handleNotificationClick = () => {
+    setIsNotificationModalOpen(true);
+  };
+
+  // 알림 모달 닫기 핸들러
+  const handleNotificationModalClose = () => {
+    setIsNotificationModalOpen(false);
+    // 모달을 닫을 때 알림 개수 다시 조회
+    if (isLoggedIn) {
+      fetchNotificationCount();
+    }
+  };
 
   const handleLoginClick = () => {
     setIsNavOpen(false);
@@ -106,13 +146,20 @@ const Header = ({
             <div className="header-actions">
               {isLoggedIn ? (
                   <>
-                    <button className="notification-button">
+                    <button 
+                      className="notification-button"
+                      onClick={handleNotificationClick}
+                    >
                       <Bell className="icon" />
-                      {hasNotifications && <div className="notification-dot"></div>}
+                      {notificationCount > 0 && (
+                        <div className="notification-badge">
+                          {notificationCount > 99 ? '99+' : notificationCount}
+                        </div>
+                      )}
                     </button>
                     <button className="profile-button" onClick={handleProfileClick}>
                       <img
-                          src={userInfo?.profileImage || '/default-profile.svg'}
+                          src={userInfo?.profileImage || userInfo?.imgUrl || '/default-profile.svg'}
                           alt="프로필"
                           className="profile-image"
                           onError={(e) => {
@@ -291,6 +338,12 @@ const Header = ({
             )}
           </div>
         </div>
+
+        {/* 알림 내역 모달 */}
+        <NotificationHistoryModal 
+          isOpen={isNotificationModalOpen}
+          onClose={handleNotificationModalClose}
+        />
       </>
   );
 };

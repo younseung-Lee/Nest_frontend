@@ -77,7 +77,31 @@ class NotificationService {
   // 에러 처리
   handleError(event) {
     console.error('❌ 알림 서비스 연결 오류:', event);
+    console.error('❌ 에러 세부 정보:', {
+      type: event?.type,
+      target: event?.target?.readyState,
+      url: event?.target?.url,
+      message: event?.message
+    });
+    
     this.isConnected = false;
+    
+    // 에러 유형별 처리
+    if (event?.target?.readyState === EventSource.CLOSED) {
+      console.warn('⚠️ SSE 연결이 서버에 의해 닫혔습니다');
+    }
+    
+    // 백엔드가 준비되지 않은 경우 재연결 시도를 중단
+    if (event?.target?.url && (
+      event?.target?.url.includes('/sse/') || 
+      event?.message?.includes('404') ||
+      event?.message?.includes('Failed to fetch')
+    )) {
+      console.warn('⚠️ SSE 엔드포인트가 준비되지 않은 것 같습니다. 재연결을 중단합니다.');
+      sseService.disconnect(); // 재연결 방지
+      this.notifyListeners('connection', { status: 'endpoint_not_ready' });
+      return;
+    }
     
     // SSE 서비스가 재연결을 처리하므로 여기서는 상태만 업데이트
     if (!sseService.isConnected()) {
@@ -97,93 +121,13 @@ class NotificationService {
       case 'chat-open':
         this.handleChatStartNotification(notification);
         break;
-      // 다른 알림 타입들은 주석 처리하여 비활성화
-      // case 'session_ending':
-      //   this.handleSessionEndingNotification(notification);
-      //   break;
-      // case 'new_message':
-      //   this.handleNewMessageNotification(notification);
-      //   break;
-      // case 'system_update':
-      //   this.handleSystemUpdateNotification(notification);
-      //   break;
       default:
         console.log('처리하지 않는 알림 타입:', notification.type);
-        // 기본 알림도 비활성화
-        // this.notifyListeners('notification', notification);
         break;
     }
   }
 
-  // 세션 종료 5분 전 알림
-  handleSessionEndingNotification(notification) {
-    const sessionNotification = {
-      id: `session_${Date.now()}`,
-      type: 'session',
-      title: '세션 종료 알림',
-      message: `멘토링 세션이 ${notification.remainingMinutes}분 후 종료됩니다. 마무리 준비를 해주세요.`,
-      timestamp: new Date().toISOString(),
-      actions: [
-        {
-          label: '연장 요청',
-          type: 'primary',
-          onClick: () => this.requestSessionExtension(notification.sessionId)
-        },
-        {
-          label: '확인',
-          type: 'secondary',
-          onClick: () => {}
-        }
-      ]
-    };
 
-    this.notifyListeners('notification', sessionNotification);
-  }
-
-  // 새 메시지 알림
-  handleNewMessageNotification(notification) {
-    const messageNotification = {
-      id: `message_${Date.now()}`,
-      type: 'chat',
-      title: '새 메시지',
-      message: `${notification.senderName}님이 새 메시지를 보냈습니다.`,
-      timestamp: new Date().toISOString(),
-      actions: [
-        {
-          label: '채팅 보기',
-          type: 'primary',
-          onClick: () => this.openChat(notification.chatId)
-        }
-      ]
-    };
-
-    this.notifyListeners('notification', messageNotification);
-  }
-
-  // 시스템 업데이트 알림
-  handleSystemUpdateNotification(notification) {
-    const updateNotification = {
-      id: `update_${Date.now()}`,
-      type: 'info',
-      title: '시스템 업데이트',
-      message: notification.message || '새로운 기능이 추가되었습니다.',
-      timestamp: new Date().toISOString(),
-      actions: [
-        {
-          label: '새로고침',
-          type: 'primary',
-          onClick: () => window.location.reload()
-        },
-        {
-          label: '나중에',
-          type: 'secondary',
-          onClick: () => {}
-        }
-      ]
-    };
-
-    this.notifyListeners('notification', updateNotification);
-  }
 
   // 채팅 종료 알림
   handleChatTerminationNotification(notification) {
@@ -204,26 +148,11 @@ class NotificationService {
 
   // 채팅 시작 알림
   async handleChatStartNotification(notification) {
-    console.log('🚀 채팅 시작 알림 처리 시작');
-    console.log('📨 받은 notification 객체:', notification);
-    console.log('📨 notification 타입:', typeof notification);
-    console.log('📨 notification 키들:', Object.keys(notification));
+    // 백엔드 SSE 이벤트의 다양한 필드명 패턴 매핑
+    const chatRoomId = notification.chatRoomId;
     
-    const chatRoomId = notification.chatRoomId || notification.roomId || notification.id;
-    const reservationId = notification.reservationId || notification.reservation_id || notification.reservationID;
-    
-    console.log('🔍 추출된 데이터:');
-    console.log('  - chatRoomId:', chatRoomId, '(타입:', typeof chatRoomId, ')');
-    console.log('  - reservationId:', reservationId, '(타입:', typeof reservationId, ')');
-    
-    // 추가 가능한 필드들도 확인
-    console.log('🔍 기타 가능한 필드들:');
-    console.log('  - notification.roomId:', notification.roomId);
-    console.log('  - notification.reservation_id:', notification.reservation_id);
-    console.log('  - notification.reservationID:', notification.reservationID);
-    console.log('  - notification.mentorId:', notification.mentorId);
-    console.log('  - notification.menteeId:', notification.menteeId);
-    
+    const reservationId = notification.reservationId;
+
     try {
       // 채팅방 ID가 없으면 에러
       if (!chatRoomId) {
@@ -397,22 +326,7 @@ class NotificationService {
                   reservationData.ticketInfo = { name: '멘토링 상담', title: '멘토링 상담' };
                 }
               }
-              
-              console.group('📋 최종 예약 데이터 구조 분석');
-              console.log('reservationData 키들:', Object.keys(reservationData));
-              console.log('현재 사용자 ID:', currentUserId);
-              console.log('현재 사용자 역할:', currentUserRole);
-              console.log('mentor ID:', reservationData.mentor);
-              console.log('mentee ID:', reservationData.mentee);
-              console.log('상대방 ID:', partnerUserId);
-              console.log('상대방 역할:', partnerRole);
-              console.log('partnerInfo:', reservationData.partnerInfo);
-              console.log('ticket ID:', reservationData.ticket);
-              console.log('ticketInfo:', reservationData.ticketInfo);
-              console.log('date (from reservationStartAt):', reservationData.reservationStartAt?.split(' ')[0]);
-              console.log('startTime (from reservationStartAt):', reservationData.reservationStartAt?.split(' ')[1]?.substring(0, 5));
-              console.log('endTime (from reservationEndAt):', reservationData.reservationEndAt?.split(' ')[1]?.substring(0, 5));
-              console.groupEnd();
+
             }
           } catch (parseError) {
             console.error('❌ JSON 파싱 오류:', parseError);
@@ -422,7 +336,17 @@ class NotificationService {
         } else {
           console.error('❌ API 호출 실패:', response.status, response.statusText);
           console.error('❌ 오류 응답 내용:', responseText);
-          apiError = `API 호출 실패 (${response.status}): ${responseText}`;
+          
+          // 403 권한 오류인 경우 특별 처리
+          if (response.status === 403) {
+            console.warn('⚠️ 예약 정보 조회 권한이 없습니다. 기본값으로 표시합니다.');
+            apiError = `권한 없음 (403): 예약 정보 조회 권한이 없습니다`;
+          } else if (response.status === 404) {
+            console.warn('⚠️ 예약 정보를 찾을 수 없습니다.');
+            apiError = `예약 정보 없음 (404): 해당 예약을 찾을 수 없습니다`;
+          } else {
+            apiError = `API 호출 실패 (${response.status}): ${responseText}`;
+          }
         }
       } catch (error) {
         console.error('❌ 예약 정보 조회 중 네트워크 오류:', error);
@@ -459,17 +383,14 @@ class NotificationService {
       reservationData: {
         // 상대방 이름 표시 (멘토 로그인 시 → 멘티 이름, 멘티 로그인 시 → 멘토 이름)
         partnerName: reservationData?.partnerInfo?.name || 
-                    (reservationData?.partnerInfo?.role === 'MENTOR' ? '멘토' : '멘티') ||
-                    (apiError ? '상대방 정보를 불러올 수 없습니다' : '상대방 정보 없음'),
-        partnerRole: reservationData?.partnerInfo?.role || 'UNKNOWN',
+                    (reservationData?.partnerInfo?.role === 'MENTOR' ? '멘토님' : '멘티님') ||
+                    (apiError ? '멘토' : '상대방'),
+        partnerRole: reservationData?.partnerInfo?.role || 'MENTOR',
         serviceName: reservationData?.ticketInfo?.name || 
-                    reservationData?.ticketInfo?.title ||
-                    reservationData?.serviceName || 
-                    reservationData?.ticketName || 
-                    '멘토링 서비스',
-        date: startDateTime.date || reservationData?.date || '날짜 정보 없음',
-        startTime: startDateTime.time || reservationData?.startTime || '시간 정보 없음',
-        endTime: endDateTime.time || reservationData?.endTime || '시간 정보 없음',
+                    reservationData?.ticketInfo?.title ,
+        date: startDateTime.date || reservationData?.date || '오늘',
+        startTime: startDateTime.time || reservationData?.startTime || '지금',
+        endTime: endDateTime.time || reservationData?.endTime || '시간 미정',
         // 사용자에게 유용한 정보만 포함
         reservationId: reservationData?.id || reservationId,
         status: reservationData?.reservationStatus === 'PAID' ? '결제 완료' : 
@@ -496,82 +417,8 @@ class NotificationService {
         ticketInfo: reservationData?.ticketInfo
       }
     };
-    
-    console.log('✅ 생성된 토스트 데이터:', detailedNotification);
-    console.log('🔍 토스트 예약 정보:');
-    console.log('  - 상대방 이름:', detailedNotification.reservationData.partnerName);
-    console.log('  - 상대방 역할:', detailedNotification.reservationData.partnerRole);
-    console.log('  - 서비스명:', detailedNotification.reservationData.serviceName);
-    console.log('  - 날짜:', detailedNotification.reservationData.date);
-    console.log('  - 시작시간:', detailedNotification.reservationData.startTime);
-    console.log('  - 종료시간:', detailedNotification.reservationData.endTime);
-    console.log('  - 예약상태:', detailedNotification.reservationData.status);
-    console.log('  - 소요시간:', detailedNotification.reservationData.duration);
-    
+
     this.notifyListeners('notification', detailedNotification);
-  }
-
-  // 세션 연장 요청
-  async requestSessionExtension(sessionId) {
-    try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-      const accessToken = accessTokenUtils.getAccessToken();
-      
-      const headers = {
-        'Content-Type': 'application/json',
-      };
-      
-      if (accessToken) {
-        if (accessToken.startsWith('Bearer ')) {
-          headers.Authorization = accessToken;
-        } else {
-          headers.Authorization = `Bearer ${accessToken}`;
-        }
-      }
-      
-      const response = await fetch(`${baseUrl}/api/sessions/extend`, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify({ sessionId, extensionMinutes: 15 })
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        this.notifyListeners('notification', {
-          id: `extension_${Date.now()}`,
-          type: 'success',
-          title: '연장 요청 완료',
-          message: '멘토에게 연장 요청이 전송되었습니다.',
-          timestamp: new Date().toISOString()
-        });
-      } else {
-        throw new Error('연장 요청 실패');
-      }
-    } catch (error) {
-      console.error('세션 연장 요청 오류:', error);
-      this.notifyListeners('notification', {
-        id: `extension_error_${Date.now()}`,
-        type: 'error',
-        title: '연장 요청 실패',
-        message: '연장 요청 중 오류가 발생했습니다. 다시 시도해주세요.',
-        timestamp: new Date().toISOString()
-      });
-    }
-  }
-
-  // 채팅방 열기
-  openChatRoom(chatRoomId) {
-    // React Router를 사용하여 채팅방으로 이동
-    if (chatRoomId) {
-      window.location.href = `/chat/${chatRoomId}`;
-    } else {
-      console.error('채팅방 ID가 없습니다.');
-    }
-  }
-
-  // 채팅방 열기 (기존 메서드 - 호환성 유지)
-  openChat(chatId) {
-    this.openChatRoom(chatId);
   }
 
   // 연결 상태 확인
@@ -579,10 +426,6 @@ class NotificationService {
     return sseService.isConnected();
   }
 
-  // 재연결 활성화
-  enableReconnect() {
-    sseService.enableReconnect();
-  }
 
   // 이벤트 리스너 등록
   addEventListener(event, callback) {
@@ -614,41 +457,6 @@ class NotificationService {
         }
       });
     }
-  }
-
-  // 테스트용 알림 생성 (개발 환경에서만) - 비활성화
-  createTestNotifications() {
-    // 테스트 알림 비활성화 - 채팅 종료 알림만 받도록 함
-    console.log('테스트 알림 비활성화됨 - 채팅 종료 알림만 수신');
-    return;
-    
-    if (import.meta.env.MODE !== 'development') return;
-
-    // 5초 후 세션 종료 알림
-    setTimeout(() => {
-      this.handleNotification({
-        type: 'session_ending',
-        remainingMinutes: 5,
-        sessionId: 'test_session_123'
-      });
-    }, 3000);
-
-    // 8초 후 새 메시지 알림
-    setTimeout(() => {
-      this.handleNotification({
-        type: 'new_message',
-        senderName: '김개발',
-        chatId: 'chat_123'
-      });
-    }, 8000);
-
-    // 12초 후 시스템 업데이트 알림
-    setTimeout(() => {
-      this.handleNotification({
-        type: 'system_update',
-        message: '새로운 화상통화 기능이 추가되었습니다!'
-      });
-    }, 12000);
   }
 
   // 시간 계산 헬퍼 함수
@@ -732,18 +540,6 @@ if (import.meta.env.MODE === 'development') {
     console.log('🔌 EventSource States: CONNECTING=0, OPEN=1, CLOSED=2');
   };
 
-  window.testChatOpenEvent = (chatRoomId = null, reservationId = null) => {
-    console.log('🧪 chat-open 이벤트 시뮬레이션');
-    // 파라미터가 제공되지 않으면 랜덤하게 생성
-    const testChatRoomId = chatRoomId || `test_chat_${Date.now()}`;
-    const testReservationId = reservationId || Math.floor(Math.random() * 1000) + 1;
-    
-    console.log(`📋 테스트 채팅방 ID: ${testChatRoomId}, 예약 ID: ${testReservationId}`);
-    notificationService.handleChatStartNotification({
-      chatRoomId: testChatRoomId,
-      reservationId: testReservationId
-    });
-  };
 
   // 실제 백엔드 SSE 이벤트 구조 확인용
   window.debugSSEEvent = (eventData) => {
@@ -763,141 +559,6 @@ if (import.meta.env.MODE === 'development') {
     notificationService.handleChatStartNotification(eventData);
   };
 
-  // API 직접 테스트 함수 (개선된 버전)
-  window.testReservationAPI = async (reservationId) => {
-    if (!reservationId) {
-      console.log('사용법: window.testReservationAPI(123)');
-      return;
-    }
-    
-    console.log('🧪 예약 API 직접 테스트:', reservationId);
-    console.log('🔥 완전한 알림 생성 프로세스 테스트');
-    
-    // 실제 알림 생성 프로세스 실행
-    await notificationService.showChatRoomCreatedNotification(`test_chat_${Date.now()}`, reservationId);
-  };
-
-  // 멘토와 티켓 API 개별 테스트 함수
-  window.testMentorAPI = async (mentorId) => {
-    if (!mentorId) {
-      console.log('사용법: window.testMentorAPI(12)');
-      return;
-    }
-    
-    console.log('🧪 멘토 API 테스트:', mentorId);
-    
-    try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-      const accessToken = accessTokenUtils.getAccessToken();
-      
-      const headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      };
-      
-      if (accessToken) {
-        headers.Authorization = accessToken.startsWith('Bearer ') ? accessToken : `Bearer ${accessToken}`;
-      }
-      
-      // 가능한 여러 엔드포인트 시도
-      const possibleEndpoints = [
-        `/api/mentors/${mentorId}`,
-        `/api/mentor/${mentorId}`,
-        `/api/users/${mentorId}`,
-        `/api/profiles/${mentorId}`
-      ];
-      
-      for (const endpoint of possibleEndpoints) {
-        const apiUrl = `${baseUrl}${endpoint}`;
-        console.log('🌐 시도 중인 멘토 API URL:', apiUrl);
-        
-        try {
-          const response = await fetch(apiUrl, { headers });
-          const responseText = await response.text();
-          
-          console.log(`🌐 ${endpoint} 응답 상태:`, response.status);
-          console.log(`🌐 ${endpoint} 응답 본문:`, responseText);
-          
-          if (response.ok) {
-            try {
-              const data = JSON.parse(responseText);
-              console.log(`✅ ${endpoint} 성공! 파싱된 데이터:`, data);
-              return data;
-            } catch (e) {
-              console.error(`❌ ${endpoint} JSON 파싱 실패:`, e);
-            }
-          }
-        } catch (error) {
-          console.error(`❌ ${endpoint} 네트워크 오류:`, error);
-        }
-      }
-      
-      console.log('❌ 모든 멘토 API 엔드포인트 시도 실패');
-    } catch (error) {
-      console.error('❌ 멘토 API 테스트 실패:', error);
-    }
-  };
-
-  window.testTicketAPI = async (ticketId) => {
-    if (!ticketId) {
-      console.log('사용법: window.testTicketAPI(1)');
-      return;
-    }
-    
-    console.log('🧪 티켓 API 테스트:', ticketId);
-    
-    try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-      const accessToken = accessTokenUtils.getAccessToken();
-      
-      const headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      };
-      
-      if (accessToken) {
-        headers.Authorization = accessToken.startsWith('Bearer ') ? accessToken : `Bearer ${accessToken}`;
-      }
-      
-      // 가능한 여러 엔드포인트 시도
-      const possibleEndpoints = [
-        `/api/tickets/${ticketId}`,
-        `/api/ticket/${ticketId}`,
-        `/api/services/${ticketId}`,
-        `/api/packages/${ticketId}`,
-        `/api/products/${ticketId}`
-      ];
-      
-      for (const endpoint of possibleEndpoints) {
-        const apiUrl = `${baseUrl}${endpoint}`;
-        console.log('🌐 시도 중인 티켓 API URL:', apiUrl);
-        
-        try {
-          const response = await fetch(apiUrl, { headers });
-          const responseText = await response.text();
-          
-          console.log(`🌐 ${endpoint} 응답 상태:`, response.status);
-          console.log(`🌐 ${endpoint} 응답 본문:`, responseText);
-          
-          if (response.ok) {
-            try {
-              const data = JSON.parse(responseText);
-              console.log(`✅ ${endpoint} 성공! 파싱된 데이터:`, data);
-              return data;
-            } catch (e) {
-              console.error(`❌ ${endpoint} JSON 파싱 실패:`, e);
-            }
-          }
-        } catch (error) {
-          console.error(`❌ ${endpoint} 네트워크 오류:`, error);
-        }
-      }
-      
-      console.log('❌ 모든 티켓 API 엔드포인트 시도 실패');
-    } catch (error) {
-      console.error('❌ 티켓 API 테스트 실패:', error);
-    }
-  };
 
   // 채팅 종료 토스트 직접 테스트 함수 (5분 전 알림만)
   window.testTerminationToast = (message = null, endTime = null) => {
@@ -948,83 +609,6 @@ if (import.meta.env.MODE === 'development') {
     // SSE 메시지 핸들러로 전달
     notificationService.handleMessage(mockEvent);
   };
-
-  // 멘티 정보 직접 테스트 함수
-  window.testMenteeAPI = async (menteeId) => {
-    if (!menteeId) {
-      console.log('사용법: window.testMenteeAPI(37)');
-      return;
-    }
-    
-    console.log('🧪 멘티 API 테스트:', menteeId);
-    
-    try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-      const accessToken = accessTokenUtils.getAccessToken();
-      
-      const headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      };
-      
-      if (accessToken) {
-        headers.Authorization = accessToken.startsWith('Bearer ') ? accessToken : `Bearer ${accessToken}`;
-      }
-      
-      const apiUrl = `${baseUrl}/api/users/${menteeId}`;
-      console.log('🌐 멘티 API URL:', apiUrl);
-      console.log('🌐 헤더:', headers);
-      
-      const response = await fetch(apiUrl, { headers });
-      const responseText = await response.text();
-      
-      console.log('🌐 응답 상태:', response.status);
-      console.log('🌐 응답 본문:', responseText);
-      
-      if (response.ok) {
-        try {
-          const data = JSON.parse(responseText);
-          console.log('✅ 멘티 데이터 파싱 성공:', data);
-          console.log('🔍 멘티 이름:', data.data?.name);
-          console.log('🔍 멘티 역할:', data.data?.userRole);
-          return data;
-        } catch (e) {
-          console.error('❌ JSON 파싱 실패:', e);
-        }
-      } else {
-        console.error('❌ 멘티 API 호출 실패');
-      }
-    } catch (error) {
-      console.error('❌ 멘티 API 테스트 실패:', error);
-    }
-  };
-
-  // 사용법 안내
-  console.log(`
-🧪 알림 테스트 함수 사용법:
-
-📢 기본 알림 테스트:
-- window.testChatRoomNotification() // 랜덤 예약 ID로 테스트
-- window.testChatRoomNotification(123) // 특정 예약 ID로 테스트
-- window.testChatOpenEvent() // 랜덤 ID들로 테스트  
-- window.testChatOpenEvent('chat_456', 789) // 특정 ID들로 테스트
-
-🔌 연결 및 이벤트 테스트:
-- window.testSSEConnection() // SSE 연결 상태 확인
-- window.debugSSEEvent({chatRoomId: 'room123', reservationId: 456}) // SSE 이벤트 구조 분석
-
-📊 API 직접 테스트:
-- window.testReservationAPI(120) // 완전한 알림 생성 프로세스 테스트
-- window.testMentorAPI(12) // 멘토 API 테스트
-- window.testTicketAPI(1) // 티켓 API 테스트
-- window.testMenteeAPI(37) // 멘티 API 직접 테스트
-
-🚨 종료 알림 테스트 (5분 전 알림만):
-- window.testTerminationToast() // 기본: 5분 후 종료 예정 알림
-- window.testTerminationToast('커스텀 메시지') // 커스텀 메시지로 5분 전 종료 알림
-- window.testSSETerminationEvent() // SSE 종료 이벤트 시뮬레이션 (5분 전)
-- window.testSSETerminationEvent('chat_123', '멘토님이 종료를 요청했습니다') // 커스텀 SSE 종료 이벤트
-  `);
 }
 
 export default notificationService;

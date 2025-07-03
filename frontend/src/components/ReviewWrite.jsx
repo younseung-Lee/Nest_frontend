@@ -20,6 +20,7 @@ const ReviewWrite = () => {
   const [reviewText, setReviewText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mentorInfo, setMentorInfo] = useState(null);
+  const [mentorProfileImage, setMentorProfileImage] = useState(null);
   const [sessionInfo, setSessionInfo] = useState(null);
   const [reservationInfo, setReservationInfo] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,10 +38,29 @@ const ReviewWrite = () => {
             const mentorResponse = await userAPI.getUserById(mentorId);
             console.log('👤 멘토 정보 API 응답:', mentorResponse);
             setMentorInfo(mentorResponse.data.data || mentorResponse.data);
+
+            // 멘토 프로필 이미지 조회
+            try {
+              const profileImageResponse = await userAPI.getUserProfileImage(mentorId);
+              console.log('🖼️ 멘토 프로필 이미지 API 응답:', profileImageResponse);
+              console.log('🖼️ 전체 응답 데이터:', JSON.stringify(profileImageResponse.data, null, 2));
+              
+              // 다양한 응답 구조에 대응
+              const imageUrl = profileImageResponse.data?.imgUrl || 
+                              profileImageResponse.data?.data?.imgUrl;
+              
+              console.log('🖼️ 추출된 이미지 URL:', imageUrl);
+              setMentorProfileImage(imageUrl || null);
+            } catch (imageError) {
+              console.warn('멘토 프로필 이미지 조회 실패:', imageError);
+              console.warn('🖼️ 에러 응답:', imageError.response?.data);
+              setMentorProfileImage(null);
+            }
           } catch (error) {
             console.warn('멘토 정보 조회 실패:', error);
             // 실패 시 URL 파라미터의 이름 사용
             setMentorInfo({ name: mentorName || '멘토' });
+            setMentorProfileImage(null);
           }
         }
 
@@ -175,6 +195,9 @@ const ReviewWrite = () => {
 
       alert('리뷰가 성공적으로 제출되었습니다! 감사합니다!');
       
+      // 채팅 목록으로 이동
+      navigate('/chat');
+      
     } catch (error) {
       console.error('리뷰 제출 실패:', error);
       
@@ -193,17 +216,10 @@ const ReviewWrite = () => {
         console.log(`🔍 저장 확인: ${reviewCompletedKey} = ${savedValue}`);
         
         // 성공 메시지 표시
-        const userChoice = confirm(
-          '이미 리뷰를 작성하셨습니다! 감사합니다!\n\n' +
-          '확인: 홈으로 이동하여 새로운 멘토를 찾아보세요\n' +
-          '취소: 마이페이지에서 예약 내역과 리뷰를 확인하세요'
-        );
-
-        if (userChoice) {
-          navigate('/');
-        } else {
-          navigate('/mypage');
-        }
+        alert('이미 리뷰를 작성하셨습니다! 감사합니다!');
+        
+        // 채팅 목록으로 이동
+        navigate('/chat');
         
         return; // 에러 처리 로직 실행하지 않고 종료
       }
@@ -267,13 +283,23 @@ const ReviewWrite = () => {
         <section className="mentor-section">
           <div className="mentor-card">
             <div className="mentor-avatar">
-              {mentorInfo?.profileImage ? (
-                <img src={mentorInfo.profileImage} alt={`${mentorInfo.name} 프로필`} />
-              ) : (
-                <div className="avatar-placeholder">
-                  {(mentorInfo?.name || mentorName || '멘토')[0]}
-                </div>
-              )}
+              {mentorProfileImage && typeof mentorProfileImage === 'string' ? (
+                <img 
+                  src={mentorProfileImage} 
+                  alt={`${mentorInfo?.name || mentorName || '멘토'} 프로필`}
+                  onError={(e) => {
+                    console.error('🖼️ 이미지 로드 실패:', mentorProfileImage);
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div 
+                className="avatar-placeholder"
+                style={{ display: mentorProfileImage && typeof mentorProfileImage === 'string' ? 'none' : 'flex' }}
+              >
+                {(mentorInfo?.name || mentorName || '멘토')[0]}
+              </div>
             </div>
             <div className="mentor-details">
               <h2 className="mentor-name">{mentorInfo?.name || mentorName || '멘토'}님</h2>

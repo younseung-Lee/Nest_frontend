@@ -1,8 +1,8 @@
 import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {Search, Plus, MoreVertical, User, ArrowLeft, X} from 'lucide-react';
 import './ChatList.css';
-import axios from "axios";
-import { accessTokenUtils } from '../utils/tokenUtils';
+import {chatroomAPI, userAPI} from '../services/api';
+import {accessTokenUtils} from '../utils/tokenUtils';
 
 const ChatList = ({onChatSelect, currentChatId, onBack}) => {
   const [chatRooms, setChatRooms] = useState([]);
@@ -15,19 +15,81 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
   const chatListRef = useRef(null);
 
   // URL로 직접 접근한 채팅방 처리를 위한 상태
-  const [hasTriggeredInitialSelect, setHasTriggeredInitialSelect] = useState(false);
-  
+  const [hasTriggeredInitialSelect, setHasTriggeredInitialSelect] = useState(
+      false);
+
   // 검색 모드 상태
   const [isSearchMode, setIsSearchMode] = useState(false);
+
+  // 프로필 이미지 관련 상태
+  const [profileImages, setProfileImages] = useState(new Map()); // userId -> imageUrl 매핑
+  const [loadingImages, setLoadingImages] = useState(new Set()); // 로딩 중인 userId들
+
+  // 프로필 이미지 로딩 함수
+  const loadProfileImage = useCallback(async (userId) => {
+    // 이미 로딩 중이거나 캐시에 있으면 건너뛰기
+    if (loadingImages.has(userId) || profileImages.has(userId)) {
+      return;
+    }
+
+    console.log(`🖼️ 프로필 이미지 로딩 시작: userId=${userId}`);
+    
+    setLoadingImages(prev => new Set(prev).add(userId));
+    
+    try {
+      const response = await userAPI.getUserProfileImage(userId);
+      console.log(`✅ 프로필 이미지 조회 성공: userId=${userId}`, response.data);
+      
+      if (response.data && response.data.data && response.data.data.imgUrl) {
+        const imageUrl = response.data.data.imgUrl;
+        setProfileImages(prev => new Map(prev).set(userId, imageUrl));
+        console.log(`🎨 프로필 이미지 캐시 저장: userId=${userId}, url=${imageUrl}`);
+      } else {
+        console.log(`📷 프로필 이미지 없음: userId=${userId}`);
+        // 프로필 이미지가 없는 경우 null로 저장하여 재요청 방지
+        setProfileImages(prev => new Map(prev).set(userId, null));
+      }
+    } catch (error) {
+      console.error(`❌ 프로필 이미지 로딩 실패: userId=${userId}`, error);
+      // 에러 발생시에도 null로 저장하여 재요청 방지
+      setProfileImages(prev => new Map(prev).set(userId, null));
+    } finally {
+      setLoadingImages(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
+    }
+  }, [loadingImages, profileImages]);
+
+  // 여러 사용자의 프로필 이미지를 배치로 로딩
+  const loadMultipleProfileImages = useCallback(async (userIds) => {
+    console.log(`📦 배치 프로필 이미지 로딩: ${userIds.length}개 사용자`);
+    
+    // 아직 로딩하지 않은 userId들만 필터링
+    const unloadedUserIds = userIds.filter(userId => 
+      !loadingImages.has(userId) && !profileImages.has(userId)
+    );
+
+    if (unloadedUserIds.length === 0) {
+      console.log(`✅ 모든 프로필 이미지가 이미 로딩됨`);
+      return;
+    }
+
+    console.log(`🔄 새로 로딩할 사용자: ${unloadedUserIds.length}개`);
+
+    // 동시에 너무 많은 요청을 보내지 않도록 제한 (최대 5개씩)
+    const batchSize = 5;
+    for (let i = 0; i < unloadedUserIds.length; i += batchSize) {
+      const batch = unloadedUserIds.slice(i, i + batchSize);
+      await Promise.all(batch.map(userId => loadProfileImage(userId)));
+    }
+  }, [loadProfileImage, loadingImages, profileImages]);
 
   // 채팅방 상태 확인 함수
   const checkChatRoomStatus = async (chatRoomId) => {
     try {
-      const response = await axios.get(`/api/chat_rooms/${chatRoomId}/status`, {
-        headers: {
-          'Authorization': `Bearer ${accessTokenUtils.getAccessToken()}`
-        }
-      });
+      const response = await chatroomAPI.getChatroomStatus(chatRoomId);
       return response.data.closed;
     } catch (error) {
       console.error(`채팅방 ${chatRoomId} 상태 확인 실패:`, error);
@@ -41,36 +103,11 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
       return;
     }
 
-    // 토큰 확인
+    // 간단한 토큰 확인
     const token = accessTokenUtils.getAccessToken();
-    console.log('=== 채팅방 목록 API 호출 ===');
-    console.log('토큰 존재:', token ? '있음' : '없음');
-    console.log('토큰 길이:', token?.length);
-    
     if (!token) {
       console.error('토큰이 없습니다. 로그인이 필요합니다.');
       alert('로그인이 필요합니다.');
-      return;
-    }
-
-    // 토큰 만료 확인
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const currentTime = Math.floor(Date.now() / 1000);
-      console.log('토큰 만료 시간:', new Date(payload.exp * 1000));
-      console.log('현재 시간:', new Date(currentTime * 1000));
-      console.log('토큰 만료됨:', currentTime > payload.exp);
-      
-      if (currentTime > payload.exp) {
-        console.error('토큰이 만료되었습니다.');
-        accessTokenUtils.removeAccessToken();
-        alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
-        return;
-      }
-    } catch (error) {
-      console.error('토큰 검증 실패:', error);
-      alert('유효하지 않은 토큰입니다. 다시 로그인해주세요.');
-      accessTokenUtils.removeAccessToken();
       return;
     }
 
@@ -90,31 +127,21 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
         }
       }
 
-      console.log('API 요청 URL:', '/api/chat_rooms');
-      console.log('API 요청 파라미터:', params);
-      console.log('API 요청 헤더:', {
-        'Authorization': `Bearer ${token.substring(0, 20)}...`
-      });
+      console.log('🔍 채팅방 목록 API 호출, 파라미터:', params);
 
-      const response = await axios.get('/api/chat_rooms', {
-        params,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await chatroomAPI.getChatroomsWithPagination(params);
 
-      console.log('API 응답 성공:', response.data);
+      console.log('✅ API 응답 성공, 채팅방 수:', response.data.content?.length);
 
       const fetchedRooms = response.data.content.map(room => {
         console.log('🔍 ChatList - 백엔드에서 받은 room 데이터:', room);
         console.log('🔍 예약 ID 확인:', room.reservationId);
-        
+
         const currentUserId = parseInt(getCurrentUserId()); // 문자열을 숫자로 변환
 
         // 현재 사용자가 멘토인지 멘티인지 판단 (JWT 토큰의 사용자 ID 기준)
         const isCurrentUserMentor = currentUserId === room.mentorId;
-        
+
         // 상대방 정보 설정
         const contactInfo = isCurrentUserMentor ? {
           id: room.menteeId,
@@ -131,7 +158,7 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
         if (room.lastMessageContent) {
           // 백엔드에서 마지막 메시지가 있는 경우
           const isMyMessage = room.lastMessageSenderId === currentUserId;
-          
+
           lastMessage = {
             id: null, // 메시지 ID는 현재 제공되지 않음
             text: room.lastMessageContent,
@@ -139,7 +166,7 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
             timestamp: room.lastMessageTime || new Date().toISOString(),
             isRead: true // 읽음 상태는 추후 구현
           };
-          
+
           console.log('📨 마지막 메시지 정보:', {
             content: room.lastMessageContent,
             senderId: room.lastMessageSenderId,
@@ -156,7 +183,7 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
             timestamp: new Date().toISOString(),
             isRead: true
           };
-          
+
           console.log('📝 새 채팅방 - 기본 메시지 설정');
         }
 
@@ -189,19 +216,19 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
           lastMessage: lastMessage.text,
           lastMessageTime: lastMessage.timestamp
         });
-        
+
         return chatData;
       });
 
       // 각 채팅방의 상태를 확인하여 isClosed 필드 설정
       console.log('🔍 채팅방 상태 확인 시작...');
-      
+
       for (const room of fetchedRooms) {
         const isClosed = await checkChatRoomStatus(room.id);
         room.isClosed = isClosed;
         console.log(`🔍 채팅방 ${room.id} 상태: ${isClosed ? '종료됨' : '활성'}`);
       }
-      
+
       console.log(`✅ 채팅방 상태 확인 완료: ${fetchedRooms.length}개`);
 
       if (reset) {
@@ -209,6 +236,15 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
       } else {
         setChatRooms(prev => [...prev, ...fetchedRooms]);
       }
+
+      // 🖼️ 프로필 이미지 로딩: 모든 상대방 userId 수집
+      const partnerUserIds = fetchedRooms.map(room => room.contact.id);
+      console.log(`🎯 프로필 이미지 로딩 대상: ${partnerUserIds.join(', ')}`);
+      
+      // 프로필 이미지 배치 로딩 (비동기 - UI 블로킹 없음)
+      loadMultipleProfileImages(partnerUserIds).catch(error => {
+        console.error('❌ 배치 프로필 이미지 로딩 실패:', error);
+      });
 
       // 다음 페이지를 위한 커서 설정
       if (fetchedRooms.length > 0) {
@@ -219,25 +255,15 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
 
       setHasNext(response.data.hasNext);
     } catch (err) {
-      console.error('=== API 요청 실패 ===');
-      console.error('에러:', err);
-      console.error('응답 상태:', err.response?.status);
-      console.error('응답 상태 텍스트:', err.response?.statusText);
-      console.error('응답 데이터:', err.response?.data);
-      console.error('응답 헤더:', err.response?.headers);
-      console.error('요청 설정:', err.config);
-      
-      // 에러 처리 - 토큰이 만료된 경우 등
-      if (err.response?.status === 401) {
-        console.warn('401 Unauthorized - 인증 실패');
-        alert('인증에 실패했습니다. 다시 로그인해주세요.');
-        accessTokenUtils.removeAccessToken();
-        // 로그인 페이지로 리다이렉트 등의 처리 필요
-      } else if (err.response?.status === 403) {
-        console.warn('403 Forbidden - 권한 없음');
+      console.error('❌ 채팅방 목록 API 실패:', err.response?.status,
+          err.response?.data);
+
+      // 간소화된 에러 처리 (api.js interceptor가 대부분 처리)
+      if (err.response?.status === 403) {
         alert('접근 권한이 없습니다.');
+      } else if (!err.response?.status || err.response?.status >= 500) {
+        alert('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
       } else {
-        console.error('기타 에러:', err.message);
         alert('채팅방 목록을 불러오는데 실패했습니다.');
       }
     } finally {
@@ -246,7 +272,7 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
         setInitialLoading(false);
       }
     }
-  }, [lastMessageId, cursorTime, hasNext, loading, initialLoading]);
+  }, [lastMessageId, cursorTime, hasNext, loading, initialLoading, loadMultipleProfileImages]);
 
   // JWT 토큰에서 사용자 정보 추출
   const getCurrentUserInfo = () => {
@@ -310,10 +336,10 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
   // URL로 직접 접근한 채팅방이 있을 때 자동 선택
   useEffect(() => {
     if (currentChatId && chatRooms.length > 0 && !hasTriggeredInitialSelect) {
-      const targetChat = chatRooms.find(chat => 
-        chat.id.toString() === currentChatId.toString()
+      const targetChat = chatRooms.find(chat =>
+          chat.id.toString() === currentChatId.toString()
       );
-      
+
       if (targetChat) {
         console.log('🎯 URL에서 지정한 채팅방 자동 선택:', targetChat);
         onChatSelect(targetChat);
@@ -352,7 +378,7 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
       const now = new Date();
       // 백엔드에서 문자열로 온 경우 파싱
       const messageTime = new Date(timestamp);
-      
+
       // 유효한 날짜인지 확인
       if (isNaN(messageTime.getTime())) {
         console.warn('잘못된 시간 형식:', timestamp);
@@ -433,15 +459,16 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
             <button className="back-to-home-button" onClick={onBack}>
               <ArrowLeft className="icon"/>
             </button>
-            <h2 className={`chat-list-title ${isSearchMode ? 'search-active' : ''}`}>
+            <h2 className={`chat-list-title ${isSearchMode ? 'search-active'
+                : ''}`}>
               채팅
             </h2>
           </div>
           <div className="header-actions">
-            <button 
-              className="header-action-button" 
-              onClick={toggleSearchMode}
-              title="검색"
+            <button
+                className="header-action-button"
+                onClick={toggleSearchMode}
+                title="검색"
             >
               <Search className="icon"/>
             </button>
@@ -456,26 +483,26 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
 
         {/* 검색창 */}
         {isSearchMode && (
-          <div className="search-container">
-            <div className="search-input-wrapper">
-              <Search className="search-icon" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-                autoFocus
-              />
-              {searchTerm && (
-                <button 
-                  className="search-clear-button"
-                  onClick={() => setSearchTerm('')}
-                >
-                  <X className="icon"/>
-                </button>
-              )}
+            <div className="search-container">
+              <div className="search-input-wrapper">
+                <Search className="search-icon"/>
+                <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input"
+                    autoFocus
+                />
+                {searchTerm && (
+                    <button
+                        className="search-clear-button"
+                        onClick={() => setSearchTerm('')}
+                    >
+                      <X className="icon"/>
+                    </button>
+                )}
+              </div>
             </div>
-          </div>
         )}
 
         {/* 채팅방 목록 */}
@@ -497,40 +524,60 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
               </div>
           ) : (
               <>
-                {filteredChatRooms.map((chat) => (
+                {filteredChatRooms.map((chat) => {
+                  // 현재 채팅방 상대방의 프로필 이미지 가져오기
+                  const profileImageUrl = profileImages.get(chat.contact.id);
+                  const isImageLoading = loadingImages.has(chat.contact.id);
+                  
+                  return (
                     <div
                         key={chat.id}
                         className={`chat-room-item ${currentChatId === chat.id
                             ? 'active' : ''}`}
                         onClick={() => handleChatClick(chat)}
                     >
-                      <div className="chat-avatar-container">
+                      <div className={`chat-avatar-container ${
+                        isImageLoading ? 'loading' : profileImageUrl ? 'loaded' : ''
+                      }`}>
                         <div className="chat-avatar">
-                          {chat.contact.profileImage ? (
-                              <img
-                                  src={chat.contact.profileImage}
-                                  alt={chat.contact.name}
-                                  onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'flex';
-                                  }}
-                              />
+                          {isImageLoading ? (
+                            // 로딩 중일 때 스켈레톤 표시
+                            <div className="avatar-skeleton">
+                              <div className="skeleton-circle"></div>
+                            </div>
+                          ) : profileImageUrl ? (
+                            // 프로필 이미지가 있을 때
+                            <img
+                                src={profileImageUrl}
+                                alt={chat.contact.name}
+                                className="profile-image"
+                                onError={(e) => {
+                                  console.warn(`이미지 로드 실패: ${profileImageUrl}`);
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'flex';
+                                }}
+                            />
                           ) : null}
-                          <User className="avatar-icon" style={{
-                            display: chat.contact.profileImage ? 'none' : 'flex'
-                          }}/>
+                          
+                          {/* 기본 아이콘 (이미지 없거나 로딩 실패시) */}
+                          <User 
+                            className="avatar-icon" 
+                            style={{
+                              display: (!isImageLoading && !profileImageUrl) ? 'flex' : 'none'
+                            }}
+                          />
                         </div>
-                        {chat.isOnline && <div
-                            className="online-indicator"></div>}
+                        {chat.isOnline}
                       </div>
 
                       <div className="chat-info">
                         <div className="chat-header-info">
                           <div className="chat-name-container">
-                            <span className="chat-name">{chat.contact.name}</span>
+                            <span
+                                className="chat-name">{chat.contact.name}</span>
                             {/* 활성화된 채팅방에만 상태 표시 */}
                             {!chat.isClosed && (
-                              <span className="contact-title">멘토링 중</span>
+                                <span className="contact-title">멘토링 중</span>
                             )}
                           </div>
                           <div className="chat-meta">
@@ -564,7 +611,8 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
                         </div>
                       </div>
                     </div>
-                ))}
+                  );
+                })}
 
                 {/* 로딩 인디케이터 */}
                 {loading && (
@@ -577,12 +625,6 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
           )}
         </div>
 
-        {/* 온라인 상태 표시 */}
-        <div className="online-status">
-          <div className="online-count">
-            온라인: {chatRooms.filter(chat => chat.isOnline).length}명
-          </div>
-        </div>
       </div>
   );
 };

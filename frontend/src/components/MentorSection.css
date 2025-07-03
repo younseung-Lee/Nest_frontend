@@ -165,11 +165,40 @@
   margin: 0 auto 1.25rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+}
+
+.mentor-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 1.25rem;
+}
+
+.mentor-avatar-text {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .mentor-card:hover .mentor-avatar {
   transform: scale(1.1) rotate(5deg);
   box-shadow: 0 15px 40px rgba(168, 85, 247, 0.5);
+}
+
+.mentor-card:hover .mentor-avatar img {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.mentor-card:hover .mentor-avatar-text {
+  transform: scale(1.1) rotate(5deg);
 }
 
 /* Gradient backgrounds for avatars */
@@ -275,14 +304,6 @@
   color: #a855f7;
 }
 
-.online-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: #10b981;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
 
 .online-status::before {
   content: '';

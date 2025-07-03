@@ -85,7 +85,23 @@ const MentorProfile = ({ mentor, onBack, onBooking }) => {
         <div className="profile-content">
           <div className="profile-hero">
             <div className={`profile-avatar gradient-bg-${mentorDetails.id}`}>
-              {mentorDetails.avatar || mentorDetails.name?.[0]}
+              {mentorDetails.imgUrl ? (
+                <img 
+                  src={mentorDetails.imgUrl} 
+                  alt={mentorDetails.name}
+                  className="profile-avatar-image"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div 
+                className="profile-avatar-text"
+                style={{ display: mentorDetails.imgUrl ? 'none' : 'flex' }}
+              >
+                {mentorDetails.avatar || mentorDetails.name?.[0] || 'M'}
+              </div>
             </div>
             <div className="profile-info">
               <div className="mentor-username">{mentorDetails.username || mentorDetails.name}</div>

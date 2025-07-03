@@ -81,7 +81,11 @@ const CategoryFormModal = ({ category, onSave, onClose, saving }) => {
           </div>
 
           <div className="modal-actions">
-            <button type="button" className="btn-secondary" onClick={onClose}>
+            <button 
+              type="button" 
+              className="btn-secondary" 
+              onClick={onClose}
+            >
               취소
             </button>
             <button 

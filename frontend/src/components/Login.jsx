@@ -27,8 +27,21 @@ const Login = ({ onLoginSuccess }) => {
     const loginData = { email: email.trim(), password: password };
     try {
       const response = await authAPI.login(loginData);
+      
+      // 🔍 [2단계] 로그인 API 응답 전체 확인
+      console.log('🔍 [2단계] 로그인 API 전체 응답:', response);
+      console.log('🔍 [2단계] 로그인 API 응답 데이터:', response.data);
+      console.log('🔍 [2단계] 로그인 API responseData:', response.data.data);
+      
       // 로그인 성공 처리 (토큰 저장 등)
       const responseData = response.data.data;
+      
+      // 🔍 [2단계] responseData 모든 필드 확인
+      console.log('🔍 [2단계] responseData 모든 필드:', Object.keys(responseData));
+      console.log('🔍 [2단계] profileImage 필드 확인:', responseData.profileImage);
+      console.log('🔍 [2단계] imgUrl 필드 확인:', responseData.imgUrl);
+      console.log('🔍 [2단계] image 필드 확인:', responseData.image);
+      console.log('🔍 [2단계] avatar 필드 확인:', responseData.avatar);
       const token = responseData.accessToken;
       const refreshToken = responseData.refreshToken;
       const userRole = decodeJWT(token).userRole;

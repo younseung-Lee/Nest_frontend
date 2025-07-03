@@ -8,7 +8,6 @@ const CouponFormModal = ({ coupon, onSave, onClose, saving }) => {
     discountType: 'FIXED_AMOUNT', // 할인 타입 (기본값: 금액 할인)
     totalQuantity: '', //총 쿠폰 수
     issuedQuantity: '', // 발급된 쿠폰 수
-    startDate: '',
     validFrom: '', // 유효 시작일
     validTo: '',  // 유효 종료일
     minGrade: '',
@@ -19,7 +18,6 @@ const CouponFormModal = ({ coupon, onSave, onClose, saving }) => {
     if (coupon) {
       setForm({
         ...coupon,
-        startDate: coupon.startDate?.split('T')[0] || '',
         validFrom: coupon.validFrom?.split('T')[0] || '',
         validTo: coupon.validTo?.split('T')[0] || '',
       });
@@ -75,7 +73,6 @@ const CouponFormModal = ({ coupon, onSave, onClose, saving }) => {
     // 날짜를 DateTime 형식으로 변환
     const formattedData = {
       ...form,
-      startDate: form.startDate ? new Date(form.startDate + 'T00:00:00').toISOString() : null,
       validFrom: form.validFrom ? new Date(form.validFrom + 'T00:00:00').toISOString() : null,
       validTo: form.validTo ? new Date(form.validTo + 'T23:59:59').toISOString() : null,
     };
@@ -163,17 +160,6 @@ const CouponFormModal = ({ coupon, onSave, onClose, saving }) => {
                   placeholder="0"
                 />
               </div>
-
-              <div className="form-group">
-                <label htmlFor="startDate">등록일</label>
-                <input 
-                  id="startDate"
-                  name="startDate" 
-                  type="date" 
-                  value={form.startDate} 
-                  onChange={handleChange}
-                />
-              </div>
             </div>
 
             <div className="form-row">
@@ -236,8 +222,19 @@ const CouponFormModal = ({ coupon, onSave, onClose, saving }) => {
               </div>
             </div>
             <div className="modal-actions">
-              <button type="button" onClick={onClose} disabled={saving}>취소</button>
-              <button type="submit" className="btn-primary" disabled={saving}>
+              <button 
+                type="button" 
+                className="btn-secondary"
+                onClick={onClose} 
+                disabled={saving}
+              >
+                취소
+              </button>
+              <button 
+                type="submit" 
+                className="btn-primary" 
+                disabled={saving}
+              >
                 {saving ? '저장 중...' : '저장'}
               </button>
             </div>

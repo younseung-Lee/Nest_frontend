@@ -1,15 +1,10 @@
-import axios from 'axios';
-import { accessTokenUtils } from '../utils/tokenUtils';
+import { chatroomAPI } from './api';
 
 export const chatService = {
   // 채팅방이 종료되었는지 확인하는 API
   async isChatRoomClosed(chatRoomId) {
     try {
-      const response = await axios.get(`/api/chat_rooms/${chatRoomId}/status`, {
-        headers: {
-          'Authorization': `Bearer ${accessTokenUtils.getAccessToken()}`
-        }
-      });
+      const response = await chatroomAPI.getChatroomStatus(chatRoomId);
       
       console.log(`🔍 API 응답:`, response.data);
       

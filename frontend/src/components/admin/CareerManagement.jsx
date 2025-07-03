@@ -343,11 +343,11 @@ const CareerManagement = ({isDarkMode}) => {
   });
 
   return (
-      <div className={`career-management ${isDarkMode ? 'dark-mode' : ''}`} style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto', minHeight: '100vh' }}>
+      <div className={`career-management ${isDarkMode ? 'dark-mode' : ''}`} style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
         <div className="content-header">
           <div className="header-left">
             <h2 className="career-title">
-              <Briefcase size={28} color="#ffffff"/>
+              <Briefcase size={28} />
               경력 관리
             </h2>
             <p>멘토들의 경력 정보를 검토하고 관리합니다</p>
@@ -376,18 +376,16 @@ const CareerManagement = ({isDarkMode}) => {
         )}
 
         <div className="content-stats">
-          <div className="stat-card total">
+          <div className="stat-card total" style={{ background: '#FBF9EF' }}>
             <div className="stat-number">{pagination.totalElements}</div>
             <div className="stat-label">총 건수</div>
           </div>
-          <div className="stat-card approved">
-            <div className="stat-number">{careers.filter(
-                c => c.status === 'AUTHORIZED').length}</div>
+          <div className="stat-card approved" style={{ background: '#FBF9EF' }}>
+            <div className="stat-number">{careers.filter(c => c.status === 'AUTHORIZED').length}</div>
             <div className="stat-label">승인됨</div>
           </div>
-          <div className="stat-card rejected">
-            <div className="stat-number">{careers.filter(
-                c => c.status === 'UNAUTHORIZED').length}</div>
+          <div className="stat-card rejected" style={{ background: '#FBF9EF' }}>
+            <div className="stat-number">{careers.filter(c => c.status === 'UNAUTHORIZED').length}</div>
             <div className="stat-label">거절됨</div>
           </div>
         </div>
@@ -431,27 +429,87 @@ const CareerManagement = ({isDarkMode}) => {
                 const statusBadge = getStatusBadge(career.status);
                 const StatusIcon = statusBadge.icon;
                 return (
-                    <div key={career.careerId} className="table-row">
-                      <div className="table-cell">
-                        <div className="cell-content">
-                          <User size={16}/>
-                          <strong>{career.mentorName}</strong>
+                    <div key={career.careerId} className="table-row" style={{
+                      background: 'rgb(251, 249, 239)',
+                      borderBottom: '1px solid rgba(255, 179, 0, 0.2)',
+                      padding: '20px 32px',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'linear-gradient(145deg, #fff3c4, #fff8e1)';
+                      e.currentTarget.style.transform = 'translateX(4px)';
+                      e.currentTarget.style.boxShadow = '0 4px 20px rgba(255, 179, 0, 0.15)';
+                      e.currentTarget.style.borderLeft = '4px solid #ffb300';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgb(251, 249, 239)';
+                      e.currentTarget.style.transform = 'translateX(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                      e.currentTarget.style.borderLeft = 'none';
+                    }}>
+                      <div className="table-cell" style={{
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: '#6d4c41',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}>
+                        <div className="cell-content" style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}>
+                          <User size={16} style={{ color: '#ffb300' }}/>
+                          <strong style={{ color: '#e65100', fontWeight: '700' }}>{career.mentorName}</strong>
                         </div>
                       </div>
-                      <div className="table-cell">{career.mentorEmail}</div>
-                      <div className="table-cell">{career.company}</div>
-                      <div className="table-cell">{formatDate(
-                          career.startAt)}</div>
-                      <div className="table-cell">{formatDate(
-                          career.endAt)}</div>
-                      <div className="table-cell">
+                      <div className="table-cell" style={{
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: '#6d4c41',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}>{career.mentorEmail}</div>
+                      <div className="table-cell" style={{
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: '#6d4c41',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}>{career.company}</div>
+                      <div className="table-cell" style={{
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: '#6d4c41',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}>{formatDate(career.startAt)}</div>
+                      <div className="table-cell" style={{
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: '#6d4c41',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}>{formatDate(career.endAt)}</div>
+                      <div className="table-cell" style={{
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: '#6d4c41',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}>
                         <span
                             className={`status-badge ${statusBadge.className}`}>
-                          <StatusIcon size={14}/>
                           {statusBadge.text}
                         </span>
                       </div>
-                      <div className="table-cell">
+                      <div className="table-cell" style={{
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: '#6d4c41',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}>
                         <div className="table-actions">
                           <button
                               className="action-btn view"
@@ -548,3 +606,4 @@ const CareerManagement = ({isDarkMode}) => {
 };
 
 export default CareerManagement;
+

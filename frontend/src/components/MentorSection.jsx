@@ -3,8 +3,13 @@ import {Star, ChevronLeft, ChevronRight} from 'lucide-react';
 import './MentorSection.css';
 import {profileAPI, categoryAPI} from "../services/api";
 import MentorProfile from "./MentorProfile";
-import { useNavigate } from 'react-router-dom';
-
+import {useNavigate} from 'react-router-dom';
+import {
+  preloadMentorImages,
+  getMentorGradientClass,
+  handleImageError,
+  handleImageLoad
+} from '../utils/imageUtils';
 
 const MentorSection = ({onCategorySelect, onMentorSelect}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -81,19 +86,8 @@ const MentorSection = ({onCategorySelect, onMentorSelect}) => {
           // recommendedProfiles 호출
           const response = await profileAPI.getRecommendedMentors(
               {categoryId});
-          console.log('응답:', response.data.data);
-          /* const fetchedMentors = response.data && response.data.data && Array.isArray(response.data.data) ? response.data.data.map(profile => ({
-             id: profile.profileId,
-             name: profile.userName,
-             userId: profile.userId,
-             title: profile.profileTitle,
-             categoryName: profile.categoryName,
-             tags: profile.keywords ? profile.keywords.map(keyword => keyword.name) : [],
-             avatar: profile.userName ? profile.userName.charAt(0) : 'M' // 이름의 첫 글자를 아바타로 사용
-           })) : [];
- */
+          console.log('✅ 추천 멘토 API 응답 성공, 멘토 수:', response.data.data?.length);
           const fetchedMentors = response.data.data.map(profile => {
-            console.log("profile 확인:", profile); // 🔍 디버깅용 로그
             return {
               ...profile,
               id: profile.profileId,
@@ -104,9 +98,16 @@ const MentorSection = ({onCategorySelect, onMentorSelect}) => {
               categoryName: profile.categoryName,
               tags: profile.keywords?.map(k => k.name) || [],
               avatar: profile.userName?.charAt(0) || 'M',
+              imgUrl: profile.imgUrl, // ✅ 이미지 URL 추가
             };
           });
+          
           setMentors(fetchedMentors);
+
+          // 🚀 이미지 프리로드 (성능 최적화)
+          preloadMentorImages(fetchedMentors)
+          .then(() => console.log('✅ 멘토 이미지 프리로드 완료'))
+          .catch(err => console.warn('⚠️ 이미지 프리로드 중 일부 실패:', err));
         } catch (error) {
           console.error("추천 멘토 정보를 불러오는 데 실패했습니다. : ", error);
           setError('추천 멘토 정보를 불러오는 중 오류가 발생했습니다.');
@@ -242,8 +243,30 @@ const MentorSection = ({onCategorySelect, onMentorSelect}) => {
                             <div className="mentor-card-shimmer"></div>
                             <div className="mentor-card-content">
                               <div>
-                                <div className={`mentor-avatar`}>
-                                  {mentor.avatar}
+                                <div className="mentor-avatar">
+                                  {mentor.imgUrl ? (
+                                      <img
+                                          src={mentor.imgUrl}
+                                          alt={mentor.name}
+                                          loading="lazy"
+                                          onLoad={(e) => handleImageLoad(e)}
+                                          onError={(e) => handleImageError(e, mentor.name)}
+                                          style={{
+                                            opacity: '0',
+                                            transition: 'opacity 0.3s ease'
+                                          }}
+                                      />
+                                  ) : null}
+                                  <div
+                                      className={`mentor-avatar-text ${!mentor.imgUrl
+                                          ? getMentorGradientClass(mentor.id, 8)
+                                          : ''}`}
+                                      style={{
+                                        display: mentor.imgUrl ? 'none' : 'flex'
+                                      }}
+                                  >
+                                    {mentor.avatar}
+                                  </div>
                                 </div>
                                 <h3 className="mentor-name">{mentor.name}</h3>
                                 <p className="mentor-profileTitle">{mentor.title}</p>

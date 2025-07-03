@@ -150,15 +150,15 @@ api.interceptors.response.use(
         } catch (refreshError) {
           console.error('❌ 토큰 갱신 실패:', refreshError);
 
-          // // 토큰 갱신 실패 시 로그아웃 처리
-          // accessTokenUtils.removeAccessToken();
-          // refreshTokenUtils.removeRefreshToken();
-          //
-          // // 현재 페이지가 로그인 페이지가 아닌 경우에만 리다이렉트
-          // if (!window.location.pathname.includes('/login')) {
-          //   alert('세션이 만료되었습니다. 다시 로그인해주세요.');
-          //   window.location.reload(); // 페이지 새로고침으로 로그인 상태 초기화
-          // }
+          // 토큰 갱신 실패 시 로그아웃 처리
+          accessTokenUtils.removeAccessToken();
+          refreshTokenUtils.removeRefreshToken();
+
+          // 현재 페이지가 로그인 페이지가 아닌 경우에만 리다이렉트
+          if (!window.location.pathname.includes('/login')) {
+            alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+            window.location.reload(); // 페이지 새로고침으로 로그인 상태 초기화
+          }
         }
       }
 
@@ -231,6 +231,36 @@ export const userAPI = {
   deleteUser: (deleteData) => {
     return api.delete('/api/users/me', {data: deleteData});
   },
+
+  // 프로필 이미지 업로드 (최초 등록)
+  uploadProfileImage: (file) => {
+    const formData = new FormData();
+    formData.append('files', file);
+    
+    return api.post('/api/users/profile-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // 프로필 이미지 수정
+  updateProfileImage: (file) => {
+    const formData = new FormData();
+    formData.append('files', file);
+    
+    return api.patch('/api/users/profile-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // 프로필 이미지 삭제
+  deleteProfileImage: () => api.delete('/api/users/profile-image'),
+
+  // 프로필 이미지 조회
+  getUserProfileImage: (userId) => api.get(`/api/users/${userId}/profile-image`),
 };
 
 // Profile API
@@ -318,17 +348,11 @@ export const reservationAPI = {
 
 // Chatroom API
 export const chatroomAPI = {
-  // 채팅방 목록 조회
-  getChatrooms: () => api.get('/api/chat_rooms'),
+  // 채팅방 목록 조회 (페이지네이션 지원)
+  getChatroomsWithPagination: (params) => api.get('/api/chat_rooms', { params }),
 
-  // 채팅방 생성
-  //createChatroom: (chatroomData) => api.post('/api/chatrooms', chatroomData),
-
-  // 채팅방 입장
-  //joinChatroom: (chatroomId) => api.post(`/api/chatrooms/${chatroomId}/join`),
-
-  // 채팅방 나가기
-  //leaveChatroom: (chatroomId) => api.post(`/api/chatrooms/${chatroomId}/leave`),
+  // 채팅방 상태 확인
+  getChatroomStatus: (chatroomId) => api.get(`/api/chat_rooms/${chatroomId}/status`),
 };
 
 // Message API
@@ -398,15 +422,9 @@ export const categoryAPI = {
 
 // Notification API
 export const notificationAPI = {
-  // 알림 목록 조회
-  getNotifications: (params) => api.get('/api/notifications', {params}),
+  // 알림 목록 조회 (SSE 알림 내역)
+  getNotifications: (params) => api.get('/sse/notifications', {params}),
 
-  // 알림 읽음 처리
-  markNotificationAsRead: (notificationId) =>
-      api.patch(`/api/notifications/${notificationId}/read`),
-
-  // 모든 알림 읽음 처리
-  markAllNotificationsAsRead: () => api.patch('/api/notifications/read-all'),
 };
 
 // Ticket API
@@ -564,7 +582,7 @@ export const adminAPI = {
       `/api/admin/complaints/${complaintId}`),
 
   // [관리자] 문의 답변 수정
-  updateAnswer: (answerId) => api.patch(`/answers/${answerId}`),
+  updateAnswer: (answerId, answerData) => api.patch(`/api/admin/answers/${answerId}`, answerData),
 
   // [관리자] 쿠폰 등록
   registerCoupon: (couponData) => api.post('/api/admin/coupons', couponData),

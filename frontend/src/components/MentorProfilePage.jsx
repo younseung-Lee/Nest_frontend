@@ -34,6 +34,9 @@ const MentorProfilePage = () => {
         setError(null);
         const res = await profileAPI.getMentorDetail(userId, profileId);
         console.log("🧩 mentor data:", res);
+        console.log("🔍 [멘토상세] 응답 데이터 구조:", res.data);
+        console.log("🔍 [멘토상세] data.data 확인:", res.data.data);
+        console.log("🔍 [멘토상세] imgUrl 필드 확인:", res.data.data?.imgUrl);
         setMentor(res.data);
       } catch (error) {
         console.error('멘토 정보 가져오기 실패:', error);

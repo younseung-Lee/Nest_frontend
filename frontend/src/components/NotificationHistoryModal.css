@@ -1,0 +1,436 @@
+/* 알림 모달 오버레이 */
+.notification-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  overflow: hidden; /* 오버레이에서 스크롤 방지 */
+}
+
+/* 모달 컨텐츠 */
+.notification-modal-content {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 500px;
+  height: 600px; /* 고정 높이 */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 헤더 */
+.notification-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.notification-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.notification-modal-title .title-icon {
+  width: 24px;
+  height: 24px;
+  color: #3b82f6;
+}
+
+.notification-modal-title h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.notification-count {
+  background: #3b82f6;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.notification-modal-close {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.notification-modal-close:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+/* 바디 */
+.notification-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden; /* 가로 스크롤 방지 */
+  padding: 8px 0;
+  position: relative;
+}
+
+/* 로딩 상태 */
+.notification-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.notification-loading p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* 에러 상태 */
+.notification-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  gap: 16px;
+}
+
+.notification-error .error-icon {
+  width: 48px;
+  height: 48px;
+  color: #ef4444;
+}
+
+.notification-error p {
+  margin: 0;
+  color: #374151;
+  text-align: center;
+}
+
+.retry-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.retry-button:hover {
+  background-color: #2563eb;
+}
+
+/* 빈 상태 */
+.notification-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  gap: 16px;
+}
+
+.notification-empty .empty-icon {
+  width: 64px;
+  height: 64px;
+  color: #d1d5db;
+}
+
+.notification-empty h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.notification-empty p {
+  margin: 0;
+  color: #6b7280;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* 알림 리스트 */
+.notification-list {
+  padding: 0;
+}
+
+/* 더보기 섹션 */
+.notification-load-more {
+  padding: 16px 24px;
+  border-top: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: center;
+}
+
+.load-more-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.load-more-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.load-more-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.load-more-icon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
+}
+
+.load-more-button:hover:not(:disabled) .load-more-icon {
+  transform: translateY(2px);
+}
+
+.button-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+/* 클릭 가능한 알림 (채팅방 ID가 있는 경우) */
+.notification-item.clickable {
+  cursor: pointer;
+}
+
+.notification-item.clickable:hover {
+  background-color: #f0f9ff;
+  transform: translateX(4px);
+}
+
+.notification-item.clickable:hover .notification-icon-wrapper {
+  background-color: #dbeafe;
+}
+
+.notification-item.clickable:hover .notification-action .action-text {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 클릭 불가능한 알림 (채팅방 ID가 없는 경우) */
+.notification-item.non-clickable {
+  cursor: default;
+}
+
+.notification-item.non-clickable:hover {
+  background-color: #f9fafb;
+}
+
+.notification-icon-wrapper {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background-color: #f3f4f6;
+}
+
+.notification-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.notification-icon.chat {
+  color: #10b981;
+}
+
+.notification-icon.time {
+  color: #f59e0b;
+}
+
+.notification-icon.default {
+  color: #6b7280;
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-message {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.notification-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.notification-time {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* 알림 액션 (이동 버튼) */
+.notification-action {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.action-text {
+  font-size: 12px;
+  color: #3b82f6;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: all 0.2s ease;
+}
+
+/* 푸터 */
+.notification-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.notification-info {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.footer-tip {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* 반응형 */
+@media (max-width: 640px) {
+  .notification-modal-overlay {
+    padding: 16px;
+  }
+  
+  .notification-modal-content {
+    height: 500px; /* 모바일에서는 조금 더 작게 */
+  }
+  
+  .notification-modal-header {
+    padding: 20px 20px 16px 20px;
+  }
+  
+  .notification-modal-title h2 {
+    font-size: 18px;
+  }
+  
+  .notification-item {
+    padding: 16px 20px;
+  }
+  
+  .notification-modal-footer {
+    padding: 16px 20px;
+  }
+
+  .notification-load-more {
+    padding: 16px 20px;
+  }
+}
+
+@media (max-height: 600px) {
+  .notification-modal-content {
+    height: 400px; /* 세로가 짧은 화면에서는 더 작게 */
+  }
+}
+
+/* 스크롤바 스타일링 */
+.notification-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-modal-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.notification-modal-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.notification-modal-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
