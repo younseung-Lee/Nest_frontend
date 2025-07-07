@@ -451,7 +451,11 @@ export const categoryAPI = {
 // Notification API
 export const notificationAPI = {
   // 알림 목록 조회 (SSE 알림 내역)
-  getNotifications: (params) => api.get('/sse/notifications', {params}),
+  getNotifications: (params) => api.get('/sse/notifications', {params,
+    headers: {
+      'Accept': 'application/json'
+    }
+  }),
 
 };
 
