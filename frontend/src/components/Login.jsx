@@ -5,6 +5,7 @@ import logo from '../image/cool.png';
 import { authAPI } from '../services/api';
 import { authUtils, decodeJWT } from '../utils/tokenUtils';
 import { useNavigate } from 'react-router-dom';
+import naverLogo from '../image/naver.png';
 
 const Login = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
@@ -161,7 +162,7 @@ const Login = ({ onLoginSuccess }) => {
             </button>
             <button onClick={handleNaverLogin}
                 className="social-button naver">
-              <img className="naver-logo" src={"src/image/naver.png"} alt={"네이버로 시작하기"}/>
+              <img className="naver-logo" src={naverLogo} alt={"네이버로 시작하기"}/>
               <span style={{ color: 'white' }}>네이버로 시작하기</span>
             </button>
           </div>

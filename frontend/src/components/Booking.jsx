@@ -96,7 +96,7 @@ const Booking = ({ mentor, onBack, onBooking }) => {
       
       if (isToday) {
         const currentTime = new Date();
-        const minBookingTime = new Date(currentTime.getTime()); // 현재 시간 + 10분  ( + 10 * 60000)
+        const minBookingTime = new Date(currentTime.getTime() + 10 * 60000); // 현재 시간 + 10분
         const minBookingTimeStr = `${minBookingTime.getHours().toString().padStart(2, '0')}:${minBookingTime.getMinutes().toString().padStart(2, '0')}`;
         
         uniqueSortedSlots = uniqueSortedSlots.filter(slot => {
