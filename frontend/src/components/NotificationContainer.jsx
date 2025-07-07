@@ -26,7 +26,6 @@ const NotificationContainer = ({ isLoggedIn = false }) => {
       if (data.status === 'connected') {
         console.log('✅ SSE 연결 성공 - 실시간 알림 수신 가능');
         // 연결 성공 시 테스트 알림 생성 (개발 환경)
-        notificationService.createTestNotifications();
       } else if (data.status === 'failed' || data.status === 'error') {
         console.error('❌ SSE 연결 실패 - 실시간 알림 불가');
         // 연결 실패 시 오프라인 알림은 표시하지 않음 (너무 많은 알림 방지)

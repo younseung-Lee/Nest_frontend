@@ -162,7 +162,7 @@ api.interceptors.response.use(
           // 세션 만료 상태로 설정 (중복 처리 방지)
           if (!isSessionExpired) {
             isSessionExpired = true;
-            
+
             // 토큰 갱신 실패 시 로그아웃 처리
             accessTokenUtils.removeAccessToken();
             refreshTokenUtils.removeRefreshToken();
@@ -171,7 +171,7 @@ api.interceptors.response.use(
             if (!window.location.pathname.includes('/login') && !sessionExpireAlertShown) {
               sessionExpireAlertShown = true;
               alert('로그인이 필요합니다!');
-              
+
               // 홈페이지로 리다이렉트 (로그인 상태 초기화)
               setTimeout(() => {
                 window.location.href = '/';
@@ -260,7 +260,7 @@ export const userAPI = {
   uploadProfileImage: (file) => {
     const formData = new FormData();
     formData.append('files', file);
-    
+
     return api.post('/api/users/profile-image', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -272,7 +272,7 @@ export const userAPI = {
   updateProfileImage: (file) => {
     const formData = new FormData();
     formData.append('files', file);
-    
+
     return api.patch('/api/users/profile-image', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -423,7 +423,7 @@ export const reviewAPI = {
       api.get(`/api/mentors/${mentorId}/reviews`, {params}),
 
   // 리뷰 작성 (예약 기반)
-  createReview: (reservationId, reviewData) => 
+  createReview: (reservationId, reviewData) =>
       api.post(`/api/reservations/${reservationId}/reviews`, reviewData),
 
 
@@ -451,11 +451,7 @@ export const categoryAPI = {
 // Notification API
 export const notificationAPI = {
   // 알림 목록 조회 (SSE 알림 내역)
-  getNotifications: (params) => api.get('/sse/notifications', {params,
-    headers: {
-      'Accept': 'application/json'
-    }
-  }),
+  getNotifications: (params) => api.get('/sse/notifications', {params}),
 
 };
 
