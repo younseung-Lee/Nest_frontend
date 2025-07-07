@@ -12,14 +12,39 @@ export const useWebSocket = () => {
 
   const connect = useCallback(async () => {
     try {
+      console.log('🔄 WebSocket 연결 시도 시작...');
       setConnectionError(null);
+      
+      // 연결 상태 실시간 업데이트
+      const checkConnection = () => {
+        const connected = websocketService.isConnected();
+        setIsConnected(connected);
+        return connected;
+      };
+      
       await websocketService.connect();
-      setIsConnected(true);
-      console.log('✅ WebSocket 연결 완료');
+      
+      // 연결 후 상태 확인
+      setTimeout(() => {
+        const finalStatus = checkConnection();
+        console.log(`✅ WebSocket 연결 최종 상태: ${finalStatus}`);
+        if (finalStatus) {
+          console.log('🎉 WebSocket 연결 성공!');
+        }
+      }, 1000);
+      
     } catch (error) {
       console.error('❌ WebSocket 연결 실패:', error);
+      console.error('🔍 에러 상세:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack?.substring(0, 200)
+      });
       setConnectionError(error.message);
       setIsConnected(false);
+      
+      // 디버그 정보 출력
+      console.log('🔍 WebSocket 서비스 디버그:', websocketService.getDebugInfo());
     }
   }, []);
 

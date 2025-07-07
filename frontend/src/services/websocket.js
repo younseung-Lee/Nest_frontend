@@ -60,12 +60,33 @@ class WebSocketService {
         throw new Error('No valid token available for WebSocket connection');
       }
 
-      // WebSocket URL 동적 생성 (프로덕션/개발 환경 구분)
-      const isProduction = window.location.protocol === 'https:';
-      const protocol = isProduction ? 'wss:' : 'ws:';
-      const host = isProduction ? 'nest-dev.click' : 'localhost:8080';
-      const socketUrl = `${protocol}//${host}/ws-nest/websocket`;
-      console.log('🔌 WebSocket URL:', socketUrl);
+      // WebSocket URL 동적 생성 (환경 변수 우선, 없으면 현재 도메인 기반)
+      let baseUrl = import.meta.env.VITE_WS_URL;
+      
+      if (!baseUrl) {
+        const isProduction = window.location.protocol === 'https:';
+        const protocol = isProduction ? 'wss:' : 'ws:';
+        
+        // 프로덕션에서는 현재 도메인 사용 (포트 없이), 개발에서는 localhost:8080 사용
+        let host;
+        if (isProduction) {
+          // www. 제거하고 순수 도메인만 사용 (nginx 프록시이므로 포트 제거)
+          host = window.location.host.replace(/^www\./, '').replace(/:.*$/, '');
+        } else {
+          host = 'localhost:8080';
+        }
+        
+        baseUrl = `${protocol}//${host}`;
+      }
+      
+      const socketUrl = `${baseUrl}/ws-nest/websocket`;
+      
+      console.log('🔌 WebSocket 연결 정보:');
+      console.log('  - 환경:', import.meta.env.MODE);
+      console.log('  - 현재 도메인:', window.location.host);
+      console.log('  - Base URL:', baseUrl);
+      console.log('  - Socket URL:', socketUrl);
+      
       const socket = new WebSocket(socketUrl);
 
       this.stompClient = new Client({

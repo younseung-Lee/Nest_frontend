@@ -67,14 +67,77 @@ class WebSocketService {
           return;
         }
 
-        // WebSocket URL에 토큰을 파라미터로 추가
-        // 프로덕션에서는 wss:// 사용, 개발환경에서는 ws:// 사용
-        const isProduction = window.location.protocol === 'https:';
-        const protocol = isProduction ? 'wss:' : 'ws:';
-        const host = isProduction ? 'nest-dev.click' : 'localhost:8080';
-        const baseUrl = import.meta.env.VITE_WS_URL || `${protocol}//${host}`;
+        // WebSocket URL 동적 생성 및 연결 전략
+        console.log('🔌 WebSocket 연결 준비:');
+        console.log('  - 환경:', import.meta.env.MODE);
+        console.log('  - 현재 도메인:', window.location.host);
+        console.log('  - 프로토콜:', window.location.protocol);
+        console.log('  - VITE_WS_URL:', import.meta.env.VITE_WS_URL);
+        
+        let baseUrl = import.meta.env.VITE_WS_URL;
+        
+        if (!baseUrl) {
+          const isProduction = window.location.protocol === 'https:';
+          const protocol = isProduction ? 'wss:' : 'ws:';
+          
+          // 프로덕션에서는 현재 도메인 사용 (포트 없이), 개발에서는 localhost:8080 사용
+          let host;
+          if (isProduction) {
+            // www. 제거하고 순수 도메인만 사용 (nginx 프록시이므로 포트 제거)
+            host = window.location.host.replace(/^www\./, '').replace(/:.*$/, '');
+          } else {
+            host = 'localhost:8080';
+          }
+          
+          baseUrl = `${protocol}//${host}`;
+        }
+        
         const wsUrl = `${baseUrl}/ws-nest/websocket?token=${encodeURIComponent(this.websocketToken)}`;
-        console.log('🔌 WebSocket 연결 시도 (토큰 파라미터):', baseUrl + '/ws-nest/websocket?token=***');
+        
+        console.log('✅ 최종 WebSocket 설정:');
+        console.log('  - Base URL:', baseUrl);
+        console.log('  - Full URL:', baseUrl + '/ws-nest/websocket?token=***');
+        console.log('  - Token length:', this.websocketToken.length);
+        
+        // 테스트용 WebSocket 연결 시도 (실제 연결은 STOMP가 처리)
+        console.log('🧪 WebSocket 기본 연결 테스트 시작...');
+        try {
+          const testWs = new WebSocket(wsUrl);
+          testWs.onopen = () => {
+            console.log('✅ 기본 WebSocket 연결 성공');
+            testWs.close();
+          };
+          testWs.onerror = (error) => {
+            console.error('❌ 기본 WebSocket 연결 실패:', error);
+          };
+          testWs.onclose = (event) => {
+            console.log('🔌 테스트 WebSocket 종료:', event.code, event.reason);
+          };
+        } catch (testError) {
+          console.error('❌ WebSocket 생성 자체 실패:', testError);
+        }
+        
+        // 연결 전 기본 연결성 테스트
+        try {
+          const httpUrl = baseUrl.replace(/^wss?:/, window.location.protocol);
+          console.log('🌐 백엔드 연결성 테스트:', httpUrl + '/api/health');
+          
+          const healthCheck = await fetch(httpUrl + '/api/health', {
+            method: 'GET',
+            timeout: 5000
+          }).catch(err => {
+            console.warn('⚠️ 백엔드 연결성 테스트 실패 (계속 진행):', err.message);
+            return null;
+          });
+          
+          if (healthCheck && healthCheck.ok) {
+            console.log('✅ 백엔드 서버 응답 정상');
+          } else {
+            console.warn('⚠️ 백엔드 서버 응답 없음 (WebSocket 연결 계속 시도)');
+          }
+        } catch (healthError) {
+          console.warn('⚠️ 헬스체크 예외 (WebSocket 연결 계속 시도):', healthError.message);
+        }
         
         // STOMP 클라이언트 생성 (헤더에서 토큰 완전 제거)
         this.stompClient = new Client({
@@ -143,9 +206,19 @@ class WebSocketService {
         this.stompClient.onWebSocketError = (error) => {
           console.error('🔴 WebSocket 레벨 에러:', error);
           console.error('🔗 연결 시도했던 URL:', baseUrl + '/ws-nest/websocket?token=***');
+          console.error('🔍 에러 상세 정보:', {
+            name: error.name,
+            message: error.message,
+            type: error.type,
+            target: error.target?.url || 'unknown'
+          });
+          
+          // 네트워크 연결 상태 확인
+          console.log('🌐 네트워크 상태:', navigator.onLine ? '연결됨' : '오프라인');
+          
           this.connectionPromise = null;
           
-          reject(new Error(`WebSocket connection failed to ${baseUrl}/ws-nest/websocket`));
+          reject(new Error(`WebSocket connection failed to ${baseUrl}/ws-nest/websocket: ${error.message || 'Unknown error'}`));
         };
 
         // 연결 시작
@@ -276,8 +349,14 @@ class WebSocketService {
 
   // 메시지 전송
   async sendMessage(chatRoomId, content) {
+    console.log('📤 메시지 전송 시도:', { chatRoomId, content: content?.substring(0, 50) + '...' });
+    console.log('🔍 연결 상태 확인:', this.getDebugInfo());
+    
     if (!this.isConnected()) {
-      throw new Error('STOMP WebSocket이 연결되지 않았습니다');
+      const debugInfo = this.getDebugInfo();
+      const errorMsg = `STOMP WebSocket이 연결되지 않았습니다. 상태: ${JSON.stringify(debugInfo, null, 2)}`;
+      console.error('❌ 메시지 전송 실패:', errorMsg);
+      throw new Error(errorMsg);
     }
 
     if (!chatRoomId || !content?.trim()) {
