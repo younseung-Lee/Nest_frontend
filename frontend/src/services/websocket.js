@@ -64,7 +64,7 @@ class WebSocketService {
         throw new Error('No valid token available for WebSocket connection');
       }
 
-      const socketUrl = 'ws://nest-dev.click:8080/ws-nest/websocket';
+      const socketUrl = 'ws://www.nest-dev.click/ws-nest/websocket';
       const socket = new WebSocket(socketUrl);
 
       this.stompClient = new Client({
