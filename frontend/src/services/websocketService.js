@@ -68,7 +68,7 @@ class WebSocketService {
         }
 
         // WebSocket URL에 토큰을 파라미터로 추가
-        const baseUrl = import.meta.env.VITE_WS_URL || 'ws://nest-dev.click:8080';
+        const baseUrl = import.meta.env.VITE_WS_URL || 'wss://nest-dev.click';
         const wsUrl = `${baseUrl}/ws-nest/websocket?token=${encodeURIComponent(this.websocketToken)}`;
         console.log('🔌 WebSocket 연결 시도 (토큰 파라미터):', baseUrl + '/ws-nest/websocket?token=***');
         
