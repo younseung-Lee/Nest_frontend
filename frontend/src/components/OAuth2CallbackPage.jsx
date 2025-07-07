@@ -8,6 +8,7 @@ import { decodeJWT } from '../utils/tokenUtils'
 const OAuth2CallbackPage = () => {
   const [searchParams] = useSearchParams(); // URL 쿼리 파라미터 가져오기
   const navigate = useNavigate(); // 페이지 이동을 위한 훅
+  console.log('asdfadsfsdff', searchParams.get('code'))
 
   useEffect(() => {
     // URL에서 'code' 파라미터 추출
