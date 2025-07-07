@@ -45,7 +45,7 @@ const ChatRoom = ({
   const isMentor = userRole === 'MENTOR';
 
   // 비속어 예시 단어들
-  const badWords = ['병신', '씨발', '시발', '존나'];
+  const badWords = ['병신', '씨발', '시발', '존나', '바보'];
 
 // 띄어쓰기 포함도 감지: 시 발, 씨 발, 시  발 등
   const censorBadWords = (text) => {
