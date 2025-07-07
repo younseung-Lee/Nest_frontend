@@ -1,10 +1,12 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useCallback} from "react";
 import './Payment.css'; // 기존 CSS 스타일 사용
 import './TossPayment.css'; // 토스 전용 CSS 추가
 import TossPaymentSuccess from './TossPaymentSuccess';
 import TossPaymentFail from './TossPaymentFail';
 import { userInfoUtils } from '../utils/tokenUtils'; // 사용자 정보 유틸 추가
-import { paymentAPI } from '../services/api'; // API 서비스 추가
+import { paymentAPI, reservationAPI } from '../services/api';
+import {useNavigate} from "react-router-dom";
+import {navigate} from "jsdom/lib/jsdom/living/window/navigation.js"; // API 서비스 추가
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -19,6 +21,7 @@ function TossPaymentComponent({
 }) {
   const [payment, setPayment] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   // ❌ 하드코딩 제거: bookingData 없으면 에러 처리
   const [amount, setAmount] = useState(0);
@@ -453,11 +456,46 @@ function TossPaymentComponent({
     }
   };
 
+  const handleBack = async () => {
+    try {
+      // 확인 다이얼로그 표시
+      const confirmed = window.confirm('결제를 취소하고 예약 선택으로 돌아가시겠습니까? 현재 예약이 취소됩니다.');
+
+      if (confirmed) {
+        // 예약 삭제 API 호출
+
+        console.log('🗑️ 예약 삭제 시작:');
+        await deleteReservation();
+
+        // 홈으로 호출
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('❌ 예약 삭제 실패:', error);
+      alert('예약 취소 중 오류가 발생했습니다.');
+    }
+  };
+
+  const deleteReservation = useCallback(async () => {
+    // bookingData가 없거나 reservationId가 없으면 아무것도 하지 않음
+    if (!bookingData || !bookingData.reservationId) {
+      console.warn('🗑️ 예약 삭제 스킵: bookingData 또는 reservationId 없음');
+      return;
+    }
+    try {
+      console.log('🗑️ 예약 삭제 시작:', bookingData.reservationId);
+      await reservationAPI.cancelReservation(bookingData.reservationId); // reservationAPI 사용
+      console.log('✅ 예약 삭제 완료:', bookingData.reservationId);
+    } catch (error) {
+      console.error('❌ 예약 삭제 실패:', error);
+    }
+  }, [bookingData]); // bookingData가 변경될 때마다 함수 재생성
+
   return (
       <div className="payment-container">
         {/* Payment.css 스타일 클래스 사용 */}
         <div className="payment-header">
-          <button className="back-button" onClick={onBack}>
+          <button className="back-button" onClick={handleBack}>
             ← 뒤로가기
           </button>
           <h1>토스 결제</h1>
@@ -625,6 +663,58 @@ const TossPaymentApp = ({
   onTossSuccess,
   onTossFail
 }) => {
+
+  // 🔥🔥🔥 `Payment.jsx`에서 가져온 로직 시작 🔥🔥🔥
+
+  // ⭐ 상태 추가: 결제가 이미 성공적으로 완료되었는지 여부
+  const [isPaymentSuccess, setIsPaymentSuccess] = useState(false);
+
+  // 예약 삭제 함수
+  const deleteReservation = useCallback(async () => {
+    // bookingData가 없거나 reservationId가 없으면 아무것도 하지 않음
+    if (!bookingData || !bookingData.reservationId) {
+      console.warn('🗑️ 예약 삭제 스킵: bookingData 또는 reservationId 없음');
+      return;
+    }
+    try {
+      console.log('🗑️ 예약 삭제 시작:', bookingData.reservationId);
+      await reservationAPI.cancelReservation(bookingData.reservationId); // reservationAPI 사용
+      console.log('✅ 예약 삭제 완료:', bookingData.reservationId);
+    } catch (error) {
+      console.error('❌ 예약 삭제 실패:', error);
+    }
+  }, [bookingData]); // bookingData가 변경될 때마다 함수 재생성
+
+  // 🚨 브라우저 뒤로가기 및 페이지 이탈 감지 로직
+  useEffect(() => {
+    // 사용자가 페이지를 벗어나려 할 때 실행될 함수
+    const handleBeforeUnload = async (event) => {
+      // 결제 성공하지 않은 상태이며, 예약 ID가 있을 때
+      if (!isPaymentSuccess && bookingData?.reservationId) {
+        // beforeunload는 비동기 작업 완료를 보장하지 않으므로, fire-and-forget 방식으로 호출
+        deleteReservation();
+      }
+    };
+
+    // 브라우저 뒤로가기/앞으로가기 버튼을 눌렀을 때 실행될 함수
+    const handlePopstate = async () => {
+      // 결제 성공 상태가 아니고, 예약 ID가 있을 때
+      if (!isPaymentSuccess && bookingData?.reservationId) {
+        console.log('🔙 브라우저 뒤로가기/앞으로가기 감지됨. 예약 삭제 시도:', bookingData.reservationId);
+        await deleteReservation(); // popstate에서는 await를 사용하여 완료를 시도해 볼 수 있음.
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopstate);
+
+    // 컴포넌트 언마운트 시 클린업 함수
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopstate);
+    };
+  }, [isPaymentSuccess, bookingData, deleteReservation]); // 의존성 배열 업데이트
+
   // 개발 환경에서만 디버깅 정보 출력
   useEffect(() => {
     if (import.meta.env.DEV) {
@@ -639,13 +729,24 @@ const TossPaymentApp = ({
     }
   }, [currentTossPage, bookingData, paymentData]);
 
+  // `onTossSuccess` 및 `onTossFail`에서 `isPaymentSuccess` 상태를 업데이트할 수 있도록 변경
+  const handleInternalTossSuccess = (data) => {
+    setIsPaymentSuccess(true); // 결제 성공 시 상태 업데이트
+    onTossSuccess(data); // 부모 컴포넌트의 콜백 호출
+  };
+
+  const handleInternalTossFail = (error) => {
+    setIsPaymentSuccess(false); // 혹시 모를 실패 시에도 상태 초기화
+    onTossFail(error); // 부모 컴포넌트의 콜백 호출
+  };
+
   if (currentTossPage === "toss-success") {
     return (
         <TossPaymentSuccess
             paymentData={paymentData}
             onHome={onHome}
             onBack={onBack}
-            onTossSuccess={onTossSuccess}
+            onTossSuccess={handleInternalTossSuccess}
         />
     );
   }
@@ -663,8 +764,8 @@ const TossPaymentApp = ({
       <TossPaymentComponent
           bookingData={bookingData}
           onBack={onBack}
-          onTossSuccess={onTossSuccess}
-          onTossFail={onTossFail}
+          onTossSuccess={handleInternalTossSuccess}
+          onTossFail={handleInternalTossFail}
           onHome={onHome}
       />
   );

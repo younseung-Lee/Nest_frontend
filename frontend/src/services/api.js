@@ -487,6 +487,9 @@ export const userCouponAPI = {
     return api.get('/api/user-coupons', {params: finalParams});
   },
 
+  // 발급 가능한 쿠폰 목록 조회
+  getAvailableCoupons: () => api.get('/api/user-coupons/available'),
+
   // 사용자 쿠폰 등록 (쿠폰 코드 입력 등)
   registerUserCoupon: (couponData) => api.post('/api/user-coupons', couponData),
 

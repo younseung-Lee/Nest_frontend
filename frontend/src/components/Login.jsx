@@ -75,14 +75,14 @@ const Login = ({ onLoginSuccess }) => {
     console.log('🟡 카카오 소셜 로그인 시작...');
     // 백엔드 OAuth2 카카오 로그인 URL로 리다이렉트
     // 백엔드에서 성공 후 쿠키나 세션으로 토큰 설정하고 프론트로 리다이렉트
-    window.location.href = 'http://localhost:8080/oauth2/login/kakao';
+    window.location.href = 'http://nest-dev.click:8080/oauth2/login/kakao';
   };
 
   const handleNaverLogin = () => {
     console.log('🟢 네이버 소셜 로그인 시작...');
     // 백엔드 OAuth2 네이버 로그인 URL로 리다이렉트
     // 백엔드에서 성공 후 쿠키나 세션으로 토큰 설정하고 프론트로 리다이렉트
-    window.location.href = 'http://localhost:8080/oauth2/login/naver';
+    window.location.href = 'http://nest-dev.click:8080/oauth2/login/naver';
   };
 
   return (

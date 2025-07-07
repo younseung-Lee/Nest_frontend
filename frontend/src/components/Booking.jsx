@@ -88,7 +88,25 @@ const Booking = ({ mentor, onBack, onBooking }) => {
       console.log(`✅ ${selectedDate}에 백엔드에서 받은 10분 단위 가용 슬롯:`, formattedSlots);
 
       // 중복 제거 및 시간 순 정렬 (백엔드에서 정렬되어 온다면 필요 없을 수 있음)
-      const uniqueSortedSlots = [...new Set(formattedSlots)].sort();
+      let uniqueSortedSlots = [...new Set(formattedSlots)].sort();
+
+      // 당일 예약인 경우 현재 시간 + 10분 이후 시간만 허용
+      const today = new Date();
+      const isToday = selectedDate === `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+      
+      if (isToday) {
+        const currentTime = new Date();
+        const minBookingTime = new Date(currentTime.getTime() + 10 * 60000); // 현재 시간 + 10분
+        const minBookingTimeStr = `${minBookingTime.getHours().toString().padStart(2, '0')}:${minBookingTime.getMinutes().toString().padStart(2, '0')}`;
+        
+        uniqueSortedSlots = uniqueSortedSlots.filter(slot => {
+          const [slotHour, slotMinute] = slot.split(':').map(Number);
+          const slotTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), slotHour, slotMinute);
+          return slotTime >= minBookingTime;
+        });
+        
+        console.log(`✅ 당일 예약 - 현재 시간 + 10분(${minBookingTimeStr}) 이후 가능한 슬롯:`, uniqueSortedSlots);
+      }
 
       setConsultationSlots(uniqueSortedSlots); // 이 변수가 이제 10분 단위 시작 시간 목록
 
@@ -241,6 +259,36 @@ const Booking = ({ mentor, onBack, onBooking }) => {
     return result;
   }
 
+  // 시간 겹침 검증 함수
+  function isTimeOverlapping(newStartTime, newEndTime, availableSlots) {
+    const [newStartHour, newStartMinute] = newStartTime.split(':').map(Number);
+    const [newEndHour, newEndMinute] = newEndTime.split(':').map(Number);
+    
+    const newStartTotalMinutes = newStartHour * 60 + newStartMinute;
+    const newEndTotalMinutes = newEndHour * 60 + newEndMinute;
+    
+    // 연속되지 않은 슬롯들 사이에 예약하려는 시간이 걸치는지 확인
+    for (let i = 0; i < availableSlots.length - 1; i++) {
+      const currentSlot = availableSlots[i];
+      const nextSlot = availableSlots[i + 1];
+      
+      const [currentHour, currentMinute] = currentSlot.split(':').map(Number);
+      const [nextHour, nextMinute] = nextSlot.split(':').map(Number);
+      
+      const currentSlotEnd = currentHour * 60 + currentMinute + 10; // 현재 슬롯 끝 시간
+      const nextSlotStart = nextHour * 60 + nextMinute; // 다음 슬롯 시작 시간
+      
+      // 현재 슬롯과 다음 슬롯이 연속되지 않는 경우 (gap이 있는 경우)
+      if (currentSlotEnd < nextSlotStart) {
+        // 새로운 예약이 이 gap을 걸치는지 확인
+        if (newStartTotalMinutes < currentSlotEnd && newEndTotalMinutes > nextSlotStart) {
+          return true; // 겹침 발생
+        }
+      }
+    }
+    return false;
+  }
+
   // 달력 함수들
   const getDaysInMonth = (date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const getFirstDayOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
@@ -345,7 +393,13 @@ const Booking = ({ mentor, onBack, onBooking }) => {
       return;
     }
 
-    // 5. 로그인 상태 확인
+    // 5. 시간 겹침 검증
+    if (isTimeOverlapping(selectedStartTime, selectedEndTime, consultationSlots)) {
+      alert('선택한 시간대는 다른 예약과 겹칩니다. 다른 시간을 선택해주세요.');
+      return;
+    }
+
+    // 6. 로그인 상태 확인
     const token = localStorage?.getItem("accessToken") || sessionStorage?.getItem("accessToken");
     if (!token) {
       alert('로그인이 필요합니다. 로그인 후 다시 시도해주세요.');

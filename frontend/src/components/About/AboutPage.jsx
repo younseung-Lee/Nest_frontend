@@ -24,6 +24,11 @@ const AboutPage = () => {
     setUserInfo(userData);
   }, []);
 
+  // 페이지 로드 시 상단으로 스크롤
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Header에서 사용할 핸들러들 (About 페이지용)
   const handleCategorySelect = (category) => {
     navigate(`/mentors?category=${category}`);

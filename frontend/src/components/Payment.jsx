@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import { ArrowLeft, CreditCard, Calendar, Clock, User, Shield, CheckCircle, Gift, X } from 'lucide-react';
 import './Payment.css';
 import { ticketAPI, userCouponAPI, userAPI, reservationAPI } from "../services/api";
@@ -146,6 +146,15 @@ const Payment = ({ bookingData, onBack, onTossPayment }) => {
     setSelectedCoupon(null);
   };
 
+  const deleteReservation = useCallback(async () => {
+    if (!bookingData.reservationId) return;
+    try {
+      await reservationAPI.cancelReservation(bookingData.reservationId);
+    } catch (error) {
+      console.error('❌ 예약 삭제 실패:', error);
+    }
+  }, [bookingData.reservationId]);
+
   const handleBack = async () => {
     try {
       // 확인 다이얼로그 표시
@@ -153,11 +162,9 @@ const Payment = ({ bookingData, onBack, onTossPayment }) => {
       
       if (confirmed) {
         // 예약 삭제 API 호출
-        if (bookingData?.reservationId) {
-          console.log('🗑️ 예약 삭제 시작:', bookingData.reservationId);
-          await reservationAPI.cancelReservation(bookingData.reservationId);
-          console.log('✅ 예약 삭제 완료');
-        }
+
+        console.log('🗑️ 예약 삭제 시작:');
+        await deleteReservation();
         
         // 부모 컴포넌트의 onBack 호출
         onBack();
@@ -167,6 +174,38 @@ const Payment = ({ bookingData, onBack, onTossPayment }) => {
       alert('예약 취소 중 오류가 발생했습니다.');
     }
   };
+
+  // 🚨 브라우저 뒤로가기 및 페이지 이탈 감지 로직
+  useEffect(() => {
+    // 사용자가 페이지를 벗어나려 할 때 실행될 함수
+    const handleBeforeUnload = async (event) => {
+      if (!isProcessing && bookingData.reservationId) {
+        await deleteReservation();
+
+        const confirmationMessage = '결제를 취소하고 페이지를 떠나시겠습니까? 현재 예약이 삭제됩니다.';
+        event.returnValue = confirmationMessage; // 표준
+        return confirmationMessage; // 일부 브라우저 호환성
+      }
+    };
+
+    // 브라우저 뒤로가기/URL 변경을 감지하기 위한 popstate 이벤트 리스너
+    // history.pushState로 변경된 URL 이동에는 직접적으로 반응하지 않을 수 있습니다.
+    // 하지만 브라우저의 '뒤로/앞으로' 버튼에는 반응합니다.
+    const handlePopstate = async () => {
+      if (!isProcessing && bookingData.reservationId) {
+        await deleteReservation();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopstate); // 브라우저 뒤로가기/앞으로가기 버튼
+
+    // 컴포넌트 언마운트 시 클린업 함수
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopstate);
+    };
+  }, [isProcessing, deleteReservation]);
 
   const handleTossPayment = () => {
     console.log('🚀 토스 결제 버튼 클릭됨');

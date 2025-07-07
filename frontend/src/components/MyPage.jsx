@@ -14,7 +14,15 @@ import {
   Camera,
   Upload,
   X,
-  Ticket
+  Ticket,
+  Leaf,
+  GitBranch,
+  Flower,
+  Bird,
+    Bean,
+    Home,
+    Trees
+
 } from 'lucide-react';
 import './MyPage.css';
 import { userInfoUtils, authUtils } from '../utils/tokenUtils.js';
@@ -29,6 +37,14 @@ const BasicInfo = lazy(() => import('./MyPage/BasicInfo.jsx'));
 const CareerHistory = lazy(() => import('./MyPage/CareerHistory.jsx'));
 const MentorRegistration = lazy(() => import('./MyPage/MentorRegistration.jsx'));
 const ConsultationTime = lazy(() => import('./MyPage/ConsultationTime.jsx'));
+
+const USER_GRADE_MAP = {
+  SEED: { icon: Bean, name: '씨앗' },
+  SPROUT: { icon: Leaf, name: '새싹'},
+  BRANCH: { icon: GitBranch, name: '가지' },
+  BLOOM: { icon: Flower, name: '꽃' },
+  NEST: { icon: Bird, name: '둥지' }
+};
 
 const MyPage = ({ onBack, onLogout }) => {
   const navigate = useNavigate();
@@ -94,6 +110,7 @@ const MyPage = ({ onBack, onLogout }) => {
           nickName: backendUserData.nickName,
           phoneNumber: backendUserData.phoneNumber,
           userRole: backendUserData.userRole,
+          userGrade: backendUserData.userGrade,
           socialType: backendUserData.socialType,
           createdAt: backendUserData.createdAt,
           profileImage: backendUserData.profileImage || '/default-profile.svg',
@@ -345,6 +362,9 @@ const MyPage = ({ onBack, onLogout }) => {
     );
   }
 
+  const currentUserGrade = userInfo.userGrade ? USER_GRADE_MAP[userInfo.userGrade] : null;
+  const GradeIcon = currentUserGrade ? currentUserGrade.icon : null;
+
   return (
     <div className="mypage-container">
       <div className="mypage-header">
@@ -396,9 +416,15 @@ const MyPage = ({ onBack, onLogout }) => {
           <div className="profile-info">
             <h2>{userInfo.name}</h2>
             <p>{userInfo.email}</p>
-            <span className="user-level">
+            <div className="user-role-and-grade-wrapper">
+              <span className="user-level">
               {userInfo.userRole === 'MENTOR' ? '멘토' : '멘티'}
             </span>
+              <span className={`user-grade ${userInfo.userGrade.toLowerCase()}`}>
+                {GradeIcon && <GradeIcon size={16} className="grade-icon"/>}
+                {currentUserGrade.name}
+              </span>
+            </div>
           </div>
         </div>
 

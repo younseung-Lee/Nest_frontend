@@ -44,6 +44,29 @@ const ChatRoom = ({
   // 현재 사용자가 멘토인지 확인 (부모 컴포넌트에서 전달받은 userRole 사용)
   const isMentor = userRole === 'MENTOR';
 
+  // 비속어 예시 단어들
+  const badWords = ['병신', '씨발', '시발', '존나'];
+
+// 띄어쓰기 포함도 감지: 시 발, 씨 발, 시  발 등
+  const censorBadWords = (text) => {
+    const normalize = (str) => str.replace(/\s+/g, ''); // 공백 제거
+    const rawText = normalize(text);
+
+    const pattern = new RegExp(badWords.map(normalize).join('|'), 'gi');
+
+    let maskedText = text;
+    let match;
+
+    while ((match = pattern.exec(rawText)) !== null) {
+      const bad = match[0];
+      const re = new RegExp(bad.split('').join('\\s*'), 'gi'); // 글자 사이에 어떤 공백도 허용
+      maskedText = maskedText.replace(re, '*'.repeat(bad.length));
+    }
+
+    return maskedText;
+  };
+
+
   // Refs
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -482,6 +505,10 @@ const ChatRoom = ({
       const receivedChatRoomId = messageData.chatRoomId?.toString();
       const currentChatRoomId = chatRoomId?.toString();
 
+      // 내 메시지를 구분하는 조건
+      const isMyMessage = messageData.senderId?.toString() === userId?.toString();
+
+
       console.log('🔍 채팅방 ID 비교:', {
         received: receivedChatRoomId,
         current: currentChatRoomId,
@@ -495,11 +522,12 @@ const ChatRoom = ({
         const newMessage = {
           id: messageData.id || messageData.messageId || `ws-${Date.now()}`,
           text: messageData.content,
-          sender: messageData.isMine  ? 'user' : 'other',
-          isMine: messageData.isMine ,
+          sender: isMyMessage ? 'user' : 'other',
+          isMine: isMyMessage,
           timestamp: messageData.sentAt || new Date().toISOString(),
-          status: messageData.isMine ? 'sent' : 'received'
+          status: isMyMessage ? 'sent' : 'received'
         };
+
 
         console.log(`✅ 채팅방 ${chatRoomId}에 실시간 메시지 추가:`, newMessage);
 
@@ -1050,7 +1078,7 @@ const ChatRoom = ({
       return;
     }
 
-    const messageContent = message.trim();
+    const messageContent = censorBadWords(message.trim());
     setMessage('');
 
     // 입력창 높이 초기화

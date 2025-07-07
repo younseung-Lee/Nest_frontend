@@ -592,3 +592,43 @@
   display: inline-block;
   margin-top: 1rem;
 }
+
+.coupons-registration-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  width: 100%; /* 컨테이너는 화면 전체 너비를 차지 */
+  padding: 0 20px; /* 좌우 여백 */
+  box-sizing: border-box;
+}
+
+/* 실제 버튼 (스타일 담당) */
+.open-coupons-modal-btn {
+  padding: 15px 30px;
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-size: 1.2em;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  white-space: nowrap;
+  width: auto;
+  max-width: 300px;
+}
+
+.open-coupons-modal-btn:hover {
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
+  transform: translateY(-2px); /* 위로 뜨는 효과만 */
+}
+
+.open-coupons-modal-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}

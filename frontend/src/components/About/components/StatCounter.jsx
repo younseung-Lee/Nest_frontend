@@ -13,17 +13,17 @@ const StatCounter = ({
 }) => {
   const [count, setCount] = useState(0);
   const [ref, isVisible] = useScrollReveal({ 
-    threshold: 0.3, 
+    threshold: 0.1, // threshold를 낮춤
     triggerOnce: true 
   });
   const [hasStarted, setHasStarted] = useState(false);
 
   useEffect(() => {
-    if (isVisible && !hasStarted) {
-      setHasStarted(true);
-      
-      // 딜레이 후 카운터 시작
-      const delayTimeout = setTimeout(() => {
+    // 컴포넌트가 마운트되면 바로 애니메이션 시작 (스크롤 감지 문제 해결)
+    const timer = setTimeout(() => {
+      if (!hasStarted) {
+        setHasStarted(true);
+        
         let startTime;
         const startValue = 0;
         
@@ -47,11 +47,11 @@ const StatCounter = ({
         };
         
         requestAnimationFrame(updateCount);
-      }, delay);
+      }
+    }, delay + 200); // 200ms로 줄임
 
-      return () => clearTimeout(delayTimeout);
-    }
-  }, [isVisible, endValue, duration, delay, hasStarted]);
+    return () => clearTimeout(timer);
+  }, [endValue, duration, delay, hasStarted]);
 
   const formatNumber = (num) => {
     return num.toLocaleString();

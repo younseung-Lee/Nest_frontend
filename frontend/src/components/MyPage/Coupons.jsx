@@ -3,6 +3,7 @@ import { userCouponAPI } from "../../services/api.js";
 import { useSearchParams } from 'react-router-dom';
 import {Star, ChevronLeft, ChevronRight, Gift} from 'lucide-react';
 import './Coupons.css';
+import CouponModal from "./CouponModal.jsx";
 
 const Coupons = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,6 +15,7 @@ const Coupons = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   const [hasPrevious, setHasPrevious] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const pageFromUrl = parseInt(searchParams.get('page') || '0', 10);
@@ -91,7 +93,24 @@ const Coupons = () => {
   };
 
   // useStatus에 따른 텍스트 및 스타일 결정
-  const getStatusDisplay = (status) => {
+  const getStatusDisplay = (status, validToDateString) => {
+
+    const now = new Date(); // 현재 시간
+    let validToDate;
+    if (validToDateString) {
+      validToDate = new Date(validToDateString);
+      if (isNaN(validToDate.getTime())) {
+        console.warn('Invalid date string for getStatusDisplay (parsing error):', validToOriginalDateString);
+        validToDate = new Date(0); // 파싱 오류 시 만료된 것으로 간주
+      }
+    } else {
+      console.warn('validToOriginalDateString is not a valid string or is missing:', validToOriginalDateString);
+      validToDate = new Date(0); // 유효하지 않은 경우 만료된 것으로 간주
+    }
+    if (validToDate < now) {
+      return {text: '기간 만료', className: 'status-expired'};
+    }
+
     switch (status) {
       case 'UNUSED':
         return { text: '사용 가능', className: 'status-usable' };
@@ -103,6 +122,19 @@ const Coupons = () => {
         return { text: '알 수 없음', className: '' };
     }
   };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  }
+
+  const handleCouponIssued = () => {
+    fetchCoupons();
+    handleCloseModal();
+  }
 
   if (loading) {
     return (
@@ -127,6 +159,12 @@ const Coupons = () => {
             <h4>아직 보유한 쿠폰이 없습니다</h4>
             <p>일정 등급을 달성하면 사용할 수 있는 쿠폰이 발급 됩니다.</p>
           </div>
+          <div className="coupons-registration-btn">
+            <button className="open-coupons-modal-btn" onClick={handleOpenModal}>
+              쿠폰 발급받기
+            </button>
+            <CouponModal isOpen={isModalOpen} onClose={handleCloseModal} onCouponIssued={handleCouponIssued}></CouponModal>
+          </div>
         </div>
     );
   }
@@ -144,7 +182,7 @@ const Coupons = () => {
         
         <div className="coupons-list">
           {coupons.map((coupon) => {
-            const { text: statusText, className: statusClass } = getStatusDisplay(coupon.useStatus);
+            const { text: statusText, className: statusClass } = getStatusDisplay(coupon.useStatus, coupon.validTo);
             const isUsable = coupon.useStatus === 'UNUSED'; // '사용 가능' 상태인지 판단
 
             return (
@@ -172,7 +210,13 @@ const Coupons = () => {
             );
           })}
         </div>
-        
+        <div className="coupons-registration-btn">
+          <button className="open-coupons-modal-btn" onClick={handleOpenModal}>
+            쿠폰 발급받기
+          </button>
+          <CouponModal isOpen={isModalOpen} onClose={handleCloseModal} onCouponIssued={handleCouponIssued}></CouponModal>
+        </div>
+
         {/* 페이지네이션 */}
         {totalPages > 1 && (
           <div className="pagination">

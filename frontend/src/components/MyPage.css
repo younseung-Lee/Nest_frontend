@@ -352,6 +352,13 @@
   font-size: 1rem;
 }
 
+.user-role-and-grade-wrapper {
+  display: flex; /* 자식 요소들을 가로로 나란히 정렬 */
+  align-items: center; /* 세로 중앙 정렬 */
+  gap: 8px; /* 멘토/멘티와 등급 사이의 간격 */
+  /* 필요하다면 여기에 margin-top 등을 추가하여 .profile-info p 아래에 여백 조절 */
+}
+
 .user-level {
   display: inline-block;
   background: linear-gradient(45deg, #ffa000, #ff6f00);
@@ -363,6 +370,55 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   width: fit-content;
+}
+
+.user-grade {
+  display: inline-flex; /* .user-level과 동일하게 flex 아이템 */
+  align-items: center;
+  background: #F5F5F5; /* 회색 계열 배경색 */
+  color: black; /* 어두운 글자색 */
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.user-grade .grade-icon {
+  margin-right: 6px; /* 아이콘과 등급 텍스트 사이에 간격을 줍니다. */
+  /* 필요하다면 아이콘 색상도 여기서 조정할 수 있습니다. */
+  /* color: #666; */
+}
+ /*SEED 등급 스타일 (예: 초록색 계열) */
+.user-grade.seed {
+  background-color: #dcfce7; /* 연한 초록 */
+  color: #16a34a; /* 진한 초록 */
+}
+
+ /*SPROUT 등급 스타일 (예: 파란색 계열) */
+.user-grade.sprout {
+  background-color: #e0f2f7; /* 연한 파랑 */
+  color: #0284c7; /* 진한 파랑 */
+}
+
+ /*BRANCH 등급 스타일 (예: 갈색 계열) */
+.user-grade.branch {
+  background-color: #fef9e7; /* 연한 노랑/갈색 */
+  color: #a16207; /* 진한 갈색 */
+}
+
+ /*BLOOM 등급 스타일 (예: 분홍색 계열) */
+.user-grade.bloom {
+  background-color: #fce7f3; /* 연한 분홍 */
+  color: #be185d; /* 진한 분홍 */
+}
+
+/* NEST 등급 스타일 (예: 보라색 계열) */
+.user-grade.nest {
+  background-color: goldenrod; /* 연한 보라 */
+  color: white; /* 진한 보라 */
 }
 
 /* ===== 메인 레이아웃 ===== */
