@@ -17,6 +17,7 @@ import CategoriesTab from './CategoriesTab';
 import KeywordsTab from './KeywordsTab';
 import TicketsTab from './TicketsTab';
 import CouponsTab from './CouponsTab';
+import ReviewsTab from './ReviewsTab';
 
 
 const AdminDashboard = ({ onBack, userInfo }) => {
@@ -44,7 +45,7 @@ const AdminDashboard = ({ onBack, userInfo }) => {
       const params = new URLSearchParams(window.location.search);
       setActiveTab(params.get('tab') || 'dashboard');
     };
-    
+
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
@@ -94,7 +95,8 @@ const AdminDashboard = ({ onBack, userInfo }) => {
     { id: 'categories', label: '카테고리 관리', icon: Tag, badge: null },
     { id: 'keywords', label: '키워드 관리', icon: Hash, badge: null },
     { id: 'tickets', label: '이용권 관리', icon: Ticket, badge: null },
-    { id: 'coupons', label: '쿠폰 관리', icon: Gift, badge: null }
+    { id: 'coupons', label: '쿠폰 관리', icon: Gift, badge: null },
+    { id: 'reviews', label: '리뷰 관리', icon: Star, badge: null }
   ];
 
 
@@ -103,17 +105,17 @@ const AdminDashboard = ({ onBack, userInfo }) => {
     switch (activeTab) {
       case 'dashboard':
         return (
-          <DashboardTab
-            isDarkMode={isDarkMode}
-            stats={stats}
-            lastUpdate={lastUpdate}
-            isRealTimeMode={isRealTimeMode}
-            setIsRealTimeMode={setIsRealTimeMode}
-            loading={loading}
-            setLoading={setLoading}
-            notifications={notifications}
-            setActiveTab={setActiveTab}
-          />
+            <DashboardTab
+                isDarkMode={isDarkMode}
+                stats={stats}
+                lastUpdate={lastUpdate}
+                isRealTimeMode={isRealTimeMode}
+                setIsRealTimeMode={setIsRealTimeMode}
+                loading={loading}
+                setLoading={setLoading}
+                notifications={notifications}
+                setActiveTab={setActiveTab}
+            />
         );
       case 'careers':
         return <CareersTab isDarkMode={isDarkMode} />;
@@ -127,19 +129,21 @@ const AdminDashboard = ({ onBack, userInfo }) => {
         return <TicketsTab isDarkMode={isDarkMode} />;
       case 'coupons':
         return <CouponsTab isDarkMode={isDarkMode} />;
+      case 'reviews':
+        return <ReviewsTab isDarkMode={isDarkMode} />;
       default:
         return (
-          <div className={`rounded-2xl border p-8 text-center ${
-            isDarkMode ? 'bg-gray-800/50 border-gray-700/50' : 'bg-white/80 border-gray-200/50'
-          }`}>
-            <Briefcase size={48} className={`mx-auto mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
-            <h3 className={`text-xl font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              개발 중
-            </h3>
-            <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
-              해당 페이지는 개발 중입니다...
-            </p>
-          </div>
+            <div className={`rounded-2xl border p-8 text-center ${
+                isDarkMode ? 'bg-gray-800/50 border-gray-700/50' : 'bg-white/80 border-gray-200/50'
+            }`}>
+              <Briefcase size={48} className={`mx-auto mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+              <h3 className={`text-xl font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                개발 중
+              </h3>
+              <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
+                해당 페이지는 개발 중입니다...
+              </p>
+            </div>
         );
     }
   };
@@ -161,32 +165,32 @@ const AdminDashboard = ({ onBack, userInfo }) => {
           <div className="flex items-center justify-between p-6">
             {!sidebarCollapsed && (
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                      <Shield size={20} className="text-white" />
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                        {userInfo?.name || '관리자'}
-                      </h3>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Administrator
-                      </p>
-                    </div>
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+                    <Shield size={20} className="text-white" />
+                  </div>
+                  <div>
+                    <h3 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      {userInfo?.name || '관리자'}
+                    </h3>
+                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Administrator
+                    </p>
                   </div>
                 </div>
             )}
 
-            <button
-                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className={`p-2 rounded-lg transition-colors ${
-                    isDarkMode
-                        ? 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
-                }`}
-            >
-              <Menu size={20} />
-            </button>
+            <div className="flex items-center justify-center">
+              <button
+                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                  className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors ${
+                      isDarkMode
+                          ? 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
+                  }`}
+              >
+                <Menu size={20} />
+              </button>
+            </div>
           </div>
 
           {/* 네비게이션 메뉴 */}

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { ArrowLeft, CreditCard, Calendar, Clock, User, Shield, CheckCircle, Gift, X } from 'lucide-react';
 import './Payment.css';
-import { ticketAPI, userCouponAPI, userAPI } from "../services/api";
+import { ticketAPI, userCouponAPI, userAPI, reservationAPI } from "../services/api";
 
 const Payment = ({ bookingData, onBack, onTossPayment }) => {
   const [paymentMethod, setPaymentMethod] = useState('tosspay');
@@ -146,6 +146,28 @@ const Payment = ({ bookingData, onBack, onTossPayment }) => {
     setSelectedCoupon(null);
   };
 
+  const handleBack = async () => {
+    try {
+      // 확인 다이얼로그 표시
+      const confirmed = window.confirm('결제를 취소하고 예약 선택으로 돌아가시겠습니까? 현재 예약이 취소됩니다.');
+      
+      if (confirmed) {
+        // 예약 삭제 API 호출
+        if (bookingData?.reservationId) {
+          console.log('🗑️ 예약 삭제 시작:', bookingData.reservationId);
+          await reservationAPI.cancelReservation(bookingData.reservationId);
+          console.log('✅ 예약 삭제 완료');
+        }
+        
+        // 부모 컴포넌트의 onBack 호출
+        onBack();
+      }
+    } catch (error) {
+      console.error('❌ 예약 삭제 실패:', error);
+      alert('예약 취소 중 오류가 발생했습니다.');
+    }
+  };
+
   const handleTossPayment = () => {
     console.log('🚀 토스 결제 버튼 클릭됨');
     
@@ -192,8 +214,9 @@ const Payment = ({ bookingData, onBack, onTossPayment }) => {
       reservationId: bookingData.reservationId || bookingData.reservation?.id,
       ticketId: bookingData.ticketId || bookingData.ticket?.id,
       
-      // 🔥 결제 금액 정보 (원가 전달 - 백엔드에서 쿠폰 처리)
-      servicePrice: servicePrice, // 원가 (할인 전)
+      // 🔥 결제 금액 정보 (할인된 최종 금액 전달)
+      servicePrice: totalPrice,   // 할인된 최종 금액 (백엔드 결제 진행용)
+      originalPrice: servicePrice, // 원가 (표시용)
       finalPrice: totalPrice,     // 최종 금액 (할인 후) - 표시용
       serviceName,
       selectedCoupon,
@@ -236,7 +259,7 @@ const Payment = ({ bookingData, onBack, onTossPayment }) => {
   return (
     <div className="payment-container">
       <div className="payment-header">
-        <button className="back-button" onClick={onBack}>
+        <button className="payment-back-button" onClick={handleBack}>
           <ArrowLeft className="icon" />
         </button>
         <h1>결제하기</h1>
@@ -246,38 +269,38 @@ const Payment = ({ bookingData, onBack, onTossPayment }) => {
         {/* 예약 정보 확인 */}
         <div className="payment-section">
           <h3><CheckCircle className="icon" /> 예약 정보 확인</h3>
-          <div className="booking-summary">
-            <div className="summary-item">
-              <User className="summary-icon" />
-              <div className="summary-info">
-                <span className="summary-label">멘토</span>
-                <span className="summary-value">{bookingData?.mentor?.name || '선택된 멘토'}</span>
+          <div className="payment-booking-summary">
+            <div className="payment-summary-item">
+              <User className="payment-summary-icon" />
+              <div className="payment-summary-info">
+                <span className="payment-summary-label">멘토</span>
+                <span className="payment-summary-value">{bookingData?.mentor?.name || '선택된 멘토'}</span>
               </div>
             </div>
 
-            <div className="summary-item">
-              <Calendar className="summary-icon" />
-              <div className="summary-info">
-                <span className="summary-label">날짜</span>
-                <span className="summary-value">{bookingData?.date}</span>
+            <div className="payment-summary-item">
+              <Calendar className="payment-summary-icon" />
+              <div className="payment-summary-info">
+                <span className="payment-summary-label">날짜</span>
+                <span className="payment-summary-value">{bookingData?.date}</span>
               </div>
             </div>
 
-            <div className="summary-item">
-              <Clock className="summary-icon" />
-              <div className="summary-info">
-                <span className="summary-label">시간</span>
-                <span className="summary-value">
+            <div className="payment-summary-item">
+              <Clock className="payment-summary-icon" />
+              <div className="payment-summary-info">
+                <span className="payment-summary-label">시간</span>
+                <span className="payment-summary-value">
                   {bookingData?.startTime} - {bookingData?.endTime}
                 </span>
               </div>
             </div>
 
-            <div className="summary-item">
-              <Clock className="summary-icon" />
-              <div className="summary-info">
-                <span className="summary-label">서비스</span>
-                <span className="summary-value">{serviceName}</span>
+            <div className="payment-summary-item">
+              <Clock className="payment-summary-icon" />
+              <div className="payment-summary-info">
+                <span className="payment-summary-label">서비스</span>
+                <span className="payment-summary-value">{serviceName}</span>
               </div>
             </div>
           </div>
@@ -286,18 +309,18 @@ const Payment = ({ bookingData, onBack, onTossPayment }) => {
         {/* 결제 금액 */}
         <div className="payment-section">
           <h3>결제 금액</h3>
-          <div className="price-breakdown">
-            <div className="price-item">
+          <div className="payment-price-breakdown">
+            <div className="payment-price-item">
               <span>서비스 이용료</span>
               <span>{servicePrice.toLocaleString()}원</span>
             </div>
             {couponDiscount > 0 && (
-              <div className="price-item discount">
+              <div className="payment-price-item discount">
                 <span>쿠폰 할인</span>
                 <span>-{couponDiscount.toLocaleString()}원</span>
               </div>
             )}
-            <div className="price-item total">
+            <div className="payment-price-item total">
               <span>총 결제금액</span>
               <span>{totalPrice.toLocaleString()}원</span>
             </div>
@@ -307,28 +330,28 @@ const Payment = ({ bookingData, onBack, onTossPayment }) => {
         {/* 쿠폰 선택 */}
         <div className="payment-section">
           <h3><Gift className="icon" /> 쿠폰 사용</h3>
-          <div className="coupon-section">
+          <div className="payment-coupon-section">
             {selectedCoupon ? (
-              <div className="selected-coupon">
-                <div className="coupon-info">
-                  <div className="coupon-name">{selectedCoupon.name}</div>
-                  <div className="coupon-discount">
+              <div className="payment-coupon-selected">
+                <div className="payment-coupon-info">
+                  <div className="payment-coupon-name">{selectedCoupon.name}</div>
+                  <div className="payment-coupon-discount">
                     {selectedCoupon.type === 'fixed'
                       ? `${selectedCoupon.discount.toLocaleString()}원 할인`
                       : `${selectedCoupon.discount}% 할인 (최대 ${selectedCoupon.maxDiscount?.toLocaleString() || '무제한'}원)`
                     }
                   </div>
                 </div>
-                <button className="coupon-remove-btn" onClick={handleCouponRemove}>
+                <button className="payment-coupon-remove-btn" onClick={handleCouponRemove}>
                   <X size={16} />
                 </button>
               </div>
             ) : (
               <button
-                className="coupon-select-btn"
+                className="payment-coupon-select-btn"
                 onClick={() => setIsCouponModalOpen(true)}
               >
-                <Gift className="coupon-icon" />
+                <Gift className="payment-coupon-icon" />
                 사용 가능한 쿠폰 선택하기
               </button>
             )}
@@ -340,9 +363,9 @@ const Payment = ({ bookingData, onBack, onTossPayment }) => {
           <h3><CreditCard className="icon" /> 결제 방법</h3>
           <div className="payment-methods">
             <div className="payment-method selected">
-              <div className="toss-logo">
-                <div className="toss-circle"></div>
-                <span className="toss-text">toss</span>
+              <div className="payment-toss-logo">
+                <div className="payment-toss-circle"></div>
+                <span className="payment-toss-text">toss</span>
               </div>
               <span>토스페이</span>
             </div>
@@ -373,39 +396,39 @@ const Payment = ({ bookingData, onBack, onTossPayment }) => {
 
       {/* 쿠폰 선택 모달 */}
       {isCouponModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsCouponModalOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className="payment-modal-overlay" onClick={() => setIsCouponModalOpen(false)}>
+          <div className="payment-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="payment-modal-header">
               <h3>사용 가능한 쿠폰</h3>
               <button
-                className="modal-close"
+                className="payment-modal-close"
                 onClick={() => setIsCouponModalOpen(false)}
               >
                 <X size={24} />
               </button>
             </div>
 
-            <div className="modal-body">
+            <div className="payment-modal-body">
               {getUsableCoupons().length > 0 ? (
-                <div className="coupon-list">
+                <div className="payment-coupon-list">
                   {getUsableCoupons().map(coupon => (
                     <div
                       key={coupon.id}
-                      className="coupon-item"
+                      className="payment-coupon-item"
                       onClick={() => handleCouponSelect(coupon)}
                     >
-                      <div className="coupon-content">
-                        <div className="coupon-header">
-                          <span className="coupon-name">{coupon.name}</span>
-                          <span className="coupon-value">
+                      <div className="payment-coupon-content">
+                        <div className="payment-coupon-header">
+                          <span className="payment-coupon-name">{coupon.name}</span>
+                          <span className="payment-coupon-value">
                             {coupon.type === 'fixed'
                               ? `${coupon.discount.toLocaleString()}원`
                               : `${coupon.discount}%`
                             }
                           </span>
                         </div>
-                        <div className="coupon-description">{coupon.description}</div>
-                        <div className="coupon-details">
+                        <div className="payment-coupon-description">{coupon.description}</div>
+                        <div className="payment-coupon-details">
                           <span>최소 주문금액: {coupon.minAmount.toLocaleString()}원</span>
                           <span>만료일: {coupon.expiryDate}</span>
                         </div>
@@ -414,10 +437,10 @@ const Payment = ({ bookingData, onBack, onTossPayment }) => {
                   ))}
                 </div>
               ) : (
-                <div className="no-coupons">
-                  <Gift size={48} className="no-coupon-icon" />
+                <div className="payment-no-coupons">
+                  <Gift size={48} className="payment-no-coupon-icon" />
                   <p>사용 가능한 쿠폰이 없습니다.</p>
-                  <p className="no-coupon-desc">
+                  <p className="payment-no-coupon-desc">
                     현재 주문 금액({servicePrice.toLocaleString()}원)으로는<br />
                     사용할 수 있는 쿠폰이 없어요.
                   </p>

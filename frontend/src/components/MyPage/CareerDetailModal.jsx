@@ -83,7 +83,7 @@ const CareerDetailModal = ({ detail, onClose, onEdit, onDelete, onEditCertificat
           <button className="modal-delete-btn" onClick={onDelete}>
             <span>삭제</span>
           </button>
-          <button className="modal-close-btn" onClick={onClose}>
+          <button className="career-detail-modal-close-btn" onClick={onClose}>
             <span>닫기</span>
           </button>
         </div>

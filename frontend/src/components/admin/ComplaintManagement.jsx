@@ -233,7 +233,8 @@ const ComplaintManagement = ({isDarkMode}) => {
       setError(errorMessage);
 
       // 사용자에게 알림 (자동 새로고침이 아닌 경우만)
-      if (showLoading) {
+      // 세션 만료 에러는 api.js 인터셉터에서 처리하므로 여기서는 제외
+      if (showLoading && error.response?.status !== 401) {
         alert(errorMessage);
       }
 
@@ -653,17 +654,17 @@ const ComplaintManagement = ({isDarkMode}) => {
                 return (
                     <div key={complaint.id ?? `${complaint.title}-${index}`}
                          className="table-row" style={{ background: '#FBF9EF' }}>
-                      <div className="table-cell">
+                      <div className="table-cell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <span className="category-badge">{getCategoryText(
                             complaint.category || complaint.type)}</span>
                       </div>
-                      <div className="table-cell">
+                      <div className="table-cell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <div className="cell-content">
                           <FileText size={16} style={{ color: '#ffb300' }}/>
                           <strong style={{ color: '#e65100', fontWeight: '700' }}>{complaint.title || '제목 없음'}</strong>
                         </div>
                       </div>
-                      <div className="table-cell">
+                      <div className="table-cell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <div className="cell-content">
                           <User size={16} style={{ color: '#ffb300' }}/>
                           <span style={{ color: '#6d4c41', fontWeight: '500' }}>
@@ -671,15 +672,15 @@ const ComplaintManagement = ({isDarkMode}) => {
                           </span>
                         </div>
                       </div>
-                      <div className="table-cell" style={{ color: '#6d4c41', fontWeight: '500' }}>
+                      <div className="table-cell" style={{ color: '#6d4c41', fontWeight: '500', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {new Date(complaint.createdAt).toLocaleDateString('ko-KR')}
                       </div>
-                      <div className="table-cell">
+                      <div className="table-cell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <span className={`status-badge ${statusBadge.className}`}>
                     {statusBadge.text}
                   </span>
                       </div>
-                      <div className="table-cell">
+                      <div className="table-cell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <div className="table-actions">
                           <button
                               className="action-btn view"

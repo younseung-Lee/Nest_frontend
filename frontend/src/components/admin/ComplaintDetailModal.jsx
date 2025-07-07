@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
-import { Clock, User } from 'lucide-react';
-import { adminAPI,userAPI } from '../../services/api';
+import React, { useState, useEffect, memo } from 'react';
+import { Clock, User, FileText, MessageSquare, Calendar, RefreshCw } from 'lucide-react';
+import { adminAPI, userAPI } from '../../services/api';
 import './AdminCommon.css';
 
 const ComplaintDetailModal = ({
@@ -309,174 +309,177 @@ const ComplaintDetailModal = ({
   });
 
   return (
-      <div className="modal-overlay" onClick={onClose}>
-        <div className="modal-content complaint-modal" onClick={(e) => e.stopPropagation()} style={{ color: '#1f2937' }}>
-          <div className="modal-header">
-            <h3>민원 상세 정보</h3>
-            <button className="modal-close" onClick={onClose}>×</button>
-          </div>
-
-          <div className="modal-body">
-            <div className="complaint-info">
-              <div className="info-row">
-                <label>민원 번호:</label>
-                <span>#{displayData.id || 'N/A'}</span>
-              </div>
-                    <div className="info-row">
-                      <label>작성자:</label>
-                      <span>
-                    {loadingUser ? (
-                        '사용자 정보 로딩 중...'
-                    ) : (
-                        userInfo?.name ||           // 🎯 name을 최우선으로
-                        userInfo?.nickName ||
-                        userInfo?.nickname ||
-                        userInfo?.displayName ||
-                        userInfo?.realName ||
-                        userInfo?.username ||
-                        displayData.userName ||
-                        `사용자${displayData.userId}` ||
-                        '익명'
-                    )}
-                  </span>
-                    </div>
-                    <div className="info-row">
-                      <label>예약번호:</label>
-                      <span>{displayData.reservationId ? `#${displayData.reservationId}` : '해당 없음'}</span>
-                    </div>
-                    <div className="info-row">
-                      <label>제목:</label>
-                      <span>{displayData.title || '제목 없음'}</span>
-                    </div>
-                    <div className="info-row">
-                      <label>카테고리:</label>
-                      <span className="category-badge">{getCategoryText(displayData.type || displayData.complaintType || displayData.category)}</span>
-                    </div>
-                    <div className="info-row">
-                      <label>답변 상태:</label>
-                      <span
-                          className="status-badge"
-                          style={{ color: getStatusColor(displayData.status || displayData.complaintStatus) }}
-                      >
-                    {getStatusText(displayData.status || displayData.complaintStatus)}
-                  </span>
+    <div className="form-modal-overlay" onClick={onClose}>
+      <div className="form-modal-content admin-complaint-detail-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="form-modal-header">
+          <h3>민원 상세 정보</h3>
+          <button className="form-modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="form-modal-body">
+          {loadingUser ? (
+            <div className="loading-state">
+              <RefreshCw className="spinning" size={24} />
+              <p>상세 정보를 불러오는 중...</p>
+            </div>
+          ) : !displayData ? (
+            <div className="empty-state">
+              <p>상세 정보를 불러올 수 없습니다.</p>
+            </div>
+          ) : (
+            <div className="admin-complaint-info">
+              <div className="info-section">
+                <h4>기본 정보</h4>
+                <div className="info-grid">
+                  <div className="info-item">
+                    <label>민원 번호</label>
+                    <div className="info-value">
+                      <FileText size={16} />
+                      #{displayData.id || 'N/A'}
                     </div>
                   </div>
+                  <div className="info-item">
+                    <label>작성자</label>
+                    <div className="info-value">
+                      <User size={16} />
+                      {userInfo?.name || userInfo?.nickName || userInfo?.nickname || 
+                       userInfo?.displayName || userInfo?.realName || userInfo?.username || 
+                       displayData.userName || `사용자${displayData.userId}` || '익명'}
+                    </div>
+                  </div>
+                  <div className="info-item">
+                    <label>예약번호</label>
+                    <div className="info-value">
+                      {displayData.reservationId ? `#${displayData.reservationId}` : '해당 없음'}
+                    </div>
+                  </div>
+                  <div className="info-item">
+                    <label>제목</label>
+                    <div className="info-value">{displayData.title || '제목 없음'}</div>
+                  </div>
+                  <div className="info-item">
+                    <label>카테고리</label>
+                    <div className="info-value">
+                      <span className="category-badge">
+                        {getCategoryText(displayData.type || displayData.complaintType || displayData.category)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="info-item">
+                    <label>상태</label>
+                    <div className="info-value">
+                      <span 
+                        className="status-badge"
+                        style={{
+                          backgroundColor: getStatusColor(displayData.status || displayData.complaintStatus) + '20',
+                          color: getStatusColor(displayData.status || displayData.complaintStatus)
+                        }}
+                      >
+                        {getStatusText(displayData.status || displayData.complaintStatus)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="info-item">
+                    <label>작성일</label>
+                    <div className="info-value">
+                      <Calendar size={16} />
+                      {displayData.createdAt ? new Date(displayData.createdAt).toLocaleDateString('ko-KR') : '-'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="info-section">
+                <h4>문의 내용</h4>
+                <div className="complaint-content-display">
+                  <MessageSquare size={20} />
+                  <div className="content-text">
+                    {displayData.contents || '내용이 없습니다.'}
+                  </div>
+                </div>
+              </div>
 
-            <div className="complaint-content">
-              <label>문의 내용:</label>
-              <div className="complaint-content-box">
-                {displayData.contents || '내용이 없습니다.'}
+              <div className="info-section">
+                <h4>관리자 답변</h4>
+                {loadingAnswer ? (
+                  <div className="loading-state">
+                    <RefreshCw className="spinning" size={24} />
+                    <p>답변 정보를 불러오는 중...</p>
+                  </div>
+                ) : (
+                  <>
+                    {adminAnswer && !isEditing ? (
+                      // 답변이 있고 편집 모드가 아닐 때 - 읽기 모드
+                      <div className="complaint-answer-display">
+                        <MessageSquare size={20} />
+                          <div className="answer-text">
+                            {answer || '답변이 없습니다.'}
+                          </div>
+                          {adminAnswer.createdAt && (
+                            <div className="answer-date">
+                              <Calendar size={16} />
+                              답변일: {new Date(adminAnswer.createdAt).toLocaleString('ko-KR')}
+                            </div>
+                          )}
+                      </div>
+                    ) : (
+                      // 답변이 없거나 편집 모드일 때 - 편집 모드
+                      <div className="complaint-answer-form">
+                        <textarea
+                          value={answer}
+                          onChange={(e) => setAnswer(e.target.value)}
+                          placeholder="답변을 입력하세요..."
+                          rows="8"
+                          className="answer-textarea"
+                          disabled={isSubmitting}
+                        />
+                        <div className="answer-info">
+                          <small>답변을 저장하면 사용자에게 이메일로 알림이 발송됩니다.</small>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </div>
-
-            <div className="complaint-answer">
-              <label>관리자 답변:</label>
-              {loadingAnswer ? (
-                <div className="loading-state" style={{ textAlign: 'center', padding: '20px' }}>
-                  <p>답변 정보를 불러오는 중...</p>
-                </div>
-              ) : (
+          )}
+        </div>
+        <div className="form-modal-actions">
+          {!loadingAnswer && displayData && (
+            <div className="status-actions">
+              {adminAnswer && !isEditing && (
+                <button 
+                  className="coffee-btn coffee-btn-warning"
+                  onClick={handleEditAnswer}
+                  disabled={isSubmitting}
+                >
+                  <MessageSquare size={16} /> 답변 수정
+                </button>
+              )}
+              
+              {isEditing && (
                 <>
-                  {adminAnswer && !isEditing ? (
-                    // 답변이 있고 편집 모드가 아닐 때 - 읽기 모드
-                    <div>
-                      <div className="answer-display-box" style={{ 
-                        border: '1px solid #d1d5db', 
-                        borderRadius: '6px', 
-                        padding: '16px', 
-                        backgroundColor: '#f8fafc',
-                        minHeight: '120px',
-                        whiteSpace: 'pre-wrap',
-                        marginBottom: '12px',
-                        lineHeight: '1.6',
-                        fontSize: '14px',
-                        color: '#374151'
-                      }}>
-                        {answer || '답변이 없습니다.'}
-                      </div>
-                      {adminAnswer.createdAt && (
-                        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '12px' }}>
-                          답변일: {new Date(adminAnswer.createdAt).toLocaleString('ko-KR')}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    // 답변이 없거나 편집 모드일 때 - 편집 모드
-                    <div>
-                      <textarea
-                        value={answer}
-                        onChange={(e) => setAnswer(e.target.value)}
-                        placeholder="답변을 입력하세요..."
-                        rows="8"
-                        className="answer-textarea"
-                        disabled={isSubmitting}
-                        style={{
-                          width: '100%',
-                          minHeight: '150px',
-                          maxHeight: '300px',
-                          padding: '12px',
-                          border: '1px solid #d1d5db',
-                          borderRadius: '6px',
-                          fontSize: '14px',
-                          lineHeight: '1.6',
-                          resize: 'vertical',
-                          fontFamily: 'inherit',
-                          boxSizing: 'border-box'
-                        }}
-                      />
-                      <div className="answer-info" style={{ marginTop: '8px' }}>
-                        <small style={{ color: '#6b7280' }}>
-                          답변을 저장하면 사용자에게 이메일로 알림이 발송됩니다.
-                        </small>
-                      </div>
-                    </div>
+                  {adminAnswer && (
+                    <button 
+                      className="coffee-btn coffee-btn-secondary"
+                      onClick={handleCancelEdit}
+                      disabled={isSubmitting}
+                    >
+                      <RefreshCw size={16} /> 취소
+                    </button>
                   )}
+                  <button
+                      className={`coffee-btn coffee-btn-primary ${!answer.trim() ? 'btn-disabled' : ''}`}
+                      onClick={handleSubmitAnswer}
+                      disabled={isSubmitting || !answer.trim()}
+                  >
+                    {isSubmitting ? '저장 중...' : (adminAnswer ? '답변 수정' : '답변 저장')}
+                  </button>
                 </>
               )}
             </div>
-          </div>
-
-          <div className="modal-actions">
-            <button
-                className="btn-secondary"
-                onClick={onClose}
-                disabled={isSubmitting}
-            >
-              닫기
-            </button>
-            
-            {adminAnswer && !isEditing && (
-              <button 
-                className="btn-primary"
-                onClick={handleEditAnswer}
-                disabled={isSubmitting}
-              >
-                답변 수정
-              </button>
-            )}
-            
-            {isEditing && (
-              <>
-                {adminAnswer && (
-                  <button 
-                    className="btn-secondary"
-                    onClick={handleCancelEdit}
-                    disabled={isSubmitting}
-                  >
-                    취소
-                  </button>
-                )}
-                <button
-                    className={`btn-primary ${!answer.trim() ? 'btn-disabled' : ''}`}
-                    onClick={handleSubmitAnswer}
-                    disabled={isSubmitting || !answer.trim()}
-                >
-                  {isSubmitting ? '저장 중...' : (adminAnswer ? '답변 수정' : '답변 저장')}
-                </button>
-              </>
-            )}
-          </div>
+          )}
+          <button className="coffee-btn coffee-btn-secondary" onClick={onClose}>닫기</button>
+        </div>
         </div>
       </div>
   );

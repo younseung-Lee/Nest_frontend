@@ -9,7 +9,7 @@ import {
   Receipt,
   ArrowLeft
 } from 'lucide-react';
-import './Payment.css'; // Payment.css 사용
+import './PaymentComplete.css'; // PaymentComplete 전용 CSS 사용
 import ReceiptModal from './ReceiptModal'; // 영수증 모달 컴포넌트 import
 
 const PaymentComplete = ({paymentData, onHome, onPaymentHistory}) => {
@@ -29,15 +29,43 @@ const PaymentComplete = ({paymentData, onHome, onPaymentHistory}) => {
     console.groupEnd();
   }
 
+  // 안전한 숫자 포맷팅 함수
+  const safeFormatNumber = (value, defaultValue = 0) => {
+    if (value === null || value === undefined || value === '') return defaultValue.toLocaleString();
+    const numValue = Number(value);
+    if (isNaN(numValue)) return defaultValue.toLocaleString();
+    return numValue.toLocaleString();
+  };
+
+  // 안전한 숫자 검증 함수
+  const safeNumber = (value) => {
+    if (value === null || value === undefined || value === '') return 0;
+    const numValue = Number(value);
+    return isNaN(numValue) ? 0 : numValue;
+  };
+
   const formatDate = (dateString) => {
-    // 유효한 날짜 문자열이 아닐 경우 빈 문자열 반환
+    // 유효한 날짜 문자열이 아닐 경우 현재 시간 반환
     if (!dateString || dateString === '날짜 미정' || dateString === '시간 미정') {
-      return '';
+      return new Date().toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     }
     const date = new Date(dateString);
     // Date 객체가 유효한지 확인 (Invalid Date 방지)
     if (isNaN(date.getTime())) {
-      return dateString; // 유효하지 않은 날짜면 원본 문자열 반환 (디버깅 용이)
+      console.warn('⚠️ 유효하지 않은 날짜 형식:', dateString);
+      return new Date().toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     }
     return date.toLocaleString('ko-KR', {
       year: 'numeric',
@@ -159,18 +187,14 @@ const PaymentComplete = ({paymentData, onHome, onPaymentHistory}) => {
 
   // paymentData가 없는 경우 에러 처리
   if (!paymentData) {
+    console.error('❌ PaymentComplete: paymentData가 전달되지 않았습니다.');
     return (
-        <div className="payment-container">
-          <div className="payment-header">
-            <button onClick={onHome} className="back-button">
-              <ArrowLeft className="icon" />
-            </button>
-            <h1>결제 완료</h1>
-          </div>
-          <div className="payment-content">
-            <div className="payment-section">
+        <div className="payment-complete-container">
+          <div className="payment-complete-content">
+            <div className="error-section">
               <h2>결제 정보를 찾을 수 없습니다</h2>
-              <button onClick={onHome} className="payment-button">
+              <p>결제는 정상적으로 처리되었지만, 상세 정보를 불러올 수 없습니다.</p>
+              <button onClick={onHome} className="home-button">
                 홈으로 돌아가기
               </button>
             </div>
@@ -180,19 +204,12 @@ const PaymentComplete = ({paymentData, onHome, onPaymentHistory}) => {
   }
 
   return (
-      <div className="payment-container">
-        <div className="payment-header">
-          <button className="back-button" onClick={onHome}>
-            <ArrowLeft className="icon" />
-          </button>
-          <h1>결제 완료</h1>
-        </div>
-
-        <div className="payment-content">
+      <div className="payment-complete-container">
+        <div className="payment-complete-content">
           {/* 성공 아이콘 및 메시지 */}
           <div className="payment-section">
-            <div className="success-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
-              <div className="success-icon" style={{ marginBottom: '1rem' }}>
+            <div className="payment-complete-success-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
+              <div className="payment-success-icon" style={{ marginBottom: '1rem' }}>
                 <CheckCircle size={80} style={{ color: '#22c55e' }}/>
               </div>
               <h2 className="success-title" style={{ fontSize: '1.8rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>결제가 완료되었습니다!</h2>
@@ -208,14 +225,14 @@ const PaymentComplete = ({paymentData, onHome, onPaymentHistory}) => {
                 <Receipt className="summary-icon" />
                 <div className="summary-info">
                   <span className="summary-label">주문번호</span>
-                  <span className="summary-value">{paymentData.orderId}</span>
+                  <span className="summary-value">{paymentData?.orderId || '주문번호 없음'}</span>
                 </div>
               </div>
               <div className="summary-item">
                 <CreditCard className="summary-icon" />
                 <div className="summary-info">
                   <span className="summary-label">결제금액</span>
-                  <span className="summary-value">{Number(paymentData.amount).toLocaleString()}원</span>
+                  <span className="summary-value">{safeFormatNumber(paymentData?.amount)}원</span>
                 </div>
               </div>
               <div className="summary-item">
@@ -229,7 +246,7 @@ const PaymentComplete = ({paymentData, onHome, onPaymentHistory}) => {
                 <Clock className="summary-icon" />
                 <div className="summary-info">
                   <span className="summary-label">결제일시</span>
-                  <span className="summary-value">{formatDate(paymentData.approvedAt || new Date())}</span>
+                  <span className="summary-value">{formatDate(paymentData?.approvedAt)}</span>
                 </div>
               </div>
             </div>
@@ -280,17 +297,17 @@ const PaymentComplete = ({paymentData, onHome, onPaymentHistory}) => {
             <div className="price-breakdown">
               <div className="price-item">
                 <span>서비스 이용료</span>
-                <span>{Number(bookingInfo.originalAmount || paymentData.amount).toLocaleString()}원</span>
+                <span>{safeFormatNumber(bookingInfo.originalAmount || paymentData?.amount)}원</span>
               </div>
-              {bookingInfo.discountAmount > 0 && (
+              {safeNumber(bookingInfo.discountAmount) > 0 && (
                   <div className="price-item discount">
                     <span>🎫 쿠폰 할인</span>
-                    <span>-{Number(bookingInfo.discountAmount).toLocaleString()}원</span>
+                    <span>-{safeFormatNumber(bookingInfo.discountAmount)}원</span>
                   </div>
               )}
               <div className="price-item total">
                 <span>총 결제금액</span>
-                <span>{Number(paymentData.amount).toLocaleString()}원</span>
+                <span>{safeFormatNumber(paymentData?.amount)}원</span>
               </div>
             </div>
           </div>
@@ -301,8 +318,7 @@ const PaymentComplete = ({paymentData, onHome, onPaymentHistory}) => {
             <div className="payment-info">
               <p><strong>채팅방</strong>은 멘토링 시작 시간에 자동으로 생성되며, 알림을 통해 안내드립니다.</p>
               <p><strong>예약 취소</strong>는 멘토링 시작 2시간 전까지 가능하며, 취소 시 전액 환불됩니다.</p>
-              <p>멘토링 진행 중 기술적 문제가 발생하면 <strong>고객센터 1588-1234</strong>로 연락주세요.</p>
-              <p>멘토링 완료 후 <strong>리뷰 작성</strong>하시면 다음 멘토링에서 사용할 수 있는 쿠폰을 드립니다.</p>
+              <p>멘토링 진행 중 기술적 문제가 발생하면 <strong>문의 하기</strong>로 문의 부탁드립니다.</p>
             </div>
           </div>
 
@@ -312,7 +328,7 @@ const PaymentComplete = ({paymentData, onHome, onPaymentHistory}) => {
             <div className="booking-summary">
               <div className="summary-item">
                 <div className="summary-icon" style={{ 
-                  backgroundColor: '#3b82f6', 
+                  backgroundColor: '#FF8F00',
                   color: 'white', 
                   borderRadius: '50%', 
                   width: '32px', 
@@ -330,7 +346,7 @@ const PaymentComplete = ({paymentData, onHome, onPaymentHistory}) => {
               </div>
               <div className="summary-item">
                 <div className="summary-icon" style={{ 
-                  backgroundColor: '#3b82f6', 
+                  backgroundColor: '#FF8F00',
                   color: 'white', 
                   borderRadius: '50%', 
                   width: '32px', 
@@ -348,7 +364,7 @@ const PaymentComplete = ({paymentData, onHome, onPaymentHistory}) => {
               </div>
               <div className="summary-item">
                 <div className="summary-icon" style={{ 
-                  backgroundColor: '#3b82f6', 
+                  backgroundColor: '#FF8F00',
                   color: 'white', 
                   borderRadius: '50%', 
                   width: '32px', 
@@ -369,17 +385,16 @@ const PaymentComplete = ({paymentData, onHome, onPaymentHistory}) => {
 
           {/* 액션 버튼들 */}
           <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-            <button onClick={onHome} className="payment-button" style={{ flex: 1 }}>
+            <button onClick={onHome} className="payment-home-button" style={{ flex: 1 }}>
               <Home className="icon" />
               홈으로 돌아가기
             </button>
             {onPaymentHistory && (
-                <button className="payment-button hover:bg-gray-600" onClick={onPaymentHistory} style={{ 
-                  flex: 1, 
-                  backgroundColor: '#6b7280'
+                <button className="payment-secondary-button" onClick={onPaymentHistory} style={{
+                  flex: 1
                 }}>
                   <Calendar className="icon" />
-                  내 예약 보기
+                  마이 페이지로 가기
                 </button>
             )}
           </div>

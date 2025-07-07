@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import './Payment.css';
 import './TossPayment.css';
+import { paymentAPI } from '../services/api';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -25,19 +26,22 @@ function TossPaymentSuccess({paymentData, onHome, onBack, onTossSuccess}) {
     // sessionStorage에서 결제 데이터 복원
     const savedPaymentData = sessionStorage.getItem('tossPaymentData');
     let reservationId = "";
+    let finalAmount = amount; // URL 파라미터의 amount (할인 전 원가)
 
     if (savedPaymentData) {
       try {
         const parsedData = JSON.parse(savedPaymentData);
         reservationId = parsedData.reservationId || "";
 
-        // URL에서 orderId나 amount가 없으면 저장된 데이터 사용
+        // ✅ 중요: sessionStorage에 저장된 할인된 금액을 우선 사용
+        if (parsedData.amount) {
+          finalAmount = parsedData.amount.toString();
+          console.log('🔍 금액 우선순위 - sessionStorage:', parsedData.amount, 'URL 파라미터:', amount);
+        }
+        
+        // URL에서 orderId가 없으면 저장된 데이터 사용
         if (!orderId && parsedData.orderId) {
           setPaymentInfo(prev => ({...prev, orderId: parsedData.orderId}));
-        }
-        if (!amount && parsedData.amount) {
-          setPaymentInfo(
-              prev => ({...prev, amount: parsedData.amount.toString()}));
         }
       } catch (e) {
         console.error('저장된 결제 데이터 파싱 실패:', e);
@@ -48,7 +52,18 @@ function TossPaymentSuccess({paymentData, onHome, onBack, onTossSuccess}) {
         || sessionStorage?.getItem("accessToken");
 
     setJwtToken(tokenFromStorage || "");
-    setPaymentInfo({paymentKey, orderId, amount, reservationId});
+    
+    // ✅ finalAmount 사용 (할인된 금액)
+    setPaymentInfo({paymentKey, orderId, amount: finalAmount, reservationId});
+    
+    console.log('📋 최종 결제 정보 설정:', {
+      paymentKey,
+      orderId, 
+      amount: finalAmount,
+      reservationId,
+      urlAmount: amount,
+      savedAmount: savedPaymentData ? JSON.parse(savedPaymentData).amount : 'none'
+    });
   }, []);
 
   // 🚀 자동 승인 처리 - 결제 정보가 준비되면 즉시 실행
@@ -82,23 +97,14 @@ function TossPaymentSuccess({paymentData, onHome, onBack, onTossSuccess}) {
     setConfirmResult(null);
 
     try {
-      const response = await fetch(`${BASE_URL}/api/v1/payments/confirm`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwtToken}`,
-        },
-        body: JSON.stringify({
-          paymentKey: paymentInfo.paymentKey,
-          orderId: paymentInfo.orderId,
-          amount: Number(paymentInfo.amount),
-          reservationId: Number(paymentInfo.reservationId),
-        }),
+      const data = await paymentAPI.confirmPayment({
+        paymentKey: paymentInfo.paymentKey,
+        orderId: paymentInfo.orderId,
+        amount: Number(paymentInfo.amount),
+        reservationId: Number(paymentInfo.reservationId),
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (data) {
         setConfirmResult({success: true, data});
 
         // 🔥 sessionStorage에서 원본 예약 데이터 백업
@@ -194,11 +200,14 @@ function TossPaymentSuccess({paymentData, onHome, onBack, onTossSuccess}) {
           }
         }, 1500); // 1.5초 후 이동 (사용자가 완료 메시지를 볼 수 있도록)
       } else {
-        throw new Error(data.message || "결제 승인 실패");
+        throw new Error("결제 승인 실패");
       }
     } catch (error) {
-      setConfirmResult({success: false, error: error.message});
-      if (error.message.includes("인증")) {
+      console.error('결제 승인 실패:', error);
+      const errorMessage = error.response?.data?.message || error.message || "결제 승인 실패";
+      setConfirmResult({success: false, error: errorMessage});
+      
+      if (errorMessage.includes("인증") || error.response?.status === 401) {
         localStorage?.removeItem("accessToken");
         sessionStorage?.removeItem("accessToken");
         setJwtToken("");

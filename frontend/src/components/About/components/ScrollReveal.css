@@ -1,0 +1,53 @@
+/* 기본 상태 */
+.scroll-reveal {
+  opacity: 0;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scroll-reveal.visible {
+  opacity: 1;
+}
+
+/* Fade Up 애니메이션 */
+.scroll-reveal.fadeUp {
+  transform: translateY(60px);
+}
+
+.scroll-reveal.fadeUp.visible {
+  transform: translateY(0);
+}
+
+/* Fade Left 애니메이션 */
+.scroll-reveal.fadeLeft {
+  transform: translateX(-60px);
+}
+
+.scroll-reveal.fadeLeft.visible {
+  transform: translateX(0);
+}
+
+/* Fade Right 애니메이션 */
+.scroll-reveal.fadeRight {
+  transform: translateX(60px);
+}
+
+.scroll-reveal.fadeRight.visible {
+  transform: translateX(0);
+}
+
+/* Scale 애니메이션 */
+.scroll-reveal.scale {
+  transform: scale(0.8);
+}
+
+.scroll-reveal.scale.visible {
+  transform: scale(1);
+}
+
+/* Stagger 애니메이션을 위한 딜레이 클래스 */
+.stagger-1 { animation-delay: 0.1s !important; }
+.stagger-2 { animation-delay: 0.2s !important; }
+.stagger-3 { animation-delay: 0.3s !important; }
+.stagger-4 { animation-delay: 0.4s !important; }
+.stagger-5 { animation-delay: 0.5s !important; }
+.stagger-6 { animation-delay: 0.6s !important; }

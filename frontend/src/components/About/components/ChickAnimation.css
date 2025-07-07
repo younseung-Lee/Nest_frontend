@@ -1,0 +1,95 @@
+.chick-animation {
+  display: inline-block;
+  position: relative;
+}
+
+/* 크기 variants */
+.chick-animation.small { font-size: 1.5rem; }
+.chick-animation.medium { font-size: 2.5rem; }
+.chick-animation.large { font-size: 4rem; }
+
+/* Bounce 애니메이션 */
+.chick-animation.bounce .chick-emoji {
+  animation: chickBounce 2s ease-in-out infinite;
+}
+
+@keyframes chickBounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-15px);
+  }
+  60% {
+    transform: translateY(-7px);
+  }
+}
+
+/* Float 애니메이션 */
+.chick-animation.float .chick-emoji {
+  animation: chickFloat 3s ease-in-out infinite;
+}
+
+@keyframes chickFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(3deg);
+  }
+}
+
+/* Hatch 애니메이션 */
+.hatch-container {
+  position: relative;
+  display: inline-block;
+}
+
+.egg {
+  transition: all 0.5s ease;
+  display: inline-block;
+}
+
+.egg.cracking {
+  animation: eggCrack 1s ease-in-out;
+}
+
+.egg.hatched {
+  opacity: 0;
+  transform: scale(0);
+}
+
+@keyframes eggCrack {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+  75% { transform: rotate(-3deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.chick {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.5s ease;
+}
+
+.chick.emerged {
+  opacity: 1;
+  transform: scale(1);
+  animation: chickEmerge 0.5s ease-out;
+}
+
+@keyframes chickEmerge {
+  0% {
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}

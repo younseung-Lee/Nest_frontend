@@ -49,7 +49,7 @@ const HeroSection = () => {
             멘토링 시작하기
             <div className="button-shine"></div>
           </button>
-          <button className="secondary-button glass-effect">
+          <button className="hero-secondary-button glass-effect">
             더 알아보기
           </button>
         </div>

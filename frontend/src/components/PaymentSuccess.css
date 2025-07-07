@@ -11,7 +11,7 @@
 }
 
 /* 성공 헤더 */
-.success-header {
+.payment-success-header {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   padding: 2rem 1.5rem;
@@ -372,7 +372,7 @@
     padding: 1rem;
   }
   
-  .success-header {
+  .payment-success-header {
     padding: 1.5rem 1rem;
   }
   

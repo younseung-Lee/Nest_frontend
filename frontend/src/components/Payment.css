@@ -1,6 +1,6 @@
 .payment-container {
   min-height: 100vh;
-  background: linear-gradient(90deg, #e4efe5 50%, #e1efe1 100%);
+  background: linear-gradient(135deg, #fff8e1 0%, #fff3c4 100%);
 }
 
 .payment-header {
@@ -15,21 +15,21 @@
 .payment-header h1 {
   margin: 0 0 0 1rem;
   font-size: 1.25rem;
-  color: #2d3748;
+  color: #6d4c41;
   font-weight: 700;
 }
 
-.back-button {
+.payment-back-button {
   background: none;
   border: none;
   padding: 0.5rem;
   cursor: pointer;
-  color: #4a5568;
+  color: #6d4c41;
   transition: color 0.2s;
 }
 
-.back-button:hover {
-  color: #15803D;
+.payment-back-button:hover {
+  color: #ff8f00;
 }
 
 .payment-content {
@@ -54,93 +54,93 @@
   gap: 0.5rem;
   margin: 0 0 1rem 0;
   font-size: 1.1rem;
-  color: #2d3748;
+  color: #6d4c41;
   font-weight: 600;
 }
 
 .payment-section .icon {
   width: 1.25rem;
   height: 1.25rem;
-  color: #15803D;
+  color: #ff8f00;
 }
 
 /* 예약 정보 요약 */
-.booking-summary {
+.payment-booking-summary {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.summary-item {
+.payment-summary-item {
   display: flex;
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: rgba(21, 128, 61, 0.05);
+  background: rgba(255, 179, 0, 0.05);
   border-radius: 12px;
-  border-left: 4px solid #15803D;
+  border-left: 4px solid #ffb300;
 }
 
-.summary-icon {
+.payment-summary-icon {
   width: 1.25rem;
   height: 1.25rem;
-  color: #15803D;
+  color: #ffb300;
   flex-shrink: 0;
 }
 
-.summary-info {
+.payment-summary-info {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.summary-label {
+.payment-summary-label {
   font-size: 0.875rem;
   color: #6b7280;
   font-weight: 500;
 }
 
-.summary-value {
+.payment-summary-value {
   font-size: 1rem;
-  color: #2d3748;
+  color: #6d4c41;
   font-weight: 600;
 }
 
 /* 가격 정보 */
-.price-breakdown {
+.payment-price-breakdown {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.price-item {
+.payment-price-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #2d3748;
+  color: #6d4c41;
 }
 
-.price-item:not(.total) {
+.payment-price-item:not(.total) {
   font-size: 0.95rem;
 }
 
-.price-item.total {
+.payment-price-item.total {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #15803D;
+  color: #ff8f00;
 }
 
-.price-item.discount {
-  color: #f59e0b;
+.payment-price-item.discount {
+  color: #ffcc02;
   font-weight: 600;
 }
 
-.price-item.discount span:last-child {
-  color: #f59e0b;
+.payment-price-item.discount span:last-child {
+  color: #ffcc02;
 }
 
-.price-item.final-amount {
-  background: linear-gradient(135deg, #10b981, #34d399);
+.payment-price-item.final-amount {
+  background: linear-gradient(135deg, #ffb300, #ff8f00);
   color: white !important;
   padding: 12px 16px;
   border-radius: 8px;
@@ -148,21 +148,21 @@
   font-weight: 700;
 }
 
-.price-item.final-amount span {
+.payment-price-item.final-amount span {
   color: white !important;
 }
 
-.price-final {
+.payment-price-final {
   font-size: 1.2rem !important;
   font-weight: 700 !important;
 }
 
-.price-discount {
-  color: #f59e0b !important;
+.payment-price-discount {
+  color: #ffcc02 !important;
   font-weight: 700;
 }
 
-.price-divider {
+.payment-price-divider {
   height: 1px;
   background: #e5e7eb;
   margin: 0.5rem 0;
@@ -180,24 +180,24 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem;
-  border: 2px solid #15803D;
+  border: 2px solid #ffb300;
   border-radius: 12px;
-  background: rgba(21, 128, 61, 0.1);
-  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.15);
+  background: rgba(255, 179, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(255, 179, 0, 0.15);
 }
 
 .payment-method.selected {
-  border-color: #15803D;
-  background: rgba(21, 128, 61, 0.1);
+  border-color: #ffb300;
+  background: rgba(255, 179, 0, 0.1);
 }
 
-.toss-logo {
+.payment-toss-logo {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.toss-circle {
+.payment-toss-circle {
   width: 24px;
   height: 24px;
   background: #3182f6;
@@ -205,7 +205,7 @@
   position: relative;
 }
 
-.toss-circle::before {
+.payment-toss-circle::before {
   content: '';
   position: absolute;
   top: 50%;
@@ -217,7 +217,7 @@
   border-radius: 50%;
 }
 
-.toss-text {
+.payment-toss-text {
   font-weight: 700;
   color: #3182f6;
   font-size: 1.1rem;
@@ -225,7 +225,7 @@
 }
 
 .payment-method span:last-child {
-  color: #2d3748;
+  color: #6d4c41;
   font-weight: 600;
   font-size: 1.1rem;
 }
@@ -246,21 +246,21 @@
 
 .payment-info p:first-child {
   font-weight: 600;
-  color: #2d3748;
+  color: #6d4c41;
 }
 
 /* 쿠폰 선택 */
-.coupon-section {
+.payment-coupon-section {
   width: 100%;
 }
 
-.coupon-select-btn {
+.payment-coupon-select-btn {
   width: 100%;
   padding: 1rem;
   background: rgba(255, 255, 255, 0.9);
-  border: 2px dashed #15803D;
+  border: 2px dashed #ffb300;
   border-radius: 12px;
-  color: #15803D;
+  color: #ffb300;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -270,58 +270,58 @@
   gap: 0.5rem;
 }
 
-.coupon-select-btn:hover {
-  background: rgba(21, 128, 61, 0.05);
-  border-color: #166534;
+.payment-coupon-select-btn:hover {
+  background: rgba(255, 179, 0, 0.05);
+  border-color: #ff8f00;
 }
 
-.coupon-icon {
+.payment-coupon-icon {
   width: 1.25rem;
   height: 1.25rem;
 }
 
-.selected-coupon {
+.payment-coupon-selected {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
-  border: 2px solid #dc2626;
+  background: linear-gradient(135deg, rgba(255, 204, 2, 0.1) 0%, rgba(255, 179, 0, 0.05) 100%);
+  border: 2px solid #ffcc02;
   border-radius: 12px;
 }
 
-.coupon-info {
+.payment-coupon-info {
   flex: 1;
 }
 
-.coupon-name {
+.payment-coupon-name {
   font-weight: 700;
-  color: #2d3748;
+  color: #6d4c41;
   margin-bottom: 0.25rem;
 }
 
-.coupon-discount {
+.payment-coupon-discount {
   font-size: 0.9rem;
-  color: #dc2626;
+  color: #ff8f00;
   font-weight: 600;
 }
 
-.coupon-remove-btn {
+.payment-coupon-remove-btn {
   background: none;
   border: none;
-  color: #dc2626;
+  color: #ff8f00;
   cursor: pointer;
   padding: 0.25rem;
   border-radius: 4px;
   transition: background 0.2s;
 }
 
-.coupon-remove-btn:hover {
-  background: rgba(220, 38, 38, 0.1);
+.payment-coupon-remove-btn:hover {
+  background: rgba(255, 143, 0, 0.1);
 }
 
 /* 쿠폰 모달 */
-.modal-overlay {
+.payment-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -335,7 +335,7 @@
   padding: 1rem;
 }
 
-.modal-content {
+.payment-modal-content {
   background: white;
   border-radius: 16px;
   width: 100%;
@@ -345,7 +345,7 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
-.modal-header {
+.payment-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -353,13 +353,13 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-.modal-header h3 {
+.payment-modal-header h3 {
   margin: 0;
-  color: #2d3748;
+  color: #6d4c41;
   font-weight: 700;
 }
 
-.modal-close {
+.payment-modal-close {
   background: none;
   border: none;
   color: #6b7280;
@@ -369,24 +369,24 @@
   transition: all 0.2s;
 }
 
-.modal-close:hover {
+.payment-modal-close:hover {
   background: #f3f4f6;
   color: #374151;
 }
 
-.modal-body {
+.payment-modal-body {
   padding: 1.5rem;
   max-height: 60vh;
   overflow-y: auto;
 }
 
-.coupon-list {
+.payment-coupon-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.coupon-item {
+.payment-coupon-item {
   border: 2px solid #e5e7eb;
   border-radius: 12px;
   padding: 1rem;
@@ -395,32 +395,32 @@
   background: white;
 }
 
-.coupon-item:hover {
-  border-color: #15803D;
-  background: rgba(21, 128, 61, 0.02);
+.payment-coupon-item:hover {
+  border-color: #ffb300;
+  background: rgba(255, 179, 0, 0.02);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.15);
+  box-shadow: 0 4px 12px rgba(255, 179, 0, 0.15);
 }
 
-.coupon-content {
+.payment-coupon-content {
   width: 100%;
 }
 
-.coupon-header {
+.payment-coupon-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 0.5rem;
 }
 
-.coupon-item .coupon-name {
+.payment-coupon-item .payment-coupon-name {
   font-weight: 700;
-  color: #2d3748;
+  color: #6d4c41;
   font-size: 1rem;
 }
 
-.coupon-value {
-  background: #15803D;
+.payment-coupon-value {
+  background: #ffb300;
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
@@ -428,13 +428,13 @@
   font-size: 0.9rem;
 }
 
-.coupon-description {
+.payment-coupon-description {
   color: #6b7280;
   font-size: 0.9rem;
   margin-bottom: 0.75rem;
 }
 
-.coupon-details {
+.payment-coupon-details {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -442,22 +442,22 @@
   color: #9ca3af;
 }
 
-.no-coupons {
+.payment-no-coupons {
   text-align: center;
   padding: 2rem;
   color: #6b7280;
 }
 
-.no-coupon-icon {
+.payment-no-coupon-icon {
   color: #d1d5db;
   margin-bottom: 1rem;
 }
 
-.no-coupons p {
+.payment-no-coupons p {
   margin: 0.5rem 0;
 }
 
-.no-coupon-desc {
+.payment-no-coupon-desc {
   font-size: 0.9rem;
   color: #9ca3af;
 }
@@ -466,7 +466,7 @@
 .payment-button {
   width: 100%;
   padding: 1.25rem;
-  background: #15803D;
+  background: linear-gradient(45deg, #ffb300, #ff8f00);
   color: white;
   border: none;
   border-radius: 12px;
@@ -475,7 +475,7 @@
   cursor: pointer;
   margin-top: 1.5rem;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(21, 128, 61, 0.3);
+  box-shadow: 0 4px 15px rgba(255, 179, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -486,8 +486,8 @@
 
 .payment-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(21, 128, 61, 0.4);
-  background: #166534;
+  box-shadow: 0 8px 25px rgba(255, 179, 0, 0.4);
+  background: linear-gradient(45deg, #ff8f00, #e65100);
 }
 
 .payment-button:active {
@@ -520,17 +520,17 @@
 
 /* 반응형 스타일 */
 @media (max-width: 480px) {
-  .summary-item {
+  .payment-summary-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
 
-  .price-item {
+  .payment-price-item {
     font-size: 0.9rem;
   }
 
-  .price-item.total {
+  .payment-price-item.total {
     font-size: 1rem;
   }
 
@@ -538,37 +538,37 @@
     padding: 1rem;
   }
 
-  .toss-text {
+  .payment-toss-text {
     font-size: 1rem;
   }
 
-  .modal-content {
+  .payment-modal-content {
     margin: 1rem;
     max-height: 90vh;
   }
 
-  .modal-header {
+  .payment-modal-header {
     padding: 1rem;
   }
 
-  .modal-body {
+  .payment-modal-body {
     padding: 1rem;
     max-height: 70vh;
   }
 
-  .coupon-header {
+  .payment-coupon-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
 
-  .selected-coupon {
+  .payment-coupon-selected {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.75rem;
   }
 
-  .coupon-remove-btn {
+  .payment-coupon-remove-btn {
     align-self: flex-end;
   }
 }

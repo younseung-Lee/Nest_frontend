@@ -1,7 +1,7 @@
 /* ===== 컨테이너 기본 스타일 ===== */
 .mypage-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(#FFF8E1 0%,  #FFF3C4 100%);
   position: relative;
   overflow-x: hidden;
 }
@@ -13,7 +13,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+  background: linear-gradient(#FFF8E1 0%,  #FFF3C4 100%),
   radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
   radial-gradient(circle at 40% 80%, rgba(120, 200, 255, 0.3) 0%, transparent 50%);
   pointer-events: none;
@@ -27,33 +27,34 @@
   align-items: center;
   justify-content: space-between;
   padding: 2rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(255, 248, 225);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.back-button, .logout-button {
+.my-back-button, .logout-button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   color: white;
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 0.9rem;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .back-button:hover, .logout-button:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
   transform: translateY(-2px);
 }
 
 .mypage-header h1 {
-  color: white;
+  color: #ff8f00;
   font-size: 1.8rem;
   font-weight: 700;
   margin: 0;
@@ -67,6 +68,7 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
+  background: linear-gradient(#FFF8E1 0%,  #FFF3C4 100%);
 }
 
 /* ===== 프로필 섹션 ===== */
@@ -206,7 +208,7 @@
   justify-content: space-between;
   padding: 1.5rem 2rem;
   border-bottom: 1px solid #e2e8f0;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
   color: white;
   flex-shrink: 0;
 }
@@ -217,8 +219,8 @@
   font-weight: 700;
 }
 
-.modal-close-btn {
-  background: none;
+.image-modal-close-btn {
+  background: rgba(255, 255, 255, 0.1);
   border: none;
   color: white;
   cursor: pointer;
@@ -227,8 +229,8 @@
   transition: background-color 0.2s ease;
 }
 
-.modal-close-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+.image-modal-close-btn:hover {
+  background: rgba(0, 0, 0, 0.47);
 }
 
 .profile-modal-content {
@@ -287,13 +289,13 @@
 }
 
 .profile-action-btn.edit {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
   color: white;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .profile-action-btn.edit:hover:not(:disabled) {
-  background: linear-gradient(135deg, #5a67d8, #6b46c1);
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
@@ -331,6 +333,9 @@
 }
 
 .profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
   flex: 1;
 }
 
@@ -349,7 +354,7 @@
 
 .user-level {
   display: inline-block;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 20px;
@@ -357,6 +362,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  width: fit-content;
 }
 
 /* ===== 메인 레이아웃 ===== */
@@ -451,7 +457,7 @@
 }
 
 .mypage-main .sidebar-item.active {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
   color: white;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
@@ -633,7 +639,7 @@
 }
 
 .content-area p, .content-area span, .content-area div {
-  color: #4a5568 ;
+  color: black ;
 }
 
 .content-area label {

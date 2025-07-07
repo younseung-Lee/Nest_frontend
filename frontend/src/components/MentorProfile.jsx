@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Check, Star } from 'lucide-react';
+import { ArrowLeft, Check, Star, BadgeCheck } from 'lucide-react';
 import './MentorProfile.css';
 import { profileAPI } from '../services/api';
+import {authUtils, userInfoUtils} from "../utils/tokenUtils.js";
+import ReviewSection from './ReviewSection';
 
 const convertTime = (enumVal) => {
   switch (enumVal) {
@@ -53,6 +55,10 @@ const MentorProfile = ({ mentor, onBack, onBooking }) => {
   const handleServiceSelect = (service) => setSelectedService(service);
 
   const handleBookingClick = () => {
+    if (userRole === null || userRole === undefined) {
+      window.location.href = '/login';
+      return;
+    }
     if (onBooking) {
       onBooking({ mentor: mentorDetails});
     }
@@ -68,17 +74,33 @@ const MentorProfile = ({ mentor, onBack, onBooking }) => {
     popular: false
   }));
 
+  const userRole = userInfoUtils.getUserInfo()?.userRole;
+
   if (loading) return <div>로딩 중...</div>;
   if (!mentorDetails) return <div>멘토 정보를 불러오지 못했습니다.</div>;
 
   return (
       <div className="mentor-profile-container">
         <div className="profile-header">
-          <button className="back-button" onClick={onBack}>
-            <ArrowLeft className="icon" />
-          </button>
-          <div className="header-category">
-            {mentorDetails.category || '카테고리'}
+          <div className="header-left">
+            <button className="mentor-profile-back-button" onClick={onBack}>
+              <ArrowLeft className="icon" />
+            </button>
+          </div>
+          <div className="header-right">
+            {userRole ? (
+              <div className="header-profile"
+                   onClick={() => window.location.href = '/mypage'}>
+                <img src="/default-profile.svg" alt="프로필"
+                     className="profile-image"/>
+              </div>
+            ) : (
+              <button
+                className="login-button"
+                onClick={() => window.location.href = '/login'}>
+                로그인
+              </button>
+            )}
           </div>
         </div>
 
@@ -86,19 +108,19 @@ const MentorProfile = ({ mentor, onBack, onBooking }) => {
           <div className="profile-hero">
             <div className={`profile-avatar gradient-bg-${mentorDetails.id}`}>
               {mentorDetails.imgUrl ? (
-                <img 
-                  src={mentorDetails.imgUrl} 
-                  alt={mentorDetails.name}
-                  className="profile-avatar-image"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
+                  <img
+                      src={mentorDetails.imgUrl}
+                      alt={mentorDetails.name}
+                      className="profile-avatar-image"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                  />
               ) : null}
-              <div 
-                className="profile-avatar-text"
-                style={{ display: mentorDetails.imgUrl ? 'none' : 'flex' }}
+              <div
+                  className="profile-avatar-text"
+                  style={{ display: mentorDetails.imgUrl ? 'none' : 'flex' }}
               >
                 {mentorDetails.avatar || mentorDetails.name?.[0] || 'M'}
               </div>
@@ -128,19 +150,25 @@ const MentorProfile = ({ mentor, onBack, onBooking }) => {
             <h2 className="section-title">멘토 경력</h2>
             {Array.isArray(careerList) && (
                 <div className="career-content">
-                  <div className="career-table">
+                  <div className="mentor-career-table">
                     <div className="career-header">
+                      <div className="career-col">인증여부</div>
                       <div className="career-col">회사명</div>
-                      <div className="career-col">직무</div>
                       <div className="career-col">근무기간</div>
-                      <div className="career-col">설명</div>
                     </div>
                     {careerList.map((item, idx) => (
                         <div key={idx} className="career-row">
+                          <div className="career-col">
+                            {item.careerStatus === 'AUTHORIZED' ? (
+                                // AUTHORIZED: 노란색 채워진 별
+                                <BadgeCheck size={20} color="black" fill="gold" />
+                            ) : item.careerStatus === 'UNAUTHORIZED' ? (
+                                // UNAUTHORIZED: 하얀색 (테두리만) 별
+                                <p>미인증</p>
+                            ) : ('')}
+                          </div>
                           <div className="career-col">{item.company}</div>
-                          <div className="career-col">{item.position}</div>
                           <div className="career-col">{formatPeriod(item.startAt, item.endAt)}</div>
-                          <div className="career-col">{item.description}</div>
                         </div>
                     ))}
                   </div>
@@ -178,7 +206,7 @@ const MentorProfile = ({ mentor, onBack, onBooking }) => {
                           </div>
                       )}
                       <div className="service-header">
-                        <h3 className="service-name">{service.name}</h3>
+                        <h3 className="mp-service-name">{service.name}</h3>
                         <div className="service-duration">
                           {service.duration.map((dur, idx) => (
                               <span key={idx} className="duration-tag">{dur}</span>
@@ -215,17 +243,23 @@ const MentorProfile = ({ mentor, onBack, onBooking }) => {
             </div>
           </div>
 
+          <div className="content-section">
+            <ReviewSection mentorId={mentorDetails.userId || mentorDetails.id} />
+          </div>
+
         </div>
 
         <div className="fixed-bottom">
-          <button
-              className={`contact-button ${selectedService ? 'with-selection' : ''}`}
-              onClick={handleBookingClick}
-          >
-            {selectedService
-                ? `${selectedService.name} 신청하기 (${selectedService.price})`
-                : '상담 신청하기'}
-          </button>
+          {(userRole === 'MENTEE' || userRole === null || userRole === undefined)
+              && (<button
+                  className={`contact-button ${selectedService ? 'with-selection' : ''}`}
+                  onClick={handleBookingClick}
+              >
+                {selectedService
+                    ? `${selectedService.name} 신청하기 (${selectedService.price})`
+                    : '상담 신청하기'}
+              </button>
+          )}
         </div>
       </div>
   );

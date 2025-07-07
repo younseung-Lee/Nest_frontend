@@ -5,7 +5,7 @@ import HeroSection from './components/HeroSection.jsx';
 import StatsSection from './components/StatsSection.jsx';
 import MentorSection from './components/MentorSection.jsx';
 import CTASection from './components/CTASection.jsx';
-import ParticleBackground from './components/ParticleBackground.jsx';
+import Footer from './components/Footer.jsx';
 import Login from './components/Login.jsx';
 import SocialSignup from './components/SocialSignup.jsx';
 import MentorList from './components/MentorList.jsx';
@@ -23,6 +23,7 @@ import ChatContainer from './components/ChatContainer.jsx';
 import NotificationContainer from './components/NotificationContainer.jsx';
 import Inquiry from './components/Inquiry.jsx';
 import AdminDashboard from './components/admin/AdminDashboard.jsx';
+import AboutPage from './components/About/AboutPage.jsx';
 import {authUtils, userInfoUtils} from './utils/tokenUtils';
 import {registerDebugFunctions} from './utils/websocketDebug';
 import {BrowserRouter, Routes, Route, useNavigate, useParams, useLocation} from 'react-router-dom';
@@ -61,6 +62,16 @@ const AppContent = () => {
           setIsLoggedIn(true);
           setUserInfo(userData);
           console.log('세션에서 로그인 상태 복원됨:', userData);
+
+          if (userData.userRole === 'GUEST') {
+            console.warn('⚠️ App.js: GUEST 사용자 감지! 추가 정보 미입력 상태로 다른 페이지 접근 시도. 강제 로그아웃.');
+            authUtils.clearAllAuthData(); // 모든 인증 정보 삭제
+            setIsLoggedIn(false);
+            setUserInfo(null);
+            navigate('/login', { replace: true }); // 로그인 페이지로 리다이렉트
+            setIsInitializing(false); // 초기화 중단
+            return;
+          }
 
           // 🔍 [2단계] 앱 시작 시 최신 사용자 정보 API 재조회 (프로필 이미지 동기화)
           try {
@@ -779,7 +790,19 @@ const AppContent = () => {
 
     return (
         <div className="app">
-          <ParticleBackground />
+          <Header
+              isMenuOpen={isMenuOpen}
+              setIsMenuOpen={setIsMenuOpen}
+              onLoginClick={() => setIsLoginOpen(true)}
+              onCategorySelect={handleCategorySelect}
+              onProfileClick={handleProfileClick}
+              onInquiry={handleInquiry}
+              isLoggedIn={isLoggedIn}
+              userInfo={userInfo}
+              onChatRoom={handleChatRoom}
+              onLogout={handleLogout}
+              onAdminDashboard={handleAdminDashboard}
+          />
           <MentorList
               category={category}
               onBack={handleBackToHome}
@@ -803,10 +826,33 @@ const AppContent = () => {
     const tab = searchParams.get('tab') || 'inquiries';
 
     return (
-        <Inquiry
-            onBack={handleBackToHome}
-            initialTab={tab}
-        />
+        <div className="app">
+          <Header
+              isMenuOpen={isMenuOpen}
+              setIsMenuOpen={setIsMenuOpen}
+              onLoginClick={() => setIsLoginOpen(true)}
+              onCategorySelect={handleCategorySelect}
+              onProfileClick={handleProfileClick}
+              onInquiry={handleInquiry}
+              isLoggedIn={isLoggedIn}
+              userInfo={userInfo}
+              onChatRoom={handleChatRoom}
+              onLogout={handleLogout}
+              onAdminDashboard={handleAdminDashboard}
+          />
+          <Inquiry
+              onBack={handleBackToHome}
+              initialTab={tab}
+          />
+          {isLoginOpen && (
+            <Login
+                isOpen={isLoginOpen}
+                onClose={() => setIsLoginOpen(false)}
+                onLoginSuccess={handleLoginSuccess}
+            />
+          )}
+          <NotificationContainer isLoggedIn={isLoggedIn} />
+        </div>
     );
   };
 
@@ -839,7 +885,6 @@ const AppContent = () => {
   // 메인 페이지 렌더링
   return (
       <div className="app">
-        <ParticleBackground />
         {/* Header는 메인 페이지에서만 표시 */}
         {location.pathname === '/' && (
           <Header
@@ -865,8 +910,7 @@ const AppContent = () => {
                   <StatsSection />
                   <MentorSection onMentorSelect={handleMentorSelect} />
                   <CTASection />
-                  
-
+                  <Footer />
                 </main>
               }
           />
@@ -892,6 +936,7 @@ const AppContent = () => {
           <Route path="/social-signup" element={<SocialSignup />} />
           <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/about" element={<AboutPage />} />
         </Routes>
         <NotificationContainer isLoggedIn={isLoggedIn} />
       </div>

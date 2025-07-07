@@ -13,14 +13,16 @@ import {
   Star,
   Camera,
   Upload,
-  X
+  X,
+  Ticket
 } from 'lucide-react';
 import './MyPage.css';
 import { userInfoUtils, authUtils } from '../utils/tokenUtils.js';
 import { userAPI, authAPI } from '../services/api.js';
 import BookingHistory from './MyPage/BookingHistory.jsx';
-import PaymentHistory from './MyPage/PaymentHistory.jsx';
+import PaymentsHistory from './MyPage/PaymentsHistory.jsx';
 import Reviews from "./MyPage/Reviews.jsx";
+import Coupons from "./MyPage/Coupons.jsx";
 
 // Lazy load components for better performance
 const BasicInfo = lazy(() => import('./MyPage/BasicInfo.jsx'));
@@ -37,7 +39,7 @@ const MyPage = ({ onBack, onLogout }) => {
   const [imageUploading, setImageUploading] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const fileInputRef = useRef(null);
-  
+
   // URL 경로에서 현재 탭 추출
   const getCurrentTab = () => {
     const path = location.pathname.replace('/mypage', '') || '/profile';
@@ -66,7 +68,7 @@ const MyPage = ({ onBack, onLogout }) => {
 
     try {
       const response = await userAPI.getUser();
-      
+
       // 🔍 [2단계] 사용자 정보 API 응답 전체 확인
       console.log('🔍 [2단계] 사용자 정보 API 전체 응답:', response);
       console.log('🔍 [2단계] 사용자 정보 API 응답 데이터:', response.data);
@@ -74,7 +76,7 @@ const MyPage = ({ onBack, onLogout }) => {
 
       if (response.data && response.data.data) {
         const backendUserData = response.data.data;
-        
+
         // 🔍 [2단계] backendUserData 모든 필드 확인
         console.log('🔍 [2단계] backendUserData 모든 필드:', Object.keys(backendUserData));
         console.log('🔍 [2단계] profileImage 필드 확인:', backendUserData.profileImage);
@@ -112,7 +114,7 @@ const MyPage = ({ onBack, onLogout }) => {
         }
 
         setUserInfo(mappedUserInfo);
-        userInfoUtils.setUserInfo(mappedUserInfo);
+        sessionStorage.setItem('mappedUserInfo', JSON.stringify(mappedUserInfo));
 
       } else {
         setError("사용자 정보를 불러오는데 실패했습니다.");
@@ -163,10 +165,10 @@ const MyPage = ({ onBack, onLogout }) => {
 
     try {
       setImageUploading(true);
-      
+
       // 프로필 이미지가 이미 있으면 수정, 없으면 최초 등록
       const hasProfileImage = userInfo.profileImage && userInfo.profileImage !== '/default-profile.svg';
-      
+
       let uploadResponse;
       if (hasProfileImage) {
         // 기존 이미지가 있는 경우 - 수정 API 사용
@@ -177,25 +179,25 @@ const MyPage = ({ onBack, onLogout }) => {
         console.log('📸 프로필 이미지 최초 등록 중...');
         uploadResponse = await userAPI.uploadProfileImage(file);
       }
-      
+
       console.log('✅ 프로필 이미지 처리 성공:', uploadResponse.data);
-      
+
       // 업로드/수정 완료 후 최신 프로필 이미지 조회
       try {
         const imageResponse = await userAPI.getUserProfileImage(userInfo.id);
         const newImageUrl = imageResponse.data.data.imgUrl;
-        
+
         const updatedUserInfo = {
           ...userInfo,
           profileImage: newImageUrl
         };
-        
+
         setUserInfo(updatedUserInfo);
         userInfoUtils.setUserInfo(updatedUserInfo);
-        
+
         console.log('✅ 프로필 이미지 URL 업데이트:', newImageUrl);
         alert(`프로필 이미지가 성공적으로 ${hasProfileImage ? '수정' : '등록'}되었습니다!`);
-        
+
       } catch (fetchError) {
         console.error('프로필 이미지 조회 실패:', fetchError);
         // 업로드는 성공했지만 조회 실패한 경우, 업로드 응답의 URL 사용
@@ -210,10 +212,10 @@ const MyPage = ({ onBack, onLogout }) => {
         }
         alert('프로필 이미지가 업데이트되었습니다. 페이지를 새로고침해주세요.');
       }
-      
+
     } catch (error) {
       console.error('❌ 프로필 이미지 처리 실패:', error);
-      
+
       if (error.response?.status === 401) {
         alert('인증이 만료되었습니다. 다시 로그인해주세요.');
         authUtils.clearAllAuthData();
@@ -266,24 +268,24 @@ const MyPage = ({ onBack, onLogout }) => {
     try {
       setImageUploading(true);
       closeProfileModal();
-      
+
       // 백엔드 삭제 API 호출
       await userAPI.deleteProfileImage();
-      
+
       // 삭제 후 기본 이미지로 교체
       const updatedUserInfo = {
         ...userInfo,
         profileImage: '/default-profile.svg'
       };
-      
+
       setUserInfo(updatedUserInfo);
       userInfoUtils.setUserInfo(updatedUserInfo);
-      
+
       alert('프로필 이미지가 삭제되었습니다.');
-      
+
     } catch (error) {
       console.error('❌ 프로필 이미지 삭제 실패:', error);
-      
+
       if (error.response?.status === 401) {
         alert('인증이 만료되었습니다. 다시 로그인해주세요.');
         authUtils.clearAllAuthData();
@@ -325,7 +327,7 @@ const MyPage = ({ onBack, onLogout }) => {
         <div className="mypage-loading error">
           <p>{error}</p>
           <div className="error-actions">
-            <button className="back-button" onClick={onBack}>뒤로 가기</button>
+            <button className="my-back-button" onClick={onBack}>뒤로 가기</button>
           </div>
         </div>
       </div>
@@ -337,7 +339,7 @@ const MyPage = ({ onBack, onLogout }) => {
       <div className="mypage-container">
         <div className="mypage-loading">
           <p>사용자 정보를 찾을 수 없습니다.</p>
-          <button className="back-button" onClick={onBack}>뒤로 가기</button>
+          <button className="my-back-button" onClick={onBack}>뒤로 가기</button>
         </div>
       </div>
     );
@@ -346,7 +348,7 @@ const MyPage = ({ onBack, onLogout }) => {
   return (
     <div className="mypage-container">
       <div className="mypage-header">
-        <button className="back-button" onClick={onBack}>
+        <button className="my-back-button" onClick={onBack}>
           <ArrowLeft className="icon" />
         </button>
         <h1>마이페이지</h1>
@@ -359,7 +361,7 @@ const MyPage = ({ onBack, onLogout }) => {
       <div className="mypage-content">
         <div className="profile-section">
           <div className="profile-image-container">
-            <div 
+            <div
               className={`profile-image-wrapper ${imageUploading ? 'uploading' : ''}`}
               onClick={handleProfileImageClick}
               title="클릭하여 프로필 이미지 변경"
@@ -406,11 +408,11 @@ const MyPage = ({ onBack, onLogout }) => {
             <div className="profile-modal" onClick={(e) => e.stopPropagation()}>
               <div className="profile-modal-header">
                 <h3>프로필 이미지</h3>
-                <button className="modal-close-btn" onClick={closeProfileModal}>
-                  <X size={24} />
+                <button className="image-modal-close-btn" onClick={closeProfileModal}>
+                  닫기
                 </button>
               </div>
-              
+
               <div className="profile-modal-content">
                 <div className="current-profile-image">
                   <img
@@ -419,23 +421,23 @@ const MyPage = ({ onBack, onLogout }) => {
                     className="modal-profile-image"
                   />
                 </div>
-                
+
                 <div className="profile-actions">
-                  <button 
+                  <button
                     className="profile-action-btn edit"
                     onClick={handleImageEdit}
                     disabled={imageUploading}
                   >
                     <Camera size={20} />
                     <span>
-                      {userInfo.profileImage && userInfo.profileImage !== '/default-profile.svg' 
-                        ? '이미지 수정' 
+                      {userInfo.profileImage && userInfo.profileImage !== '/default-profile.svg'
+                        ? '이미지 수정'
                         : '이미지 등록'}
                     </span>
                   </button>
-                  
+
                   {userInfo.profileImage && userInfo.profileImage !== '/default-profile.svg' && (
-                    <button 
+                    <button
                       className="profile-action-btn delete"
                       onClick={handleImageDelete}
                       disabled={imageUploading}
@@ -490,6 +492,13 @@ const MyPage = ({ onBack, onLogout }) => {
                     >
                       <Star className="sidebar-icon" />
                       <span>리뷰 내역</span>
+                    </button>
+                    <button
+                        className={`sidebar-item ${activeTab === 'coupons' ? 'active' : ''}`}
+                        onClick={() => handleTabChange('coupons')}
+                    >
+                      <Ticket className="sidebar-icon" />
+                      <span>보유 쿠폰</span>
                     </button>
                   </>
               )}
@@ -556,7 +565,7 @@ const MyPage = ({ onBack, onLogout }) => {
                 } />
                 <Route path="/payments" element={
                   userInfo?.userRole === 'MENTEE' ? (
-                    <PaymentHistory userInfo={userInfo} />
+                    <PaymentsHistory userInfo={userInfo} />
                   ) : (
                     <div className="access-denied">
                       <p>접근 권한이 없습니다.</p>
@@ -599,6 +608,15 @@ const MyPage = ({ onBack, onLogout }) => {
                       </div>
                   )
                 } />
+                <Route path="/coupons" element={
+                  userInfo?.userRole === 'MENTEE' ? (
+                      <Coupons userInfo={userInfo}/>
+                  ) : (
+                      <div className="access-denied">
+                        <p>접근 권한이 없습니다.</p>
+                      </div>
+                )
+                }/>
               </Routes>
             </Suspense>
           </div>

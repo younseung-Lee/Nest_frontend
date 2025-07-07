@@ -365,13 +365,13 @@
 }
 
 /* 개별 버튼 스타일 */
-.modal-close-btn {
+.career-detail-modal-close-btn {
   background: linear-gradient(135deg, #e2e8f0, #cbd5e0);
   color: #4a5568;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.modal-close-btn:hover {
+.career-detail-modal-close-btn:hover {
   background: linear-gradient(135deg, #cbd5e0, #a0aec0);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);

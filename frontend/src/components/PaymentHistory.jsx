@@ -175,7 +175,7 @@ const PaymentHistory = ({ onBack }) => {
     return (
       <div className="payment-history-container">
         <div className="loading-section">
-          <div className="loading-spinner"></div>
+          <div className="payment-history-loading-spinner"></div>
           <h2>결제 내역을 불러오고 있습니다...</h2>
         </div>
       </div>
@@ -187,7 +187,7 @@ const PaymentHistory = ({ onBack }) => {
       <div className="payment-history-content">
         {/* 헤더 */}
         <div className="history-header">
-          <button className="back-button" onClick={onBack}>
+          <button className="payment-history-back-button" onClick={onBack}>
             <ArrowLeft className="icon" />
           </button>
           <h1>결제 내역</h1>

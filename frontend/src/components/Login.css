@@ -1,11 +1,13 @@
-/* 로그인 오버레이 */
+/* 로그인 모달 컨테이너 */
 .login-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px); /* 배경 블러 처리 */
+  -webkit-backdrop-filter: blur(10px); /* Safari 지원 */
+  background: rgba(255, 248, 225, 0.3); /* 살짝 따뜻한 오버레이 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17,26 +19,50 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
   }
   to {
     opacity: 1;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 }
 
 /* 로그인 모달 */
 .login-modal {
-  background: rgb(234, 234, 234);
+  background: #fff8e1; /* Warm Cream 적용 */
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 179, 0, 0.2); /* Primary Amber 보더 */
   border-radius: 2rem;
   width: 100%;
   max-width: 480px;
   padding: 3rem 2rem;
   position: relative;
   animation: slideUp 0.3s ease;
-  max-height: 90vh;
+  max-height: 95vh; /* 높이를 늘려서 콘텐츠가 잘 보이도록 */
   overflow-y: auto;
-  overflow-x: hidden; /* 가로 스크롤 방지 */
+  overflow-x: hidden;
+  box-shadow: 0 25px 80px rgba(255, 179, 0, 0.25), 0 0 0 1px rgba(255, 179, 0, 0.1);
+}
+
+/* 스크롤바 스타일 */
+.login-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.login-modal::-webkit-scrollbar-track {
+  background: rgba(255, 179, 0, 0.1);
+  border-radius: 3px;
+}
+
+.login-modal::-webkit-scrollbar-thumb {
+  background: rgba(255, 143, 0, 0.3);
+  border-radius: 3px;
+}
+
+.login-modal::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 143, 0, 0.5);
 }
 
 /* 회원가입 모드일 때 모달 높이 조정 */
@@ -62,7 +88,7 @@
   right: 1.5rem;
   background: transparent;
   border: none;
-  color: rgb(0, 0, 0);
+  color: #6d4c41; /* Coffee Brown */
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 0.5rem;
@@ -70,8 +96,8 @@
 }
 
 .login-close:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+  background: rgba(255, 179, 0, 0.1);
+  color: #ff8f00; /* Vibrant Orange */
 }
 
 .login-close .icon {
@@ -95,24 +121,26 @@
 .login-title {
   font-size: 2rem;
   font-weight: 800;
-  color: #fdc500;
+  color: #ffcc02; /* Bright Yellow - 병아리 메인 컬러 */
   margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(255, 204, 2, 0.2);
 }
 
 .login-subtitle {
-  color: rgb(73, 198, 160);
+  color: #ff8f00; /* Vibrant Orange */
   font-size: 1rem;
+  font-weight: 500;
 }
 
 /* 폼 스타일 */
 .login-form {
   margin-bottom: 2rem;
-  width: 100%; /* 폼이 전체 너비를 사용하도록 */
+  width: 100%;
 }
 
 .input-group {
   margin-bottom: 1.25rem;
-  width: 100%; /* 인풋 그룹이 전체 너비를 사용하도록 */
+  width: 100%;
 }
 
 .input-wrapper {
@@ -126,30 +154,30 @@
   left: 1.25rem;
   width: 1.25rem;
   height: 1.25rem;
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(255, 143, 0, 0.6); /* Vibrant Orange 투명도 */
   pointer-events: none;
 }
 
 .login-input {
   width: 100%;
   padding: 1rem 1.25rem 1rem 3.5rem;
-  background: rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 248, 225, 0.8); /* Warm Cream 투명도 */
+  border: 1px solid rgba(255, 179, 0, 0.3); /* Primary Amber 보더 */
   border-radius: 1rem;
-  color: #000000;
+  color: #6d4c41; /* Coffee Brown */
   font-size: 1rem;
   transition: all 0.2s ease;
 }
 
 .login-input::placeholder {
-  color: rgb(73, 198, 160);
+  color: #ffb74d; /* Warm Peach */
 }
 
 .login-input:focus {
   outline: none;
-  background: rgb(255, 255, 255);
-  border-color: rgb(73, 198, 160);
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+  background: #ffffff;
+  border-color: #ff8f00; /* Vibrant Orange */
+  box-shadow: 0 0 0 3px rgba(255, 179, 0, 0);
 }
 
 .password-toggle {
@@ -157,14 +185,14 @@
   right: 1rem;
   background: transparent;
   border: none;
-  color: rgba(255, 0, 0, 0.4);
+  color: rgba(255, 143, 0, 0.6);
   cursor: pointer;
   padding: 0.5rem;
   transition: color 0.2s ease;
 }
 
 .password-toggle:hover {
-  color: rgba(255, 255, 255, 0.7);
+  color: #ff8f00;
 }
 
 .password-toggle .icon {
@@ -184,7 +212,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: rgb(73, 198, 160);
+  color: #ff9800; /* Deep Orange */
   font-size: 0.875rem;
   cursor: pointer;
 }
@@ -193,24 +221,25 @@
   width: 1rem;
   height: 1rem;
   cursor: pointer;
+  accent-color: #ff8f00; /* Vibrant Orange */
 }
 
 .forgot-password {
-  color: rgba(168, 85, 247, 0.8);
+  color: #ff8a65; /* Sunset Orange */
   text-decoration: none;
   font-size: 0.875rem;
   transition: color 0.2s ease;
 }
 
 .forgot-password:hover {
-  color: #a855f7;
+  color: #ff6f00;
 }
 
 /* 로그인 버튼 */
 .login-submit {
   width: 100%;
   padding: 1rem;
-  background: linear-gradient(135deg, #a855f7, #ec4899);
+  background: linear-gradient(45deg, #ffb300, #ff8f00); /* Primary Gradient */
   color: white;
   border: none;
   border-radius: 1rem;
@@ -220,11 +249,13 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 15px rgba(255, 179, 0, 0.3);
 }
 
 .login-submit:hover:not(:disabled) {
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3);
+  box-shadow: 0 8px 25px rgba(255, 179, 0, 0.4);
 }
 
 .login-submit:disabled {
@@ -235,8 +266,8 @@
 
 /* 에러 메시지 스타일 */
 .error-message {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(255, 87, 34, 0.1); /* 따뜻한 오렌지 계열 에러 색상 */
+  border: 1px solid rgba(255, 87, 34, 0.3);
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
@@ -246,13 +277,13 @@
 }
 
 .error-message span {
-  color: #ef4444;
+  color: #ff5722; /* 에러 텍스트 색상 */
   font-size: 0.875rem;
   font-weight: 500;
 }
 
 /* 로딩 스피너 스타일 */
-.loading-spinner {
+.login-loading-spinner {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -260,12 +291,12 @@
 }
 
 .spinner {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   border-top-color: white;
-  animation: spin 1s ease-in-out infinite;
+  animation: spin 0.8s ease-in-out infinite;
 }
 
 @keyframes spin {
@@ -292,14 +323,14 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: rgb(0, 0, 0);
+  background: rgba(255, 179, 0, 0.3); /* Primary Amber 구분선 */
 }
 
 .divider span {
   position: relative;
   padding: 0 1rem;
-  background: rgb(236, 236, 236);
-  color: rgb(0, 0, 0);
+  background: #fff8e1; /* Warm Cream */
+  color: #6d4c41; /* Coffee Brown */
   font-size: 0.875rem;
 }
 
@@ -312,10 +343,10 @@
 .social-button {
   width: 100%;
   padding: 0.875rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 179, 0, 0.2);
   border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
+  background: rgba(255, 248, 225, 0.5); /* Warm Cream 투명도 */
+  color: #6d4c41; /* Coffee Brown */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -326,11 +357,12 @@
 }
 
 .social-button:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 179, 0, 0.1);
   transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 179, 0, 0.2);
 }
 
-/* 카카오 버튼 */
+/* 카카오 버튼 - 원래 색상 유지 */
 .social-button.kakao {
   background: #FEE500;
   color: #000000;
@@ -347,7 +379,7 @@
   height: 1.5rem;
 }
 
-/* 네이버 버튼 */
+/* 네이버 버튼 - 원래 색상 유지 */
 .social-button.naver {
   background: #03C75A;
   border-color: #03C75A;
@@ -376,14 +408,14 @@
 }
 
 .login-footer p {
-  color: rgb(73, 198, 160);
+  color: #ff9800; /* Deep Orange */
   font-size: 0.875rem;
 }
 
 .toggle-mode {
   background: transparent;
   border: none;
-  color: #f3734a;
+  color: #ff6f00; /* 진한 오렌지 */
   font-weight: 600;
   cursor: pointer;
   margin-left: 0.5rem;
@@ -391,7 +423,7 @@
 }
 
 .toggle-mode:hover {
-  color: #ec4899;
+  color: #ff8f00; /* Vibrant Orange */
   text-decoration: underline;
 }
 
@@ -400,6 +432,7 @@
   .login-modal {
     padding: 2rem 1.5rem;
     margin: 0 0.5rem;
+    max-height: 90vh; /* 모바일에서는 조금 더 작게 */
   }
 
   .login-title {
@@ -437,7 +470,7 @@
 
 .user-type-label {
   display: block;
-  color: rgb(73, 198, 160);
+  color: #ff9800; /* Deep Orange */
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.75rem;
@@ -467,10 +500,10 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid rgb(214, 214, 214);
+  background: rgba(255, 248, 225, 0.8); /* Warm Cream */
+  border: 2px solid rgba(255, 179, 0, 0.3); /* Primary Amber */
   border-radius: 1rem;
-  color: rgb(253, 197, 0);
+  color: #ff8f00; /* Vibrant Orange */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -481,41 +514,25 @@
 }
 
 .radio-option input[type="radio"]:checked + .radio-label {
-  background: rgb(255, 229, 139);
-  border-color: rgb(255, 229, 139);
-  color: #f3734a;
+  background: linear-gradient(45deg, #ffb74d, #ff9800); /* Warm Peach to Deep Orange */
+  border-color: #ff8f00; /* Vibrant Orange */
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 179, 0, 0.3);
 }
 
 .radio-option input[type="radio"]:hover + .radio-label {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgb(255, 229, 139);
+  background: rgba(255, 179, 0, 0.1);
+  border-color: #ff8f00; /* Vibrant Orange */
 }
 
-/* 스크롤바 스타일 */
-.login-modal::-webkit-scrollbar {
-  width: 6px;
-}
 
-.login-modal::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 3px;
-}
-
-.login-modal::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.3);
-  border-radius: 3px;
-}
-
-.login-modal::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 85, 247, 0.5);
-}
 
 /* 전화번호 입력 스타일 */
 .input-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: rgb(73, 198, 160);
+  color: #ff9800; /* Deep Orange */
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.75rem;
@@ -535,33 +552,33 @@
 
 .phone-input {
   flex: 1;
-  min-width: 0; /* flex 아이템이 너무 커지지 않도록 */
+  min-width: 0;
   padding: 1rem 0.75rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgb(188, 188, 188);
+  background: rgba(255, 248, 225, 0.8); /* Warm Cream */
+  border: 1px solid rgba(255, 179, 0, 0.3); /* Primary Amber */
   border-radius: 1rem;
-  color: #49c6a0;
+  color: #6d4c41; /* Coffee Brown */
   font-size: 1rem;
   text-align: center;
   transition: all 0.2s ease;
 }
 
 .phone-input::placeholder {
-  color: rgb(73, 198, 160);
+  color: #ffb74d; /* Warm Peach */
 }
 
 .phone-input:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(168, 85, 247, 0.5);
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+  background: #ffffff;
+  border-color: #ff8f00; /* Vibrant Orange */
+  box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.1);
 }
 
 .phone-divider {
-  color: rgba(255, 255, 255, 0.5);
+  color: #ff8f00; /* Vibrant Orange */
   font-weight: 600;
   font-size: 1.125rem;
-  flex-shrink: 0; /* 하이픈이 줄어들지 않도록 */
+  flex-shrink: 0;
 }
 
 @media (max-width: 480px) {
@@ -592,39 +609,47 @@
 
 /* 이메일 인증 버튼 및 인증코드 확인 버튼 스타일 */
 .email-auth-btn {
-  background: #f6fff2;
-  color: #3bb94c;
-  border: 2px solid #3bb94c;
+  background: linear-gradient(45deg, #fff8e1, #fff3c4); /* Background Gradient */
+  color: #ff8f00; /* Vibrant Orange */
+  border: 2px solid #ff8f00; /* Vibrant Orange */
   border-radius: 1.5rem;
   font-weight: 600;
   font-size: 1rem;
   padding: 0 1.2rem;
   height: 44px;
-  transition: background 0.2s, color 0.2s, border 0.2s;
+  transition: all 0.2s ease;
   cursor: pointer;
   margin-left: 0.5rem;
-  box-shadow: 0 2px 8px rgba(59, 185, 76, 0.06);
+  box-shadow: 0 2px 8px rgba(255, 143, 0, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .email-auth-btn:disabled {
-  background: #e0e0e0;
-  color: #bdbdbd;
-  border: 2px solid #bdbdbd;
+  background: #f5f5f5; /* Light Gray */
+  color: #6d4c41; /* Coffee Brown */
+  border: 2px solid #f5f5f5;
   cursor: not-allowed;
-}
-.email-auth-btn[disabled],
-.email-auth-btn:disabled {
   opacity: 0.7;
 }
+
 .email-auth-btn {
   min-width: 90px;
 }
+
+.email-auth-btn:hover:not(:disabled) {
+  background: linear-gradient(45deg, #ffb300, #ff8f00); /* Primary Gradient */
+  color: white;
+  border-color: #ff8f00;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(255, 143, 0, 0.25);
+}
+
 .email-auth-btn:active,
 .email-auth-btn.verified,
 .email-auth-btn[aria-verified="true"] {
-  background: #3bb94c;
-  color: #fff;
-  border: 2px solid #3bb94c;
+  background: linear-gradient(45deg, #ff9800, #f57c00); /* Growth Orange Gradient */
+  color: white;
+  border: 2px solid #ff9800;
 }

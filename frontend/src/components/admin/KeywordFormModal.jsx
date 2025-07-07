@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import './CouponFormModal.css';
+import { Hash, RefreshCw } from 'lucide-react';
+import './AdminCommon.css';
 
-const KeywordFormModal = ({ keyword, onSave, onClose, saving }) => {
+const KeywordFormModal = ({ keyword, onSave, onClose, saving, isDarkMode }) => {
   const [form, setForm] = useState({
     name: '',
   });
@@ -58,45 +59,60 @@ const KeywordFormModal = ({ keyword, onSave, onClose, saving }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
+    <div className={`form-modal-overlay ${isDarkMode ? 'dark-mode' : ''}`} onClick={onClose}>
+      <div className="form-modal-content admin-keyword-form-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="form-modal-header">
           <h3>{keyword ? '키워드 수정' : '새 키워드 등록'}</h3>
-          <button className="modal-close" onClick={onClose}>
-            ×
-          </button>
+          <button className="form-modal-close" onClick={onClose}>×</button>
         </div>
-
-        <form onSubmit={handleSubmit} className="modal-form">
-          <div className="form-group">
-            <label>키워드 이름 *</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="예: React, Spring Boot, Python"
-              required
-            />
-          </div>
-
-          <div className="modal-actions">
+        <div className="form-modal-body">
+          {saving ? (
+            <div className="loading-state">
+              <RefreshCw className="spinning" size={24} />
+              <p>저장 중...</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="admin-keyword-form">
+              <div className="info-section">
+                <h4>키워드 이름</h4>
+                <div className="info-grid">
+                    <div className="info-value">
+                      <Hash size={16} />
+                      <input
+                        type="text"
+                        name="name"
+                        value={form.name}
+                        onChange={handleChange}
+                        placeholder="예: React, Spring Boot, Python"
+                        className="coffee-form-input"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+            </form>
+          )}
+        </div>
+        <div className="form-modal-actions">
+          <div className="status-actions">
             <button 
               type="button" 
-              className="btn-secondary" 
+              className="coffee-btn coffee-btn-secondary" 
               onClick={onClose}
+              disabled={saving}
             >
               취소
             </button>
             <button 
               type="submit" 
-              className="btn-primary" 
+              className="coffee-btn coffee-btn-primary" 
               disabled={saving}
+              onClick={handleSubmit}
             >
               {saving ? '저장 중...' : (keyword ? '수정' : '등록')}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Star, Search, ArrowLeft} from 'lucide-react';
+import {Star, Search} from 'lucide-react';
 import './MentorList.css';
 import {profileAPI, categoryAPI} from '../services/api';
 import {
@@ -86,10 +86,6 @@ const MentorList = ({category, onBack, onMentorSelect}) => {
   return (
       <div className="mentor-list-container">
         <div className="mentor-list-header">
-          <button className="mentor-list-back-button" onClick={onBack}>
-            <ArrowLeft className="icon"/>
-            뒤로가기
-          </button>
           <h1 className="mentor-list-title">
             {selectedCategory || '전체'} 멘토 ({filteredMentors.length}명)
           </h1>
@@ -107,31 +103,6 @@ const MentorList = ({category, onBack, onMentorSelect}) => {
                   className="mentor-list-search-input"
               />
             </div>
-          </div>
-
-          <div className="filter-controls">
-            <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="filter-select"
-            >
-              <option value="name">이름순</option>
-              <option value="created">최근등록순</option>
-            </select>
-
-            <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="filter-select"
-            >
-              <option value="">전체 카테고리</option>
-              {Array.isArray(categories) &&
-                  categories.map(cat => (
-                      <option key={cat.id} value={cat.name}>
-                        {cat.name}
-                      </option>
-                  ))}
-            </select>
           </div>
         </div>
 
@@ -179,6 +150,15 @@ const MentorList = ({category, onBack, onMentorSelect}) => {
                       <span>{new Date(
                           mentor.createdAt).toLocaleDateString()}</span>
                     </div>
+                  </div>
+                  <div className="mentorProfile-tags">
+                    {mentor.keywords && Array.isArray(mentor.keywords)
+                        && mentor.keywords.map((keyword) => (
+                            <span key={keyword.id}
+                                  className="mentorProfile-tag">
+                            {'#'}{keyword.name}
+                          </span>
+                        ))}
                   </div>
                 </div>
               </div>

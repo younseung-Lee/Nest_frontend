@@ -1,22 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
-  UserPlus,
   Eye,
   Edit3,
-  Calendar,
-  CheckCircle,
-  ArrowRight,
-  X,
-  AlertTriangle,
-  Briefcase,
-  MessageSquare,
-  CreditCard
+  Delete
 } from 'lucide-react';
-import { profileAPI, categoryAPI, keywordAPI } from '../../services/api';
+import { profileAPI, categoryAPI, keywordAPI, userAPI } from '../../services/api';
 import { authUtils } from '../../utils/tokenUtils';
 import ProfileEditModal from './ProfileEditModal.jsx';
 import ProfilePreviewModal from './ProfilePreviewModal.jsx';
 import MentorProfileModal from './MentorProfileModal';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 import './MentorRegistration.css';
 
 const MentorRegistration = ({ userInfo, onLogout }) => {
@@ -24,6 +17,7 @@ const MentorRegistration = ({ userInfo, onLogout }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [profileImages, setProfileImages] = useState({}); // 프로필 이미지 캐시
 
   // 프로필 수정 관련 state
   const [editingProfile, setEditingProfile] = useState(null);
@@ -36,50 +30,76 @@ const MentorRegistration = ({ userInfo, onLogout }) => {
   const [previewProfileData, setPreviewProfileData] = useState(null);
   const [previewLoading, setPreviewLoading] = useState(false);
 
+  // 프로필 삭제 관련 state
+  const [deleteProfileId, setDeleteProfileId] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   const [modalOpen, setModalOpen] = useState(false);
 
-  const hasProfile = profiles.length > 0;
+  const hasAnyProfile = profiles.length > 0;
 
   useEffect(() => {
-    if (userInfo?.userRole === 'MENTOR' && !dataLoaded) {
+    if (userInfo?.userRole === 'MENTOR') {
       fetchMentorProfile();
     }
-  }, [userInfo, dataLoaded]);
+  }, [userInfo]);
 
   const fetchMentorProfile = async () => {
-    console.log('🔍 멘토 프로필 로딩 시작...');
     setLoading(true);
     setError(null);
 
     try {
       const response = await profileAPI.getMyProfile();
-      console.log('📥 API 응답:', response);
       const rawProfiles = response.data.data.content;
-      console.log('📋 프로필 데이터:', rawProfiles);
 
       if (rawProfiles && rawProfiles.length > 0) {
         setProfiles(rawProfiles);
+        // 각 프로필의 사용자 ID에 대한 프로필 이미지 가져오기
+        await fetchProfileImages(rawProfiles);
         setDataLoaded(true);
       } else {
         setProfiles([]);
-        setDataLoaded(true);
       }
-      console.log('✅ 프로필 설정 완료:', rawProfiles?.length || 0, '개');
     } catch (err) {
-      console.error('❌ 프로필 로딩 실패:', err);
       setError("오류가 발생했습니다. 다시 시도해 주세요.");
       setProfiles([]);
-      setDataLoaded(true);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRetry = () => {
-    setDataLoaded(false);
-    setError(null);
-    fetchMentorProfile();
+  // 프로필 이미지들을 가져오는 함수
+  const fetchProfileImages = async (profileList) => {
+    const imagePromises = profileList.map(async (profile) => {
+      try {
+        // 현재 로그인한 사용자의 ID를 사용 (자신의 멘토 프로필이므로)
+        const imageResponse = await userAPI.getUserProfileImage(userInfo.id);
+        const imageUrl = imageResponse.data.data.imgUrl;
+        return { userId: userInfo.id, imageUrl };
+      } catch (error) {
+        // 프로필 이미지가 없거나 오류가 발생한 경우 기본 이미지 사용
+        return { userId: userInfo.id, imageUrl: '/default-profile.svg' };
+      }
+    });
+
+    try {
+      const images = await Promise.all(imagePromises);
+      const imageMap = {};
+      images.forEach(({ userId, imageUrl }) => {
+        imageMap[userId] = imageUrl;
+      });
+      setProfileImages(imageMap);
+    } catch (error) {
+      // 프로필 이미지 로딩에 실패해도 프로필 목록은 표시
+      console.warn('프로필 이미지 로딩 실패:', error);
+    }
   };
+
+  // const handleRetry = () => {
+  //   setError(null);
+  //   fetchMentorProfile();
+  // };
 
   // 멘토 프로필 미리보기
   const handleViewMentorProfile = async (profileId) => {
@@ -115,6 +135,33 @@ const MentorRegistration = ({ userInfo, onLogout }) => {
     // 카테고리와 키워드 목록 로딩
     await fetchCategories();
     await fetchKeywords();
+  };
+
+  // 프로필 삭제 모달 열기
+  const handleDeleteProfile = async (profileId) => {
+    console.log('❌ 프로필 삭제 모달 열기 시작')
+
+    setDeleteProfileId(profileId);
+    setDeleteModalOpen(true);
+  };
+
+  // 프로필 삭제 확인 및 api 호출
+  const handleConfirmDelete = async () => {
+    if (!deleteProfileId) return;
+
+    setDeleteLoading(true);
+
+    try {
+      await profileAPI.deleteProfile(deleteProfileId);
+      alert('프로필이 성공적으로 삭제되었습니다.');
+      setDeleteModalOpen(false);
+      setDeleteProfileId(null);
+      fetchMentorProfile();
+    } catch (error) {
+      alert('프로필 삭제에 실패했습니다.')
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   // 카테고리 목록 가져오기
@@ -162,7 +209,37 @@ const MentorRegistration = ({ userInfo, onLogout }) => {
         profile.id === updatedProfile.id ? updatedProfile : profile
       )
     );
+    fetchMentorProfile();
   };
+// 프로필 생성 핸들러
+  const handleCreateProfile = async (formData) => {
+    try {
+      // 프로필 생성 (중복 체크는 모달에서 이미 처리됨)
+      await profileAPI.createProfile(formData);
+
+      setModalOpen(false);
+      await fetchMentorProfile(); // 프로필 목록과 이미지를 다시 로딩
+
+    } catch (error) {
+
+      if (error.response?.status === 400) {
+        const errorData = error.response?.data;
+
+        if (errorData?.message && errorData.message.includes('이미')) {
+          // 중복 에러는 모달을 닫지 않고 에러만 표시
+          return;
+        } else {
+          alert(`입력 오류: ${errorData?.message || '입력 정보를 확인해주세요'}`);
+        }
+      } else if (error.response?.status === 401) {
+        alert('로그인이 만료되었습니다');
+        authUtils.clearAllAuthData();
+        onLogout();
+      } else {
+        alert('프로필 처리 중 오류가 발생했습니다');
+      }
+    }
+  }
 
   // 멘토가 아닌 경우 렌더링하지 않음
   if (userInfo?.userRole !== 'MENTOR') {
@@ -211,7 +288,7 @@ const MentorRegistration = ({ userInfo, onLogout }) => {
         </div>
       </div>
 
-      {hasProfile ? (
+      {hasAnyProfile ? (
         <>
           <div className="mentor-profile-list">
             {profiles.map((profile, index) => (
@@ -219,7 +296,22 @@ const MentorRegistration = ({ userInfo, onLogout }) => {
                 {/* 프로필 헤더 */}
                 <div className="profile-card-header">
                   <div className="profile-avatar">
-                    <div className="avatar-initials">
+                    {profileImages[userInfo.id] ? (
+                      <img
+                        src={profileImages[userInfo.id]}
+                        alt={`${profile.name || '멘토'}님의 프로필`}
+                        className="avatar-image"
+                        onError={(e) => {
+                          // 이미지 로딩 실패 시 기본 이니셜로 대체
+                          e.target.style.display = 'none';
+                          e.target.nextElementSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className="avatar-initials"
+                      style={{ display: profileImages[userInfo.id] ? 'none' : 'flex' }}
+                    >
                       {profile.name ? profile.name.charAt(0) : 'M'}
                     </div>
                     <div className="status-dot"></div>
@@ -265,6 +357,13 @@ const MentorRegistration = ({ userInfo, onLogout }) => {
                     <Edit3 size={16} />
                     수정하기
                   </button>
+                  <button
+                      className="profile-action-btn btn-danger"
+                      onClick={() => handleDeleteProfile(profile.id)}
+                  >
+                    <Delete size={16} />
+                    삭제하기
+                  </button>
                 </div>
 
                 {/* 호버 이펙트를 위한 장식 요소 */}
@@ -292,10 +391,15 @@ const MentorRegistration = ({ userInfo, onLogout }) => {
         <MentorProfileModal
           onClose={() => setModalOpen(false)}
           onSubmit={async (formData) => {
-            await profileAPI.createProfile(formData);
-            setModalOpen(false);
-            // 등록 후 목록 새로고침 등 추가 가능
+            await handleCreateProfile(formData);
           }}
+          existingProfiles={profiles}
+
+          onBackendError={(errorMessage) => {
+            // 백엔드 에러를 모달에서 처리할 수 있도록 콜백 추가
+            console.log('백엔드 에러:', errorMessage);
+          }}
+
         />
       )}
 
@@ -328,6 +432,24 @@ const MentorRegistration = ({ userInfo, onLogout }) => {
           }}
         />
       )}
+      <DeleteConfirmationModal
+          isOpen={deleteModalOpen} // 모달 열림 상태
+          onClose={() => {
+            setDeleteModalOpen(false); // 닫기 버튼 클릭 시
+            setDeleteProfileId(null);
+          }}
+          onConfirm={handleConfirmDelete} // 확인 버튼 클릭 시
+          isLoading={deleteLoading} // 로딩 상태 전달
+          title="프로필 삭제 확인"
+          message={
+            <>
+              정말로 이 프로필을 삭제하시겠습니까? <br/>
+              이 작업은 되돌릴 수 없습니다.
+            </>
+          }
+          confirmText="확인"
+          cancelText="취소"
+      />
     </div>
   );
 };

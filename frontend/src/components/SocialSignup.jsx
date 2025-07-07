@@ -1,10 +1,13 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { User, Phone } from 'lucide-react';
 import './SocialSignup.css';
 import logo from '../image/cool.png';
 import { userAPI } from '../services/api';
+import { authUtils, userInfoUtils } from '../utils/tokenUtils';
+import {useNavigate} from "react-router-dom"; // authUtils, userInfoUtils 추가
 
 const SocialSignup = () => {
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [phone1, setPhone1] = useState('');
   const [phone2, setPhone2] = useState('');
@@ -14,17 +17,45 @@ const SocialSignup = () => {
   const phone2Ref = useRef(null);
   const phone3Ref = useRef(null);
 
-  const userDataStr = sessionStorage.getItem('userData');
-  let id = null;
-  if (userDataStr) {
-    try {
-      const userData = JSON.parse(userDataStr);
-      id = userData.id;
-    } catch (e) {
-      alert('사용자 정보를 불러올 수 없습니다.');
-      return;
-    }
-  }
+
+  // 사용자 정보는 userInfoUtils에서 가져오는 것이 일관적입니다.
+  const userInfo = userInfoUtils.getUserInfo();
+  const id = userInfo?.id;
+
+  // ⭐️ 핵심 로직: useEffect 훅에서 GUEST 역할 및 페이지 이탈 감지 ⭐️
+  useEffect(() => {
+
+    // 1. 페이지 이탈(Unload) 시 강제 로그아웃
+    //    (브라우저 탭 닫기, 새로고침, URL 직접 입력 등)
+    const handleBeforeUnload = () => {
+      const currentUserInfo = userInfoUtils.getUserInfo(); // 최신 userInfo 다시 가져오기
+      if (currentUserInfo?.userRole === 'GUEST' && currentUserInfo?.isNewUser) {
+        authUtils.clearAllAuthData(); // GUEST 역할이면서 신규 사용자이면 로그아웃
+        console.log('⚠️ SocialSignup: 페이지 이탈 감지 - 추가 정보 미입력 GUEST로 강제 로그아웃.');
+      }
+    };
+
+    // 3. 뒤로가기(Popstate) 시 GUEST 역할 확인 후 강제 로그아웃
+    //    (브라우저 뒤로가기 버튼 클릭)
+    const handlePopState = () => {
+      const currentUserInfo = userInfoUtils.getUserInfo(); // 최신 userInfo 다시 가져오기
+      if (currentUserInfo?.userRole === 'GUEST' && currentUserInfo?.isNewUser) {
+        authUtils.clearAllAuthData(); // GUEST 역할이면서 신규 사용자이면 로그아웃
+        console.log('⚠️ SocialSignup: 뒤로가기 감지 - 추가 정보 미입력 GUEST로 강제 로그아웃.');
+        navigate('/login', { replace: true }); // 로그인 페이지로 강제 리다이렉트
+      }
+    };
+
+    // 이벤트 리스너 등록
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+
+    // 컴포넌트 언마운트 시 이벤트 리스너 제거 (클린업)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [navigate]);  // userInfo와 navigate를 의존성 배열에 추가
 
   // 전화번호 입력 시 자동 포커스 이동
   const handlePhoneInput = (value, setter, nextRef, maxLength) => {
@@ -34,15 +65,43 @@ const SocialSignup = () => {
     }
   };
 
+  // 폼 제출 핸들러 (기존과 동일하지만, 성공 시 최종 로그인 처리 명확화)
   const handleSubmit = async (e) => {
     e.preventDefault();
     const phoneNumber = `${phone1}-${phone2}-${phone3}`;
+
+    if (!userType) {
+      alert('가입 유형을 선택해주세요.');
+      return;
+    }
+
     try {
-      await userAPI.updateExtraInfo({id, name, phoneNumber, userRole: userType.toUpperCase() });
-      // 성공 시 홈으로 이동
-      window.location.href = '/';
+      // 백엔드에 추가 정보 전송
+      const response = await userAPI.updateExtraInfo({
+        id,
+        name,
+        phoneNumber,
+        userRole: userType.toUpperCase(),
+      });
+
+      const { accessToken: finalAccessToken, refreshToken: finalRefreshToken, user: finalUserInfo } = response.data.data;
+
+      // ⭐️ 중요: 추가 정보 입력 성공 시 최종적으로 토큰 및 사용자 정보 저장 ⭐️
+      // 이제 이 사용자는 GUEST가 아니며, 신규 사용자 플래그도 false가 됩니다.
+      authUtils.setAuthData(finalAccessToken, finalRefreshToken, {
+        ...finalUserInfo,
+        isNewUser: false, // 이제 신규 사용자가 아님
+        userRole: userType.toUpperCase() // GUEST에서 최종 역할로 업데이트
+      });
+
+      alert('회원가입이 완료되었습니다!');
+      window.location.href = '/'; // 홈으로 이동 (새로고침하여 App.js 초기화 로직 재실행)
     } catch (err) {
-      alert('추가 정보 저장에 실패했습니다.');
+      console.error('추가 정보 저장 실패:', err);
+      // 에러 발생 시: 현재 임시 로그인 상태를 해제하여 로그아웃 처리
+      authUtils.clearAllAuthData();
+      alert('추가 정보 저장에 실패했습니다. 다시 시도해 주세요.');
+      navigate('/login', { replace: true }); // 로그인 페이지로 리다이렉트
     }
   };
 

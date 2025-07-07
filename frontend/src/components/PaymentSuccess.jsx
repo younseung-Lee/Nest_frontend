@@ -46,7 +46,7 @@ const PaymentSuccess = ({ paymentResult, onHome }) => {
     <div className="payment-success-container">
       <div className="payment-success-content">
         {/* 성공 아이콘 및 메시지 */}
-        <div className="success-header">
+        <div className="payment-success-header">
           <div className="success-icon">
             <CheckCircle size={80} />
           </div>

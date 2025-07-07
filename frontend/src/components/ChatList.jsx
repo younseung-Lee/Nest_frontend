@@ -444,7 +444,7 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
     return (
         <div className="chat-list-container">
           <div className="loading-container">
-            <div className="loading-spinner"></div>
+            <div className="chat-loading-spinner"></div>
             <p>채팅방 목록을 불러오는 중...</p>
           </div>
         </div>
@@ -485,12 +485,13 @@ const ChatList = ({onChatSelect, currentChatId, onBack}) => {
         {isSearchMode && (
             <div className="search-container">
               <div className="search-input-wrapper">
-                <Search className="search-icon"/>
+                <Search className="search-icon" />
                 <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="search-input"
+                    placeholder="채팅방 검색..."
                     autoFocus
                 />
                 {searchTerm && (

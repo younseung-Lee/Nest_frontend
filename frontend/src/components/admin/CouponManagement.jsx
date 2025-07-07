@@ -276,7 +276,9 @@ const CouponManagement = ({ isDarkMode }) => {
                   gap: '8px'
                 }}>
                   <div>
-                    <div style={{ color: '#e65100', fontWeight: '600' }}>₩{(coupon.discountAmount || 0).toLocaleString()}</div>
+                    <div style={{ color: '#e65100', fontWeight: '600' }}>{coupon.discountType === 'FIXED_AMOUNT'
+                        ? `₩${(coupon.discountAmount || 0).toLocaleString()}`
+                        : `${coupon.discountAmount || 0}%`}</div>
                   </div>
                 </div>
               </div>

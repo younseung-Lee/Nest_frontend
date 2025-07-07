@@ -158,10 +158,36 @@
 
 /* 멘토 프로필 리스트 */
 .content-area .mentor-profile-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
   padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  flex: 1; /* ⭐ 부모 flex 컨테이너 내에서 사용 가능한 공간을 채우도록 합니다. */
+  overflow-y: auto; /* ⭐ 세로 스크롤바를 필요할 때만 표시합니다. */
+  max-height: 500px; /* ⭐ 스크롤이 시작될 최대 높이를 설정합니다. (필요에 따라 조절) */
+  /* min-height를 설정하여 내용이 적을 때도 최소한의 높이를 가질 수 있습니다. */
+  /* min-height: 200px; */
+  border-radius: 16px; /* 컨테이너 자체에 둥근 모서리 적용 */
+  background-color: #f8fafc; /* 배경색 추가 (선택 사항) */
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.05); /* 내부 그림자 (선택 사항) */
+}
+/* ⭐ 스크롤바 스타일링 (선택 사항) */
+.mentor-profile-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.mentor-profile-list::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.mentor-profile-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.mentor-profile-list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* 멘토 프로필 카드 */
@@ -182,7 +208,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -213,7 +239,7 @@
 .content-area .avatar-initials {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  background: rgba(255, 255, 255, 0);
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -221,7 +247,17 @@
   font-size: 20px;
   font-weight: 700;
   color: white;
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0);
+}
+
+/* 아바타 이미지 스타일 */
+.content-area .avatar-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  object-fit: cover;
   box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+  border: 2px solid white;
 }
 
 .content-area .status-dot {
@@ -254,7 +290,7 @@
 
 .content-area .category-badge {
   display: inline-block;
-  background: linear-gradient(135d, #dbeafe 0%, #e0e7ff 100%);
+  background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
   color: #3730a3;
   padding: 4px 12px;
   border-radius: 12px;
@@ -336,6 +372,218 @@
   border-color: #cbd5e1;
 }
 
+/* 삭제 버튼 스타일 */
+.content-area .profile-action-btn.danger {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.content-area .profile-action-btn.danger:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15));
+  border-color: rgba(239, 68, 68, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+/* 삭제 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.delete-modal-container {
+  background: white;
+  border-radius: 20px;
+  padding: 0;
+  max-width: 480px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+.delete-modal-header {
+  position: relative;
+  padding: 32px 32px 24px 32px;
+  text-align: center;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.delete-modal-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 16px auto;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ef4444;
+}
+
+.delete-modal-header h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.delete-modal-body {
+  padding: 24px 32px;
+}
+
+.profile-delete-info h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+  text-align: center;
+}
+
+.delete-warning {
+  color: #64748b;
+  margin: 0 0 16px 0;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.delete-warning-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(220, 38, 38, 0.05));
+  border-radius: 12px;
+  padding: 16px 20px;
+  border: 1px solid rgba(239, 68, 68, 0.1);
+}
+
+.delete-warning-list li {
+  color: #ef4444;
+  padding: 6px 0;
+  position: relative;
+  padding-left: 20px;
+  font-size: 14px;
+}
+
+.delete-warning-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #ef4444;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.delete-modal-footer {
+  padding: 24px 32px 32px 32px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.modal-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.cancel-btn {
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.cancel-btn:hover {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.delete-btn:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.delete-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* 빈 상태 */
 .content-area .mentor-profile-empty {
   display: flex;
@@ -403,7 +651,7 @@
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899);
+  background: white;
   border-radius: 20px;
   opacity: 0;
   z-index: -1;

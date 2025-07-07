@@ -1,9 +1,14 @@
+/* CoffeeChat Theme - Mentor List Styles */
 .mentor-list-container {
   min-height: 100vh;
   padding: 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: transparent; /* ParticleBackground 배경 투명하게 사용 */
   position: relative;
   overflow-x: hidden;
+  /* Header와 완전히 붙게 하기 위해 모든 여백 제거 */
+  margin: 0;
+  padding-top: 0;
+  box-sizing: border-box;
 }
 
 .mentor-list-container::before {
@@ -13,52 +18,44 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-              radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+  background: radial-gradient(circle at 30% 50%, rgba(255, 179, 0, 0.04) 0%, transparent 50%),
+              radial-gradient(circle at 70% 20%, rgba(255, 193, 7, 0.03) 0%, transparent 50%),
+              radial-gradient(circle at 40% 80%, rgba(129, 199, 132, 0.02) 0%, transparent 50%);
   pointer-events: none;
+  /* Header와의 경계를 자연스럽게 */
+  z-index: 0;
 }
 
 .mentor-list-header {
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 1rem;
   margin-bottom: 2rem;
   position: relative;
   z-index: 1;
-}
-
-.mentor-list-back-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  color: white;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.mentor-list-back-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateX(-2px);
-}
-
-.mentor-list-back-button .icon {
-  width: 1.2rem;
-  height: 1.2rem;
+  animation: slideInUp 0.8s ease-out;
+  /* Header 바로 아래에 위치하도록 상단 여백 추가 */
+  margin-top: 2rem;
+  padding-top: 1rem;
 }
 
 .mentor-list-title {
   font-size: 2rem;
-  font-weight: 700;
-  color: white;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  font-weight: 900;
+  color: var(--text-coffee);
+  text-shadow: 0 2px 10px rgba(109, 76, 65, 0.1);
+  position: relative;
+  text-align: center;
+  /* 헤더와의 일관성을 위한 스타일 조정 */
+  margin-bottom: 0.5rem;
+}
+
+.mentor-list-title::after {
+  position: absolute;
+  top: -5px;
+  right: -50px;
+  font-size: 1.5rem;
+  animation: bounce 2s infinite;
 }
 
 .mentor-list-controls {
@@ -68,6 +65,7 @@
   margin-bottom: 2rem;
   position: relative;
   z-index: 1;
+  animation: slideInUp 1s ease-out 0.2s both;
 }
 
 .mentor-list-search-section {
@@ -88,31 +86,40 @@
   transform: translateY(-50%);
   width: 1.2rem;
   height: 1.2rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--primary-amber);
   pointer-events: none;
+  transition: all 0.3s ease;
 }
 
 .mentor-list-search-input {
   width: 100%;
   padding: 1rem 1rem 1rem 3rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  color: white;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(255, 179, 0, 0.2);
+  border-radius: 25px;
+  color: var(--text-coffee);
   font-size: 1rem;
   backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-soft);
+  font-weight: 500;
 }
 
-/*.mentor-list-search-input::placeholder {*/
-/*  color: rgba(255, 255, 255, 0.6);*/
-/*}*/
+.mentor-list-search-input::placeholder {
+  color: rgba(109, 76, 65, 0.6);
+}
 
 .mentor-list-search-input:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-amber);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+}
+
+.mentor-list-search-input:focus + .search-icon {
+  color: var(--primary-orange);
+  transform: translateY(-50%) scale(1.1);
 }
 
 .filter-controls {
@@ -124,25 +131,35 @@
 
 .filter-select {
   padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  color: white;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(255, 179, 0, 0.2);
+  border-radius: 12px;
+  color: var(--text-coffee);
   backdrop-filter: blur(10px);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-soft);
 }
 
 .filter-select:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--primary-amber);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+}
+
+.filter-select:hover {
+  border-color: var(--primary-orange);
+  transform: translateY(-1px);
 }
 
 .filter-select option {
-  background: #2d3748;
-  color: white;
+  background: white;
+  color: var(--text-coffee);
+  padding: 0.5rem;
 }
 
 .mentor-grid {
@@ -151,18 +168,20 @@
   gap: 2rem;
   position: relative;
   z-index: 1;
+  animation: slideInUp 1.2s ease-out 0.4s both;
 }
 
 .mentor-list-card {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 179, 0, 0.2);
   border-radius: 20px;
   padding: 1.5rem;
   backdrop-filter: blur(20px);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   cursor: pointer;
+  box-shadow: var(--shadow-soft);
 }
 
 .mentor-list-card::before {
@@ -171,16 +190,20 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
-  background-size: 200% 100%;
-  animation: shimmer 3s ease-in-out infinite;
+  height: 4px;
+  background: var(--gradient-primary);
+  border-radius: 20px 20px 0 0;
 }
 
 .mentor-list-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-strong);
+  border-color: var(--primary-amber);
+}
+
+.mentor-list-card:hover::before {
+  background: var(--gradient-energy);
+  height: 6px;
 }
 
 .mentor-card-header {
@@ -200,11 +223,17 @@
   color: white;
   font-weight: 700;
   font-size: 1.2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
   flex-shrink: 0;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 20px rgba(255, 179, 0, 0.3);
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.mentor-list-card:hover .mentor-avatar {
+  transform: scale(1.05);
+  box-shadow: 0 12px 30px rgba(255, 179, 0, 0.4);
 }
 
 .mentor-avatar img {
@@ -232,19 +261,20 @@
 .mentor-name {
   font-size: 1.25rem;
   font-weight: 700;
-  color: white;
+  color: var(--text-coffee);
   margin: 0 0 0.25rem 0;
 }
 
 .mentor-role {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--primary-orange);
   margin: 0 0 0.25rem 0;
+  font-weight: 600;
 }
 
 .mentor-company {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(109, 76, 65, 0.7);
   margin: 0 0 0.5rem 0;
 }
 
@@ -259,15 +289,18 @@
   height: 8px;
   border-radius: 50%;
   background: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
 }
 
 .status-indicator.online {
-  background: #10b981;
+  background: var(--growth-green);
+  box-shadow: 0 0 10px rgba(129, 199, 132, 0.5);
 }
 
 .status-text {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(109, 76, 65, 0.7);
+  font-weight: 500;
 }
 
 .mentor-price {
@@ -276,8 +309,9 @@
 
 .price-text {
   font-size: 1.1rem;
-  font-weight: 600;
-  color: #60a5fa;
+  font-weight: 700;
+  color: var(--primary-amber);
+  text-shadow: 0 2px 4px rgba(255, 179, 0, 0.2);
 }
 
 .mentor-card-body {
@@ -285,9 +319,9 @@
 }
 
 .mentor-description {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(109, 76, 65, 0.8);
   font-size: 0.9rem;
-  line-height: 1.5;
+  line-height: 1.6;
   margin-bottom: 1rem;
 }
 
@@ -304,30 +338,38 @@
   align-items: center;
   gap: 0.25rem;
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(109, 76, 65, 0.7);
+  font-weight: 500;
 }
 
 .star-icon {
   width: 0.9rem;
   height: 0.9rem;
-  color: #fbbf24;
+  color: var(--energy-yellow);
   fill: currentColor;
 }
 
-.mentor-tags {
+.mentorProfile-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.5rem; /* 키워드가 없어도 동일한 카드크기 유지*/
 }
 
-.mentor-tag {
+.mentorProfile-tag {
   padding: 0.25rem 0.75rem;
-  background: rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 179, 0, 0.1);
+  color: var(--primary-orange);
   border-radius: 20px;
   font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-weight: 600;
+  border: 1px solid rgba(255, 179, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.mentor-tag:hover {
+  background: var(--gradient-primary);
+  color: white;
+  transform: scale(1.05);
 }
 
 .mentor-card-footer {
@@ -340,39 +382,45 @@
   flex: 1;
   padding: 0.75rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .view-profile-button {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--text-coffee);
+  border: 2px solid rgba(255, 179, 0, 0.3);
 }
 
 .view-profile-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 1);
+  border-color: var(--primary-amber);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
 }
 
 .book-session-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
   color: white;
-  border: 1px solid transparent;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 15px rgba(255, 179, 0, 0.3);
 }
 
 .book-session-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  background: var(--gradient-energy);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 179, 0, 0.4);
 }
 
 .no-results {
   text-align: center;
   padding: 3rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(109, 76, 65, 0.8);
   position: relative;
   z-index: 1;
 }
@@ -380,39 +428,73 @@
 .no-results h3 {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
-  color: white;
+  color: var(--text-coffee);
+  font-weight: 700;
 }
 
 .no-results p {
   font-size: 1rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(109, 76, 65, 0.6);
 }
 
-/* Gradient backgrounds for avatars */
-.gradient-bg-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.gradient-bg-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-.gradient-bg-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-.gradient-bg-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-.gradient-bg-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-.gradient-bg-6 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
-.gradient-bg-7 { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
-.gradient-bg-8 { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
-.gradient-bg-9 { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
-.gradient-bg-10 { background: linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%); }
+/* CoffeeChat Theme Gradient backgrounds for avatars */
+.gradient-bg-1 { background: var(--gradient-primary); }
+.gradient-bg-2 { background: var(--gradient-growth); }
+.gradient-bg-3 { background: var(--gradient-energy); }
+.gradient-bg-4 { background: linear-gradient(135deg, var(--energy-peach), var(--primary-amber)); }
+.gradient-bg-5 { background: linear-gradient(135deg, var(--growth-green), var(--growth-mint)); }
+.gradient-bg-6 { background: linear-gradient(135deg, var(--primary-orange), var(--energy-bright)); }
+.gradient-bg-7 { background: linear-gradient(135deg, var(--growth-success), var(--growth-green)); }
+.gradient-bg-8 { background: linear-gradient(135deg, var(--energy-yellow), var(--primary-amber)); }
+.gradient-bg-9 { background: linear-gradient(135deg, var(--primary-deep), var(--primary-orange)); }
+.gradient-bg-10 { background: linear-gradient(135deg, var(--energy-bright), var(--energy-peach)); }
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+/* Modern Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { 
+    transform: translateY(0); 
+  }
+  40% { 
+    transform: translateY(-10px); 
+  }
+  60% { 
+    transform: translateY(-5px); 
+  }
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .mentor-list-container {
     padding: 1rem;
+    /* 모바일에서도 Header와 자연스럽게 연결 */
+    margin: 0;
+    padding-top: 0;
+  }
+
+  .mentor-list-header {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-top: 0.5rem;
   }
 
   .mentor-list-title {
     font-size: 1.5rem;
+  }
+
+  .mentor-list-title::after {
+    font-size: 1.25rem;
+    right: -45px;
   }
 
   .mentor-grid {
@@ -448,15 +530,21 @@
 }
 
 @media (max-width: 480px) {
-  .mentor-list-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
+  .mentor-list-container {
+    padding: 0.75rem;
+    /* 작은 화면에서도 Header와 자연스럽게 연결 */
+    margin: 0;
+    padding-top: 0;
   }
 
-  .back-button {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
+  .mentor-list-header {
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+    padding-top: 0.25rem;
+  }
+
+  .mentor-list-title {
+    font-size: 1.25rem;
   }
 
   .mentor-list-card {
@@ -472,4 +560,34 @@
   .mentor-card-footer {
     flex-direction: column;
   }
+
+  .mentor-list-title::after {
+    display: none;
+  }
+}
+
+/* Enhanced accessibility and reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .mentor-list-title::after {
+    animation: none;
+  }
+  
+  .mentor-list-header,
+  .mentor-list-controls,
+  .mentor-grid {
+    animation: none;
+  }
+  
+  .mentor-list-card:hover {
+    transform: translateY(-4px);
+  }
+}
+
+/* Focus states for accessibility */
+.mentor-list-search-input:focus-visible,
+.filter-select:focus-visible,
+.view-profile-button:focus-visible,
+.book-session-button:focus-visible {
+  outline: 3px solid rgba(255, 179, 0, 0.5);
+  outline-offset: 2px;
 }

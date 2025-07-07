@@ -2,7 +2,7 @@
 .admin-dashboard {
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
@@ -325,7 +325,7 @@
   .admin-sidebar {
     width: 240px;
   }
-  
+
   .admin-main {
     margin-left: 240px;
   }
@@ -335,11 +335,11 @@
   .admin-sidebar {
     width: 200px;
   }
-  
+
   .admin-main {
     margin-left: 200px;
   }
-  
+
   .admin-content {
     padding: 16px;
   }
@@ -352,15 +352,15 @@
     position: fixed;
     z-index: 2000;
   }
-  
+
   .admin-sidebar.mobile-open {
     transform: translateX(0);
   }
-  
+
   .admin-main {
     margin-left: 0;
   }
-  
+
   .topbar-left h1 {
     font-size: 20px;
   }
@@ -376,7 +376,7 @@
     background: rgba(0, 0, 0, 0.9);
     border-right: 2px solid white;
   }
-  
+
   .tab-button.active {
     background: rgba(255, 255, 255, 0.3);
     border: 1px solid white;
@@ -386,6 +386,18 @@
 /* 다크모드 호환 */
 @media (prefers-color-scheme: dark) {
   .admin-dashboard {
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+    background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
   }
+}
+
+/* 다크모드 클래스 지원 */
+.dark-mode .admin-dashboard,
+.admin-dashboard.dark-mode {
+  background: linear-gradient(135deg, #0f172a 0%, #111827 100%) !important;
+}
+
+/* 라이트모드 클래스 지원 */
+.light-mode .admin-dashboard,
+.admin-dashboard.light-mode {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
 }

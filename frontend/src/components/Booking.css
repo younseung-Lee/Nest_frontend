@@ -1,6 +1,6 @@
 .booking-container {
   min-height: 100vh;
-  background: linear-gradient(90deg, #e4efe5 50%, #e1efe1 100%);
+  background: linear-gradient(135deg, #fff8e1 0%, #fff3c4 100%);
   position: relative;
   z-index: 100;
 }
@@ -17,7 +17,7 @@
 .booking-header h1 {
   margin: 0 0 0 1rem;
   font-size: 1.25rem;
-  color: #2d3748;
+  color: #e65100;
   font-weight: 700;
 }
 
@@ -26,12 +26,12 @@
   border: none;
   padding: 0.5rem;
   cursor: pointer;
-  color: #4a5568;
+  color: #6d4c41;
   transition: color 0.2s;
 }
 
 .back-button:hover {
-  color: #15803D;
+  color: #ff8f00;
 }
 
 .booking-content {
@@ -56,14 +56,14 @@
   gap: 0.5rem;
   margin: 0 0 1rem 0;
   font-size: 1.1rem;
-  color: #2d3748;
+  color: #e65100;
   font-weight: 600;
 }
 
 .booking-section .icon {
   width: 1.25rem;
   height: 1.25rem;
-  color: #15803D;
+  color: #ffb300;
 }
 
 .service-options {
@@ -85,32 +85,32 @@
 }
 
 .service-option:hover {
-  border-color: #15803D;
-  background: rgba(21, 128, 61, 0.05);
+  border-color: #ffb300;
+  background: rgba(255, 179, 0, 0.05);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.15);
+  box-shadow: 0 4px 12px rgba(255, 179, 0, 0.15);
 }
 
 .service-option input {
   margin-right: 0.75rem;
-  accent-color: #15803D;
+  accent-color: #ffb300;
 }
 
 .service-option:has(input:checked) {
-  border-color: #15803D;
-  background: rgba(21, 128, 61, 0.1);
-  box-shadow: 0 4px 20px rgba(21, 128, 61, 0.2);
+  border-color: #ffb300;
+  background: rgba(255, 179, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(255, 179, 0, 0.2);
 }
 
 .service-option span {
-  color: #2d3748;
+  color: #6d4c41;
   font-weight: 600;
   font-size: 1.1rem;
 }
 
 .price {
   font-weight: 700;
-  color: #15803D;
+  color: #ff8f00;
   font-size: 1.1rem;
 }
 
@@ -130,7 +130,7 @@
 
 .calendar-header h3 {
   margin: 0;
-  color: #2d3748;
+  color: #6d4c41;
   font-weight: 700;
   font-size: 1.2rem;
 }
@@ -140,13 +140,13 @@
   border: none;
   padding: 0.5rem;
   cursor: pointer;
-  color: #15803D;
+  color: #ffb300;
   border-radius: 8px;
   transition: all 0.2s;
 }
 
 .calendar-nav:hover {
-  background: rgba(21, 128, 61, 0.1);
+  background: rgba(255, 179, 0, 0.1);
 }
 
 .calendar-grid {
@@ -172,25 +172,25 @@
   border-radius: 8px;
   transition: all 0.2s;
   font-weight: 500;
-  color: #2d3748;
+  color: #6d4c41;
 }
 
 .calendar-day:hover:not(.empty) {
-  background: rgba(21, 128, 61, 0.1);
-  color: #15803D;
+  background: rgba(255, 179, 0, 0.1);
+  color: #ffb300;
 }
 
 .calendar-day.today {
-  background: #15803D;
+  background: #ffb300;
   color: white;
   font-weight: 700;
 }
 
 .calendar-day.selected {
-  background: #15803D;
+  background: #ff8f00;
   color: white;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 143, 0, 0.3);
 }
 
 .calendar-day.empty {
@@ -212,15 +212,15 @@
 .selected-date-info {
   margin-top: 1rem;
   padding: 1rem;
-  background: rgba(21, 128, 61, 0.05);
+  background: rgba(255, 179, 0, 0.05);
   border-radius: 8px;
-  border-left: 4px solid #15803D;
-  color: #4a5568;
+  border-left: 4px solid #ffb300;
+  color: #6d4c41;
   font-size: 0.9rem;
 }
 
 .available-time {
-  color: #15803D;
+  color: #ff8f00;
   font-weight: 600;
   font-size: 1rem;
   margin-top: 0.5rem;
@@ -245,7 +245,7 @@
   border: 2px solid #e2e8f0;
   border-radius: 12px;
   font-size: 1rem;
-  color: #2d3748;
+  color: #6d4c41;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.9);
   appearance: none;
@@ -255,12 +255,12 @@
 
 .time-select:focus {
   outline: none;
-  border-color: #15803D;
-  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.1);
+  border-color: #ffb300;
+  box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.1);
 }
 
 .time-select:hover {
-  border-color: #15803D;
+  border-color: #ffb300;
 }
 
 .dropdown-icon {
@@ -268,14 +268,14 @@
   right: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #15803D;
+  color: #ffb300;
   pointer-events: none;
   width: 1.25rem;
   height: 1.25rem;
 }
 
 .time-separator {
-  color: #15803D;
+  color: #ffb300;
   font-weight: 700;
   font-size: 1.2rem;
 }
@@ -283,7 +283,7 @@
 .booking-button {
   width: 100%;
   padding: 1rem;
-  background: #15803D;
+  background: linear-gradient(45deg, #ffb300, #ff8f00);
   color: white;
   border: none;
   border-radius: 12px;
@@ -292,13 +292,13 @@
   cursor: pointer;
   margin-top: 1.5rem;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(21, 128, 61, 0.3);
+  box-shadow: 0 4px 15px rgba(255, 179, 0, 0.3);
 }
 
 .booking-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(21, 128, 61, 0.4);
-  background: #166534;
+  box-shadow: 0 8px 25px rgba(255, 179, 0, 0.4);
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
 }
 
 .booking-button:active {

@@ -1,39 +1,50 @@
 .mentor-profile-container {
   min-height: 100vh;
-  background: #f5f7fa !important;
-  padding: 0 1rem 100px 1rem;
+  background: linear-gradient(135deg, #fff8e1 0%, #fff3c4 100%) !important;
+  padding: 80px 1rem 100px 1rem;
   position: relative;
   z-index: 1;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .profile-header {
   display: flex;
   align-items: center;
-  padding: 1rem 0;
-  background: transparent !important;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
   border: none;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 10;
   margin-bottom: 1rem;
+  box-shadow: 0 2px 20px rgba(255,179,0,0.1);
+  border-bottom: 1px solid rgba(255,179,0,0.2);
 }
 
-.back-button {
-  background: white;
-  border: none;
+.mentor-profile-back-button {
+  background: #FF8F00;
+  border: 2px solid #ffb300;
   padding: 0.75rem;
-  margin-right: 1rem;
   cursor: pointer;
-  color: #666;
+  color: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(255,179,0,0.2);
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .back-button:hover {
-  background: #f8f9fa;
+  background: #ffb300;
+  color: white;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(255,179,0,0.3);
 }
 
 .back-button .icon {
@@ -41,14 +52,40 @@
   height: 1.5rem;
 }
 
-.header-category {
-  background: white;
-  color: #666;
-  font-size: 0.9rem;
-  padding: 0.75rem 1rem;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  font-weight: 500;
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-profile {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffb300, #ff8f00);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(255,179,0,0.2);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.header-profile:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255,179,0,0.3);
+}
+
+.header-profile .profile-image {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .profile-content {
@@ -61,7 +98,7 @@
 .profile-hero {
   background: white !important;
   border-radius: 20px;
-  padding: 2rem;
+  padding: 1.5rem;
   margin-bottom: 1.5rem;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   border: 1px solid rgba(255,255,255,0.8);
@@ -76,14 +113,14 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #ff6b8a, #6c63ff, #20bf6b);
+  background: linear-gradient(90deg, #ffb300, #ff8f00, #ffcc02);
 }
 
 .profile-avatar {
   width: 90px;
   height: 90px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ff6b8a, #ff8a8a);
+  background: linear-gradient(135deg, #ffb300, #ff8f00);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -92,7 +129,7 @@
   color: white;
   margin-bottom: 1.5rem;
   flex-shrink: 0;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 16px rgba(255,179,0,0.15);
   position: relative;
   overflow: hidden;
 }
@@ -118,7 +155,7 @@
 .mentor-username {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #666;
+  color: #6d4c41;
   margin-bottom: 0.5rem;
   opacity: 0.8;
 }
@@ -126,7 +163,7 @@
 .profile-title {
   font-size: 1.6rem;
   font-weight: 700;
-  color: #333;
+  color: #e65100;
   margin: 0 0 1.5rem 0;
   line-height: 1.3;
 }
@@ -138,20 +175,20 @@
 }
 
 .hashtag {
-  color: #007bff;
+  color: #ff8f00;
   font-size: 0.9rem;
   font-weight: 600;
-  background: #f0f8ff;
+  background: rgba(255,179,0,0.1);
   padding: 0.4rem 0.8rem;
   border-radius: 20px;
-  border: 1px solid #e3f2fd;
+  border: 1px solid rgba(255,179,0,0.2);
 }
 
 /* 콘텐츠 섹션들 - 박스 형태 */
 .content-section {
   background: white !important;
   border-radius: 20px;
-  padding: 2rem;
+  padding: 1.5rem;
   margin-bottom: 1.5rem;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   border: 1px solid rgba(255,255,255,0.8);
@@ -162,7 +199,7 @@
 .section-title {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #333 !important;
+  color: #e65100 !important;
   margin-bottom: 1.5rem;
   display: flex !important;
   align-items: center;
@@ -173,21 +210,21 @@
   content: '';
   width: 4px;
   height: 1.5rem;
-  background: linear-gradient(45deg, #007bff, #20bf6b);
+  background: #ffb300;
   border-radius: 2px;
 }
 
 /* 소개 섹션 */
 .intro-content {
   line-height: 1.7;
-  background: #f8f9fa;
+  background: rgba(255,248,225,0.5);
   padding: 1.5rem;
   border-radius: 16px;
-  border-left: 4px solid #007bff;
+  border-left: 4px solid #ffb300;
 }
 
 .intro-paragraph {
-  color: #333;
+  color: #6d4c41;
   margin-bottom: 1rem;
   font-size: 1rem;
 }
@@ -202,8 +239,8 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: #f8f9fa;
-  border: 2px solid #e9ecef;
+  background: rgba(255,248,225,0.5);
+  border: 2px solid rgba(255,179,0,0.2);
   padding: 1rem 1.5rem;
   margin-bottom: 1.5rem;
   cursor: pointer;
@@ -212,29 +249,29 @@
 }
 
 .section-toggle:hover {
-  background: #e9ecef;
-  border-color: #007bff;
+  background: rgba(255,179,0,0.1);
+  border-color: #ffb300;
 }
 
 .toggle-title {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #333;
+  color: #e65100;
 }
 
 .toggle-icon {
   width: 1.5rem;
   height: 1.5rem;
-  color: #666;
+  color: #ffb300;
   transition: transform 0.3s ease;
 }
 
 .career-content {
   animation: slideDown 0.3s ease-out;
-  background: #f8f9fa;
+  background: rgba(255,248,225,0.5);
   padding: 1.5rem;
   border-radius: 16px;
-  border: 1px solid #e9ecef;
+  border: 1px solid rgba(255,179,0,0.2);
 }
 
 @keyframes slideDown {
@@ -248,8 +285,15 @@
   }
 }
 
-.career-table {
+.mentor-career-table {
   width: 100%;
+  background: linear-gradient(145deg, #fff8e1, #fff3c4);
+  border: 1px solid rgba(255, 179, 0, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(255, 143, 0, 0.1);
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  position: relative;
 }
 
 .career-header,
@@ -266,27 +310,27 @@
   border-radius: 12px;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #666;
+  color: #6d4c41;
   font-size: 0.9rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(255,179,0,0.05);
 }
 
 .career-row {
   background: white;
   border-radius: 12px;
   margin-bottom: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(255,179,0,0.05);
   transition: all 0.3s ease;
 }
 
 .career-row:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 16px rgba(255,179,0,0.1);
 }
 
 .career-col {
   font-size: 0.9rem;
-  color: #333;
+  color: #6d4c41;
   word-break: keep-all;
 }
 
@@ -296,15 +340,15 @@
 
 /* 서비스 소개 섹션 */
 .service-intro {
-  background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%);
-  padding: 2rem;
+  background: linear-gradient(135deg, #fff8e1 0%, #fff3c4 100%);
+  padding: 1.5rem;
   border-radius: 16px;
-  border: 1px solid #e3f2fd;
+  border: 1px solid rgba(255,179,0,0.2);
 }
 
 .service-intro-text {
   font-weight: 600;
-  color: #333;
+  color: #6d4c41;
   margin-bottom: 1.5rem;
   line-height: 1.6;
   font-size: 1.05rem;
@@ -321,23 +365,23 @@
   align-items: flex-start;
   gap: 0.75rem;
   font-size: 0.95rem;
-  color: #333;
+  color: #6d4c41;
   line-height: 1.5;
   background: white;
   padding: 1rem;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(255,179,0,0.05);
   transition: all 0.3s ease;
 }
 
 .service-point:hover {
   transform: translateX(5px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(255,179,0,0.1);
 }
 
 .service-point::before {
   content: '✓';
-  color: #28a745;
+  color: #ff8f00;
   font-weight: bold;
   font-size: 1.2rem;
   margin-top: 0.1rem;
@@ -346,8 +390,8 @@
 
 /* 서비스 선택 섹션 */
 .service-items-section {
-  background: linear-gradient(135deg, #fff8f0 0%, #f0f8ff 100%);
-  border: 2px solid #e3f2fd;
+  background: linear-gradient(135deg, #fff8e1 0%, #fff3c4 100%);
+  border: 2px solid rgba(255,179,0,0.2);
 }
 
 .services-content {
@@ -362,14 +406,14 @@
 }
 
 .service-card {
-  border: 2px solid #e9ecef;
+  border: 2px solid rgba(255,179,0,0.2);
   border-radius: 20px;
-  padding: 2rem;
+  padding: 1.5rem;
   transition: all 0.3s ease;
   position: relative;
   cursor: pointer;
   background: white;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 16px rgba(255,179,0,0.05);
   overflow: hidden;
 }
 
@@ -380,7 +424,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #e9ecef, #e9ecef);
+  background: linear-gradient(90deg, rgba(255,179,0,0.2), rgba(255,179,0,0.2));
   transition: all 0.3s ease;
 }
 
@@ -406,24 +450,24 @@
 }*/
 
 .service-card.popular {
-  border-color: #28a745;
-  background: #f8fff9;
+  border-color: #ffb300;
+  background: rgba(255,248,225,0.3);
 }
 
 .service-card.popular::before {
-  background: linear-gradient(90deg, #28a745, #20bf6b);
+  background: linear-gradient(90deg, #ffb300, #ff8f00);
 }
 
 .service-card.popular.selected {
-  border-color: #007bff;
-  background: #f8fcff;
+  border-color: #ff8f00;
+  background: rgba(255,248,225,0.5);
 }
 
 .popular-badge {
   position: absolute;
   top: -1px;
   right: 2rem;
-  background: linear-gradient(135deg, #28a745, #20bf6b);
+  background: linear-gradient(135deg, #ffb300, #ff8f00);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 0 0 12px 12px;
@@ -432,7 +476,7 @@
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  box-shadow: 0 2px 8px rgba(40,167,69,0.3);
+  box-shadow: 0 2px 8px rgba(255,179,0,0.3);
 }
 
 .star-icon {
@@ -447,10 +491,10 @@
   margin-bottom: 1.5rem;
 }
 
-.service-name {
+.mp-service-name {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #333;
+  color: #e65100;
   margin: 0;
   line-height: 1.3;
 }
@@ -463,29 +507,29 @@
 }
 
 .duration-tag {
-  background: linear-gradient(135deg, #e3f2fd, #f0f8ff);
-  color: #007bff;
+  background: linear-gradient(135deg, rgba(255,248,225,0.8), rgba(255,243,196,0.8));
+  color: #ff8f00;
   padding: 0.4rem 0.8rem;
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 600;
   white-space: nowrap;
-  border: 1px solid #e3f2fd;
+  border: 1px solid rgba(255,179,0,0.3);
 }
 
 .service-description {
-  color: #666;
+  color: #6d4c41;
   font-size: 1rem;
   margin-bottom: 1.5rem;
   line-height: 1.6;
-  background: #f8f9fa;
+  background: rgba(255,248,225,0.5);
   padding: 1rem;
   border-radius: 12px;
-  border-left: 4px solid #007bff;
+  border-left: 4px solid #ffb300;
 }
 
 .service-detail {
-  color: #333;
+  color: #6d4c41;
   font-size: 0.9rem;
   margin-bottom: 1.5rem;
   line-height: 1.7;
@@ -499,7 +543,7 @@
 
 .detail-line::before {
   content: '•';
-  color: #007bff;
+  color: #ffb300;
   position: absolute;
   left: 0;
   font-weight: bold;
@@ -510,14 +554,14 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 1rem;
-  border-top: 2px solid #f8f9fa;
+  border-top: 2px solid rgba(255,248,225,0.8);
 }
 
 .service-price {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #007bff;
-  background: linear-gradient(135deg, #007bff, #20bf6b);
+  color: #ff8f00;
+  background: linear-gradient(135deg, #ffb300, #ff8f00);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -527,13 +571,13 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #007bff;
+  color: #ff8f00;
   font-size: 0.9rem;
   font-weight: 600;
-  background: #f0f8ff;
+  background: rgba(255,248,225,0.8);
   padding: 0.5rem 1rem;
   border-radius: 20px;
-  border: 1px solid #e3f2fd;
+  border: 1px solid rgba(255,179,0,0.3);
 }
 
 .check-icon {
@@ -543,12 +587,12 @@
 
 /* 선택 요약 섹션 */
 .selection-summary {
-  background: linear-gradient(135deg, #f8fcff, #e3f2fd);
-  border: 2px solid #007bff;
+  background: linear-gradient(135deg, #fff8e1, #fff3c4);
+  border: 2px solid #ffb300;
   border-radius: 16px;
   padding: 1.5rem;
   margin-top: 1.5rem;
-  box-shadow: 0 4px 16px rgba(0,123,255,0.1);
+  box-shadow: 0 4px 16px rgba(255,179,0,0.1);
 }
 
 .summary-content {
@@ -564,23 +608,23 @@
   background: white;
   padding: 1rem;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(255,179,0,0.05);
 }
 
 .summary-service strong {
   font-size: 1.1rem;
-  color: #333;
+  color: #e65100;
 }
 
 .summary-price {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #007bff;
+  color: #ff8f00;
 }
 
 .summary-duration {
   font-size: 0.9rem;
-  color: #666;
+  color: #6d4c41;
   font-weight: 500;
   text-align: center;
   background: white;
@@ -592,24 +636,28 @@
 .fixed-bottom {
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1rem 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 800px;
+  width: calc(100% - 2rem);
+  padding: 1rem;
+  margin-bottom: 1rem;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(233, 236, 239, 0.8);
+  border: 1px solid rgba(255, 179, 0, 0.3);
+  border-radius: 16px;
   z-index: 10;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(255,179,0,0.1);
 }
 
 .contact-button {
   width: 100%;
-  padding: 1.2rem;
-  background: linear-gradient(135deg, #dc3545, #c82333);
+  padding: 1rem;
+  background: linear-gradient(135deg, #ffb300, #ff8f00);
   color: white;
   border: none;
-  border-radius: 16px;
-  font-size: 1.1rem;
+  border-radius: 12px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -617,60 +665,76 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  box-shadow: 0 4px 16px rgba(220,53,69,0.3);
+  box-shadow: 0 4px 16px rgba(255,179,0,0.3);
 }
 
 .contact-button:hover {
-  background: linear-gradient(135deg, #c82333, #a71e2a);
+  background: linear-gradient(135deg, #ffa000, #ff6f00);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(220,53,69,0.4);
+  box-shadow: 0 6px 20px rgba(255,179,0,0.4);
 }
 
 .contact-button.with-selection {
-  background: linear-gradient(135deg, #007bff, #0056b3);
-  box-shadow: 0 4px 16px rgba(0,123,255,0.3);
+  background: linear-gradient(135deg, #ff8f00, #e65100);
+  box-shadow: 0 4px 16px rgba(255,143,0,0.3);
 }
 
 .contact-button.with-selection:hover {
-  background: linear-gradient(135deg, #0056b3, #004085);
-  box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+  background: linear-gradient(135deg, #e65100, #d84315);
+  box-shadow: 0 6px 20px rgba(255,143,0,0.4);
 }
 
 /* Gradient backgrounds for avatars */
-.gradient-bg-1 { background: linear-gradient(135deg, #ff6b8a, #ff8a8a); }
-.gradient-bg-2 { background: linear-gradient(135deg, #6c63ff, #9c88ff); }
-.gradient-bg-3 { background: linear-gradient(135deg, #20bf6b, #26d0ce); }
-.gradient-bg-4 { background: linear-gradient(135deg, #fd79a8, #fdcb6e); }
-.gradient-bg-5 { background: linear-gradient(135deg, #6c5ce7, #a29bfe); }
-.gradient-bg-6 { background: linear-gradient(135deg, #fd79a8, #ff7675); }
-.gradient-bg-7 { background: linear-gradient(135deg, #00cec9, #55a3ff); }
-.gradient-bg-8 { background: linear-gradient(135deg, #fdcb6e, #fd79a8); }
-.gradient-bg-9 { background: linear-gradient(135deg, #6c5ce7, #fd79a8); }
-.gradient-bg-10 { background: linear-gradient(135deg, #a29bfe, #fd79a8); }
+.gradient-bg-1 { background: linear-gradient(135deg, #ffb300, #ff8f00); }
+.gradient-bg-2 { background: linear-gradient(135deg, #ffcc02, #ffb300); }
+.gradient-bg-3 { background: linear-gradient(135deg, #ff9800, #f57c00); }
+.gradient-bg-4 { background: linear-gradient(135deg, #ffb74d, #ff9800); }
+.gradient-bg-5 { background: linear-gradient(135deg, #ff8a65, #ff7043); }
+.gradient-bg-6 { background: linear-gradient(135deg, #ffab91, #ff8a65); }
+.gradient-bg-7 { background: linear-gradient(135deg, #ffab40, #ff9800); }
+.gradient-bg-8 { background: linear-gradient(135deg, #ffd54f, #ffcc02); }
+.gradient-bg-9 { background: linear-gradient(135deg, #ffb300, #ffab40); }
+.gradient-bg-10 { background: linear-gradient(135deg, #ff8f00, #f57c00); }
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .mentor-profile-container {
-    padding: 0 0.75rem 100px 0.75rem;
+    padding: 80px 0.75rem 100px 0.75rem;
+    max-width: 100%;
   }
-  
+
+  .profile-header {
+    padding: 1rem;
+  }
+
+  .header-profile {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+  }
+
+  .header-profile .profile-image {
+    width: 35px;
+    height: 35px;
+  }
+
   .profile-hero,
   .content-section {
-    padding: 1.5rem;
+    padding: 1.25rem;
     margin-bottom: 1rem;
   }
-  
+
   .career-header,
   .career-row {
     grid-template-columns: 1fr;
     gap: 0.75rem;
     text-align: left;
   }
-  
+
   .career-header {
     display: none;
   }
-  
+
   .career-row {
     background: white;
     border-radius: 12px;
@@ -678,84 +742,109 @@
     margin-bottom: 1rem;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
-  
+
   .career-col::before {
     content: attr(data-label);
     font-weight: 600;
-    color: #666;
+    color: #6d4c41;
     display: block;
     margin-bottom: 0.5rem;
     font-size: 0.85rem;
   }
-  
+
   .service-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
-  
+
   .service-duration {
     margin-left: 0;
   }
-  
+
   .services-grid {
     gap: 1rem;
   }
-  
+
   .service-card {
-    padding: 1.5rem;
+    padding: 1.25rem;
   }
-  
+
   .selection-summary {
     padding: 1rem;
   }
-  
+
   .summary-service {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.75rem;
   }
-  
+
   .fixed-bottom {
-    padding: 1rem;
+    width: calc(100% - 1.5rem);
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
   }
 }
 
 @media (max-width: 480px) {
   .mentor-profile-container {
-    padding: 0 0.5rem 100px 0.5rem;
+    padding: 80px 0.5rem 100px 0.5rem;
+    max-width: 100%;
   }
-  
+
+  .profile-header {
+    padding: 0.75rem 1rem;
+  }
+
+
+  .header-profile {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+
+  .header-profile .profile-image {
+    width: 32px;
+    height: 32px;
+  }
+
   .profile-hero,
   .content-section {
-    padding: 1.25rem;
+    padding: 1rem;
     border-radius: 16px;
   }
-  
+
   .service-card {
-    padding: 1.25rem;
-  }
-  
-  .contact-button {
-    font-size: 1rem;
     padding: 1rem;
-    border-radius: 12px;
   }
-  
+
+  .contact-button {
+    font-size: 0.9rem;
+    padding: 0.875rem;
+    border-radius: 10px;
+  }
+
+  .fixed-bottom {
+    width: calc(100% - 1rem);
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
   .service-name {
     font-size: 1.1rem;
   }
-  
+
   .service-price {
     font-size: 1.2rem;
   }
-  
+
   .profile-avatar {
     width: 80px;
     height: 80px;
     font-size: 2rem;
   }
-  
+
   .section-title {
     font-size: 1.2rem;
   }

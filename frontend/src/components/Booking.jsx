@@ -1,54 +1,3 @@
-/*
- * 🔥 실제 운영용 handleBooking 함수 (임시 코드 제거된 버전)
- *
- * const handleBooking = async () => {
- *   if (selectedDate && selectedStartTime && selectedEndTime && selectedService) {
- *     try {
- *       const selectedTicket = serviceOptions.find(option => option.id === selectedService);
- *
- *       if (!selectedTicket) {
- *         alert('선택된 서비스 정보를 찾을 수 없습니다.');
- *         return;
- *       }
- *
- *       const startDateTime = `${selectedDate} ${selectedStartTime}:00`;
- *       const endDateTime = `${selectedDate} ${selectedEndTime}:00`;
- *
- *       const reservationData = {
- *         mentor: mentor?.userId || mentor?.id,
- *         ticket: selectedService,
- *         reservationStatus: "REQUESTED",
- *         reservationStartAt: startDateTime,
- *         reservationEndAt: endDateTime
- *       };
- *
- *       const reservationResponse = await reservationAPI.createReservation(reservationData);
- *       const createdReservationId = reservationResponse.data.data.id || reservationResponse.data.id;
- *
- *       const bookingData = {
- *         mentor: mentor,
- *         date: selectedDate,
- *         startTime: selectedStartTime,
- *         endTime: selectedEndTime,
- *         ticketId: selectedService,
- *         reservationId: createdReservationId,
- *         ticket: { id: selectedTicket.id, name: selectedTicket.name, duration: selectedTicket.duration, price: selectedTicket.price },
- *         serviceName: selectedTicket.duration || selectedTicket.name?.replace(" 이용권", "") || "선택된 서비스",
- *         servicePrice: selectedTicket.price || 0
- *       };
- *
- *       if (onBooking) onBooking(bookingData);
- *
- *     } catch (error) {
- *       console.error('❌ 예약 생성 중 오류:', error);
- *       alert('예약 생성에 실패했습니다. 다시 시도해주세요.');
- *     }
- *   } else {
- *     alert('모든 항목을 선택해주세요.');
- *   }
- * };
- */
-
 import React, { useEffect, useState } from 'react';
 import {
   ArrowLeft,
@@ -76,7 +25,7 @@ const Booking = ({ mentor, onBack, onBooking }) => {
   const [availableEndTimes, setAvailableEndTimes] = useState([]);
   const [selectedStartTime, setSelectedStartTime] = useState('');
   const [selectedEndTime, setSelectedEndTime] = useState('');
-  const [currentMonth, setCurrentMonth] = useState(new Date(2025, 5));
+  const [currentMonth, setCurrentMonth] = useState(() => new Date());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -194,25 +143,55 @@ const Booking = ({ mentor, onBack, onBooking }) => {
     });
   }, [mentor?.userId, selectedDate]);
 
-  // 3. 시작시간이 선택되면 종료시간 옵션 계산 (이제 예약 정보는 고려하지 않음, 오직 가용 슬롯에서)
+  // 3. 시작시간이 선택되면 이용권 시간을 바탕으로 종료시간 자동 계산
   useEffect(() => {
-    if (!selectedStartTime || consultationSlots.length === 0) {
-      setAvailableEndTimes([]);
+    if (!selectedStartTime || !selectedService) {
       setSelectedEndTime('');
       return;
     }
 
-    // `consultationSlots`는 이미 예약이 제외된 10분 단위 시작 시간 목록
-    const endTimes = calculateAvailableEndTimes(selectedStartTime, consultationSlots);
-    setAvailableEndTimes(endTimes);
-
-    // 현재 선택된 종료시간이 새로운 옵션에 없으면 초기화
-    if (selectedEndTime && !endTimes.includes(selectedEndTime)) {
-      setSelectedEndTime('');
+    // 선택된 서비스 ID로 실제 서비스 객체 찾기
+    const selectedServiceObject = serviceOptions.find(option => option.id === selectedService);
+    
+    if (!selectedServiceObject) {
+      console.warn('선택된 서비스를 찾을 수 없습니다:', selectedService);
+      return;
     }
-  }, [selectedStartTime, consultationSlots, selectedDate]); // selectedDate 의존성 유지
+
+    console.log('선택된 서비스 객체:', selectedServiceObject);
+
+    // 이용권 시간을 분 단위로 변환
+    const serviceDurationMinutes = convertTicketTimeToMinutes(selectedServiceObject.ticketTime);
+    
+    if (serviceDurationMinutes) {
+      // 시작시간 + 이용권 시간 = 종료시간 계산
+      const [startHour, startMinute] = selectedStartTime.split(':').map(Number);
+      const startDate = new Date(0, 0, 0, startHour, startMinute);
+      const endDate = new Date(startDate.getTime() + serviceDurationMinutes * 60000);
+      
+      const endTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
+      setSelectedEndTime(endTime);
+      
+      console.log(`✅ 자동 계산된 종료시간: ${selectedStartTime} + ${serviceDurationMinutes}분 = ${endTime}`);
+    } else {
+      console.warn('이용권 시간을 분 단위로 변환할 수 없습니다:', selectedServiceObject.ticketTime);
+    }
+  }, [selectedStartTime, selectedService, serviceOptions]);
 
   // --- 함수들 (간결화) ---
+
+  // 이용권 시간을 분 단위로 변환하는 함수
+  const convertTicketTimeToMinutes = (ticketTime) => {
+    switch (ticketTime) {
+      case 'MINUTES_20': return 20;
+      case 'MINUTES_30': return 30;
+      case 'MINUTES_40': return 40;
+      case 'MINUTES_60': return 60;
+      default: 
+        console.warn('알 수 없는 티켓 시간:', ticketTime);
+        return null;
+    }
+  };
 
   // 10분 단위 시작 시간으로 가능한 종료 시간 목록을 계산 (예약 정보는 이미 백엔드에서 처리됨)
   // `available10MinSlots`는 'HH:mm' 형태의 문자열 배열
@@ -556,7 +535,7 @@ const Booking = ({ mentor, onBack, onBooking }) => {
 
           {/* 시간 구간 선택 */}
           <div className="booking-section">
-            <h3>가능한 시간 범위(최소 20분)를 선택해주세요.</h3>
+            <h3>시작 시간을 선택해주세요. (종료 시간은 이용권 시간에 따라 자동 계산됩니다)</h3>
             <div className="time-selector">
               <div className="time-dropdown">
                 <select
@@ -575,17 +554,16 @@ const Booking = ({ mentor, onBack, onBooking }) => {
               <span className="time-separator">~</span>
               <div className="time-dropdown">
                 <select
-                    value={selectedEndTime}
-                    onChange={e => setSelectedEndTime(e.target.value)}
-                    className="time-select"
-                    disabled={!selectedStartTime || availableEndTimes.length === 0}
+                    value={selectedEndTime || ''}
+                    className="time-select auto-calculated"
+                    disabled
                 >
                   <option value="">종료 시간</option>
-                  {availableEndTimes.map((slot, idx) => (
-                      <option key={idx} value={slot}>{slot}</option>
-                  ))}
+                  {selectedEndTime && (
+                    <option value={selectedEndTime}>{selectedEndTime}</option>
+                  )}
                 </select>
-                <ChevronDown className="dropdown-icon" />
+                <ChevronDown className="dropdown-icon disabled" />
               </div>
             </div>
           </div>

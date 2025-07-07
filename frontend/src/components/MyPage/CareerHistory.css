@@ -3,10 +3,15 @@
 /* 기본 컨테이너 스타일 */
 .career-history-container {
   padding: 32px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #fff8e1, #fff3c4);
   border-radius: 20px;
   box-shadow: 0 25px 50px rgba(102, 126, 234, 0.15);
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* 내용에 따라 높이가 늘어나도록 */
+  min-height: 500px; /* 최소 높이 설정 (컨텐츠가 적을 때) */
+  max-height: 80vh; /* ⭐ 뷰포트 높이에 따른 최대 높이 (필요 시 조절) */
   overflow: hidden;
 }
 
@@ -21,6 +26,7 @@
   background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
   transform: rotate(45deg);
   pointer-events: none;
+  z-index: 0;
 }
 
 .career-history-container::after {
@@ -33,6 +39,7 @@
   background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
+  z-index: 0;
 }
 
 /* 제목 스타일 */
@@ -40,11 +47,12 @@
   font-size: 2.25rem;
   font-weight: 800;
   margin-bottom: 32px;
-  color: #ffffff;
+  color: #6D4C41;
   text-shadow: 0 4px 8px rgba(0,0,0,0.1);
   letter-spacing: -0.02em;
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
 }
 
 .career-history-container h3::after {
@@ -66,10 +74,38 @@
   margin-bottom: 32px;
   position: relative;
   z-index: 1;
+
+  flex: 1; /* ⭐ 남은 공간을 채우도록 함 */
+  overflow-y: auto; /* ⭐ 세로 스크롤바를 필요할 때만 표시 */
+  /* max-height: calc(100% - 100px); ⭐ 이 값은 career-history-container의 max-height와 함께 조절 필요 */
+  min-height: 0; /* ⭐ flex 아이템이 내용물에 의해 밀려나지 않도록 함 (매우 중요!) */
+
+  /* 스크롤바 스타일링 (기존 유지) */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #cbd5e1 transparent; /* Firefox */
+}
+
+/* 웹킷 기반 브라우저 스크롤바 스타일링 (기존 유지) */
+.career-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.career-list::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.career-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.career-list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* 정보 카드 기본 스타일 */
-.info-card {
+.careers-info-card {
   display: flex;
   align-items: center;
   padding: 24px;
@@ -82,9 +118,11 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.info-card::before {
+.careers-info-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -96,21 +134,21 @@
   transition: opacity 0.3s ease;
 }
 
-.info-card:hover {
+.careers-info-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 16px 48px rgba(102, 126, 234, 0.25);
   border-color: rgba(102, 126, 234, 0.3);
 }
 
-.info-card:hover::before {
+.careers-info-card:hover::before {
   opacity: 1;
 }
 
 /* 아이콘 스타일 */
-.info-card-icon {
+.careers-info-card-icon {
   margin-right: 20px;
   color: #667eea;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
   padding: 12px;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
@@ -119,47 +157,55 @@
   justify-content: center;
   position: relative;
   z-index: 2;
+  flex-shrink: 0;
 }
 
-.info-card-icon svg {
+.careers-info-card-icon svg {
   color: white;
   width: 24px;
   height: 24px;
 }
 
 /* 카드 콘텐츠 */
-.info-card-content {
+.careers-info-card-content {
   flex-grow: 1;
   position: relative;
   z-index: 2;
+  min-width: 0;
 }
 
-.info-card-label {
+.careers-info-card-label {
   font-weight: 700;
   color: #1a202c;
   font-size: 1.125rem;
   margin-bottom: 4px;
   letter-spacing: -0.01em;
+  word-break: break-word;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.info-card-value {
+.careers-info-card-value {
   color: #718096;
   font-size: 0.95rem;
   font-weight: 500;
   margin: 0;
+  word-break: break-word;
 }
 
 /* 액션 버튼 영역 */
-.info-card-actions {
+.careers-info-card-actions {
   display: flex;
   gap: 12px;
   position: relative;
   z-index: 2;
   opacity: 0;
   transition: opacity 0.3s ease;
+  flex-shrink: 0;
 }
 
-.info-card:hover .info-card-actions {
+.careers-info-card:hover .careers-info-card-actions {
   opacity: 1;
 }
 
@@ -244,8 +290,8 @@
   width: 100%;
   padding: 20px;
   border: 2px dashed rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.3);
+  color: black;
   border-radius: 16px;
   cursor: pointer;
   display: flex;
@@ -258,11 +304,12 @@
   backdrop-filter: blur(10px);
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
 }
 
 .add-career-btn:hover {
   border-color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
@@ -526,12 +573,18 @@
     margin-bottom: 24px;
   }
 
-  .info-card {
+  .careers-info-card {
     padding: 20px;
     border-radius: 12px;
   }
 
-  .info-card-icon {
+  .career-list {
+    padding: 16px;
+    gap: 16px;
+    max-height: calc(100vh - 150px);
+  };
+
+  .careers-info-card-icon {
     margin-right: 16px;
     padding: 10px;
   }
@@ -564,7 +617,7 @@
     border-radius: 0 !important;
   }
 
-  .info-card {
+  .careers-info-card {
     background: white !important;
     border: 1px solid #e2e8f0 !important;
     box-shadow: none !important;
@@ -636,4 +689,91 @@
   content: '⚠️';
   font-size: 1.5rem;
   margin-right: 12px;
+}
+
+/* ⭐ 빈 목록 상태 UI (추가) */
+.empty-career-list {
+  text-align: center;
+  padding: 50px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  margin: 20px 0;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  flex: 1; /* 남은 공간을 채우도록 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ⭐ 페이지네이션 컨트롤러 스타일 (추가) */
+.career-pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 30px;
+  padding-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.career-pagination-button {
+  padding: 12px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 50px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  backdrop-filter: blur(5px);
+}
+
+.career-pagination-button:hover:not(:disabled),
+.career-pagination-button.active {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+  transform: translateY(-2px);
+}
+
+.career-pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+  background-color: rgba(255, 255, 255, 0.05); /* ⭐ 비활성 시 배경색 더 연하게 */
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: none;
+  box-shadow: none;
+}
+
+.career-pagination-controls span {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* 반응형 디자인 (페이지네이션 부분만 수정) */
+@media (max-width: 768px) {
+  /* ... (기존 반응형 스타일 유지) ... */
+
+  .career-pagination-controls {
+    gap: 6px;
+    margin-top: 20px;
+    padding-bottom: 10px;
+  }
+
+  .career-pagination-button {
+    padding: 10px 14px;
+    font-size: 13px;
+    min-width: 45px;
+  }
 }

@@ -59,7 +59,7 @@
 
 /* 모달 헤더 */
 .career-edit-modal-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
   padding: 24px 32px;
   display: flex;
   justify-content: space-between;
@@ -370,13 +370,13 @@
 }
 
 .save-button {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
   color: white;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .save-button:hover {
-  background: linear-gradient(135deg, #5a67d8, #553c9a);
+  background: linear-gradient(45deg, #ffa000, #ff6f00);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }

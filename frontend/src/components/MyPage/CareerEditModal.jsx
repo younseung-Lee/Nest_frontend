@@ -12,6 +12,15 @@ const CareerEditModal = ({
   selectedProfileId, 
   setSelectedProfileId 
 }) => {
+  // 오늘 날짜를 YYYY-MM-DD 형식으로 가져오는 함수
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const [formData, setFormData] = useState({
     company: career?.company || '',
     startAt: career?.startAt?.slice(0, 10) || '',
@@ -19,6 +28,9 @@ const CareerEditModal = ({
   });
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState('');
+
+  // 오늘 날짜를 max 속성에 사용할 변수로 선언
+  const today = getTodayDate();
 
   if (!isOpen) return null;
 
@@ -38,6 +50,12 @@ const CareerEditModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // 날짜 유효성 검사 추가: 시작일이 종료일보다 늦을 수 없음 (종료일이 있는 경우)
+    if (formData.startAt && formData.endAt && new Date(formData.startAt) > new Date(formData.endAt)) {
+      alert('시작일은 종료일보다 늦을 수 없습니다.');
+      return;
+    }
+
     if (!isEditing) {
       // 추가 모드: 직접 API 호출
       try {
@@ -156,6 +174,7 @@ const CareerEditModal = ({
                   onChange={handleChange}
                   required
                   className="form-input date-input"
+                  max={today}
                 />
               </div>
 
@@ -172,6 +191,7 @@ const CareerEditModal = ({
                   onChange={handleChange}
                   className="form-input date-input"
                   placeholder="재직중인 경우 비워두세요"
+                  max={today}
                 />
               </div>
             </div>

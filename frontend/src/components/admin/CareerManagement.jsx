@@ -435,29 +435,30 @@ const CareerManagement = ({isDarkMode}) => {
                       padding: '20px 32px',
                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'linear-gradient(145deg, #fff3c4, #fff8e1)';
-                      e.currentTarget.style.transform = 'translateX(4px)';
-                      e.currentTarget.style.boxShadow = '0 4px 20px rgba(255, 179, 0, 0.15)';
-                      e.currentTarget.style.borderLeft = '4px solid #ffb300';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgb(251, 249, 239)';
-                      e.currentTarget.style.transform = 'translateX(0)';
-                      e.currentTarget.style.boxShadow = 'none';
-                      e.currentTarget.style.borderLeft = 'none';
-                    }}>
+                         onMouseEnter={(e) => {
+                           e.currentTarget.style.background = 'linear-gradient(145deg, #fff3c4, #fff8e1)';
+                           e.currentTarget.style.transform = 'translateX(4px)';
+                           e.currentTarget.style.boxShadow = '0 4px 20px rgba(255, 179, 0, 0.15)';
+                           e.currentTarget.style.borderLeft = '4px solid #ffb300';
+                         }}
+                         onMouseLeave={(e) => {
+                           e.currentTarget.style.background = 'rgb(251, 249, 239)';
+                           e.currentTarget.style.transform = 'translateX(0)';
+                           e.currentTarget.style.boxShadow = 'none';
+                           e.currentTarget.style.borderLeft = 'none';
+                         }}>
                       <div className="table-cell" style={{
                         fontSize: '14px',
                         fontWeight: '500',
                         color: '#6d4c41',
                         display: 'flex',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        justifyContent: 'center'
                       }}>
                         <div className="cell-content" style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '8px'
+                          gap: '0'
                         }}>
                           <User size={16} style={{ color: '#ffb300' }}/>
                           <strong style={{ color: '#e65100', fontWeight: '700' }}>{career.mentorName}</strong>
@@ -468,35 +469,48 @@ const CareerManagement = ({isDarkMode}) => {
                         fontWeight: '500',
                         color: '#6d4c41',
                         display: 'flex',
-                        alignItems: 'center'
-                      }}>{career.mentorEmail}</div>
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <div style={{ textAlign: 'center' }}>{career.mentorEmail}</div>
+                      </div>
                       <div className="table-cell" style={{
                         fontSize: '14px',
                         fontWeight: '500',
                         color: '#6d4c41',
                         display: 'flex',
-                        alignItems: 'center'
-                      }}>{career.company}</div>
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <div style={{ textAlign: 'center' }}>{career.company}</div>
+                      </div>
                       <div className="table-cell" style={{
                         fontSize: '14px',
                         fontWeight: '500',
                         color: '#6d4c41',
                         display: 'flex',
-                        alignItems: 'center'
-                      }}>{formatDate(career.startAt)}</div>
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <div style={{ textAlign: 'center' }}>{formatDate(career.startAt)}</div>
+                      </div>
                       <div className="table-cell" style={{
                         fontSize: '14px',
                         fontWeight: '500',
                         color: '#6d4c41',
                         display: 'flex',
-                        alignItems: 'center'
-                      }}>{formatDate(career.endAt)}</div>
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <div style={{ textAlign: 'center' }}>{formatDate(career.endAt)}</div>
+                      </div>
                       <div className="table-cell" style={{
                         fontSize: '14px',
                         fontWeight: '500',
                         color: '#6d4c41',
                         display: 'flex',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        justifyContent: 'center'
                       }}>
                         <span
                             className={`status-badge ${statusBadge.className}`}>
@@ -508,7 +522,8 @@ const CareerManagement = ({isDarkMode}) => {
                         fontWeight: '500',
                         color: '#6d4c41',
                         display: 'flex',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        justifyContent: 'center'
                       }}>
                         <div className="table-actions">
                           <button

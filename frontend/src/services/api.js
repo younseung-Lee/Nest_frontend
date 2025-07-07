@@ -1,5 +1,9 @@
 import axios from 'axios';
-import {accessTokenUtils, refreshTokenUtils} from '../utils/tokenUtils';
+import {
+  accessTokenUtils,
+  refreshTokenUtils,
+  userInfoUtils
+} from '../utils/tokenUtils';
 
 // API 베이스 URL 설정
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -52,6 +56,7 @@ api.interceptors.request.use(
         '/api/mentors/profiles', // 멘토 목록 조회 (로그인 없이도 볼 수 있음)
         '/api/oauth2/login',
         '/api/oauth2/callback',
+        '/api/auth/token/refresh',
       ];
 
       // 현재 요청 URL이 공개 엔드포인트인지 확인
@@ -99,6 +104,10 @@ api.interceptors.request.use(
     }
 );
 
+// 세션 만료 처리 상태 관리
+let isSessionExpired = false;
+let sessionExpireAlertShown = false;
+
 // 응답 인터셉터 - 에러 처리
 api.interceptors.response.use(
     (response) => {
@@ -121,7 +130,7 @@ api.interceptors.response.use(
           originalRequest?.method?.toLowerCase() === 'delete';
 
       if (error.response?.status === 401 && !originalRequest._retry
-          && !isDeleteUserRequest) {
+          && !isDeleteUserRequest && !isSessionExpired) {
         originalRequest._retry = true;
 
         console.log('🔄 401 에러 감지 - 토큰 갱신 시도...');
@@ -138,7 +147,7 @@ api.interceptors.response.use(
                 refreshToken: refreshToken
               });
 
-          const newAccessToken = refreshResponse.data.accessToken;
+          const newAccessToken = refreshResponse.data.data.accessToken;
           accessTokenUtils.setAccessToken(newAccessToken);
 
           // 원래 요청에 새 토큰으로 재시도
@@ -150,16 +159,31 @@ api.interceptors.response.use(
         } catch (refreshError) {
           console.error('❌ 토큰 갱신 실패:', refreshError);
 
-          // 토큰 갱신 실패 시 로그아웃 처리
-          accessTokenUtils.removeAccessToken();
-          refreshTokenUtils.removeRefreshToken();
+          // 세션 만료 상태로 설정 (중복 처리 방지)
+          if (!isSessionExpired) {
+            isSessionExpired = true;
+            
+            // 토큰 갱신 실패 시 로그아웃 처리
+            accessTokenUtils.removeAccessToken();
+            refreshTokenUtils.removeRefreshToken();
 
-          // 현재 페이지가 로그인 페이지가 아닌 경우에만 리다이렉트
-          if (!window.location.pathname.includes('/login')) {
-            alert('세션이 만료되었습니다. 다시 로그인해주세요.');
-            window.location.reload(); // 페이지 새로고침으로 로그인 상태 초기화
+            // 현재 페이지가 로그인 페이지가 아닌 경우에만 처리
+            if (!window.location.pathname.includes('/login') && !sessionExpireAlertShown) {
+              sessionExpireAlertShown = true;
+              alert('로그인이 필요합니다!');
+              
+              // 홈페이지로 리다이렉트 (로그인 상태 초기화)
+              setTimeout(() => {
+                window.location.href = '/';
+              }, 100);
+            }
           }
         }
+      }
+
+      // 세션이 만료된 상태에서는 추가 에러 처리 없이 거부
+      if (isSessionExpired && error.response?.status === 401) {
+        return Promise.reject(new Error('세션이 만료되었습니다.'));
       }
 
       // CORS 에러 처리
@@ -295,6 +319,9 @@ export const profileAPI = {
 
   // 티켓 조회
   getTicketList: () => api.get('/api/ticket'),
+
+  // 프로필 삭제
+  deleteProfile: (profileId) => api.delete(`/api/profiles/${profileId}`),
 };
 
 // Consultation API
@@ -327,7 +354,7 @@ export const consultationAPI = {
 // Reservation API
 export const reservationAPI = {
   // 예약 목록 조회
-  getReservations: () => api.get('/api/reservations'),
+  getReservations: ({ page, size }) => api.get(`/api/reservations?page=${page}&size=${size}`),
 
   // 예약 단건 조회
   getReservation: (reservationId) => api.get(
@@ -365,8 +392,8 @@ export const messageAPI = {
 
 // Payment API
 export const paymentAPI = {
-  // 결제 요청
-  createPayment: (paymentData) => api.post('/api/v1/payments', paymentData),
+  // 결제 준비
+  preparePayment: (paymentData) => api.post('/api/v1/payments/prepare', paymentData),
 
   // 토스페이먼츠 결제 승인
   confirmPayment: (confirmData) => api.post('/api/v1/payments/confirm',
@@ -380,24 +407,22 @@ export const paymentAPI = {
       `/api/v1/payments/${paymentId}/cancel`, cancelData),
 
   // 결제 내역 조회
-  getPaymentHistory: () => api.get(`/api/v1/payments`),
+  getPaymentHistory: ({ page, size }) => api.get(`/api/v1/payments?page=${page}&size=${size}`),
 
-  // 결제 상세 조회
-  getPaymentDetail: (paymentId) => api.get(`/api/payments/${paymentId}`),
+  // 결제 상세 조회 (URL 패턴 통일)
+  getPaymentDetail: (paymentId) => api.get(`/api/v1/payments/${paymentId}`),
 };
 
 // Review API
 export const reviewAPI = {
   // 리뷰 목록 조회
   getReviews: (mentorId, params) =>
-      api.get(`/api/reviews/mentors/${mentorId}`, {params}),
+      api.get(`/api/mentors/${mentorId}/reviews`, {params}),
 
   // 리뷰 작성 (예약 기반)
   createReview: (reservationId, reviewData) => 
       api.post(`/api/reservations/${reservationId}/reviews`, reviewData),
 
-  // 일반 리뷰 작성 (기존 API가 있는 경우)
-  createGeneralReview: (reviewData) => api.post('/api/reviews', reviewData),
 
   // 리뷰 수정
   updateReview: (reviewId, reviewData) =>
@@ -504,7 +529,7 @@ const fileApi = axios.create({
 // Career API
 export const careerAPI = {
   // 경력 전체 목록 조회
-  getAllCareers: () => api.get('/api/careers'),
+  getAllCareers: ({page, size}) => api.get(`/api/careers?page=${page}&size=${size}`),
 
   // 경력 상세 조회
   getCareerDetail: (profileId, careerId) => api.get(
@@ -588,19 +613,6 @@ export const adminAPI = {
   registerCoupon: (couponData) => api.post('/api/admin/coupons', couponData),
 
   // [관리자] 쿠폰 목록 조회
-  /*findCoupons: (params = {}) => {
-    console.log('🔍 [adminAPI.findCoupons] 요청 시작, params:', params);
-    return api.get('/api/admin/coupons', {params})
-      .then(response => {
-        console.log('✅ [adminAPI.findCoupons] 성공:', response);
-        return response;
-      })
-      .catch(error => {
-        console.error('❌ [adminAPI.findCoupons] 실패:', error);
-        throw error;
-      });
-  },
-*/
   findCoupons: () => api.get('/api/admin/coupons'),
 
   // [관리자] 쿠폰 수정
@@ -626,6 +638,12 @@ export const adminAPI = {
 
   // [관리자] 카테고리 삭제
   deleteCategory: (categoryId) => api.delete(`/api/admin/categories/${categoryId}`),
+
+  // [관리자] 리뷰 목록 조회
+  getReviewList: (params) => api.get('/api/admin/reviews', {params}),
+
+  // [관리자] 리뷰 샅태 변경
+  changeReviewStatus: (reviewId) => api.patch(`/api/admin/reviews/${reviewId}`),
 
 
 };

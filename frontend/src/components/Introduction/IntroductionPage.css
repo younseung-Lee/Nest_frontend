@@ -1,0 +1,190 @@
+/* 소개 페이지 전용 스타일 - 홈화면과 완전히 분리됨 */
+
+:root {
+  /* 소개 페이지 전용 색상 팔레트 */
+  --introduction-primary: #3B82F6;
+  --introduction-secondary: #8B5CF6;
+  --introduction-accent: #06B6D4;
+  --introduction-success: #10B981;
+  --introduction-warning: #F59E0B;
+  --introduction-danger: #EF4444;
+  --introduction-dark: #1F2937;
+  --introduction-light: #F9FAFB;
+  --introduction-white: #FFFFFF;
+  
+  /* 소개 페이지 전용 간격 */
+  --introduction-section-padding: 4rem 0;
+  --introduction-container-max-width: 1200px;
+  --introduction-border-radius: 12px;
+  --introduction-box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+  --introduction-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.introduction-page {
+  background: linear-gradient(135deg, var(--introduction-light) 0%, #E0F2FE 100%);
+  min-height: 100vh;
+  color: var(--introduction-dark);
+  overflow-x: hidden;
+}
+
+/* 소개 페이지 네비게이션 바 */
+.introduction-navigation-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+  padding: 1rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: var(--introduction-container-max-width);
+  margin: 0 auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.introduction-back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--introduction-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--introduction-transition);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.introduction-back-button:hover {
+  background: #2563EB;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.introduction-back-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.introduction-nav-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--introduction-primary);
+}
+
+.introduction-home-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* 소개 페이지 콘텐츠 */
+.introduction-content {
+  padding-top: 80px; /* 네비게이션 바 높이만큼 패딩 */
+}
+
+/* 공통 섹션 스타일 */
+.introduction-section {
+  padding: var(--introduction-section-padding);
+  position: relative;
+}
+
+.introduction-container {
+  max-width: var(--introduction-container-max-width);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.introduction-card {
+  background: var(--introduction-white);
+  border-radius: var(--introduction-border-radius);
+  box-shadow: var(--introduction-box-shadow);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  transition: var(--introduction-transition);
+  padding: 2rem;
+}
+
+.introduction-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.15);
+}
+
+/* 공통 타이틀 스타일 */
+.introduction-section-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--introduction-dark);
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.introduction-section-subtitle {
+  text-align: center;
+  font-size: 1.125rem;
+  color: var(--introduction-dark);
+  opacity: 0.8;
+  margin-bottom: 3rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  :root {
+    --introduction-section-padding: 2.5rem 0;
+  }
+  
+  .introduction-navigation-bar {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  .introduction-content {
+    padding-top: 120px; /* 모바일에서 네비게이션 바가 더 높음 */
+  }
+  
+  .introduction-container {
+    padding: 0 1rem;
+  }
+  
+  .introduction-section-title {
+    font-size: 2rem;
+  }
+  
+  .introduction-section-subtitle {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .introduction-card {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .introduction-section-title {
+    font-size: 1.75rem;
+  }
+  
+  .introduction-nav-title {
+    font-size: 1.125rem;
+  }
+}

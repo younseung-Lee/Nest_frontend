@@ -232,7 +232,8 @@ const CategoryManagement = ({ isDarkMode }) => {
                 fontWeight: '500',
                 color: '#6d4c41',
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                justifyContent: 'center'
               }}>
                 <div className="cell-content" style={{
                   display: 'flex',
@@ -250,7 +251,8 @@ const CategoryManagement = ({ isDarkMode }) => {
                 fontWeight: '500',
                 color: '#6d4c41',
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                justifyContent: 'center'
               }}>
                 <div className="table-actions">
                   <button

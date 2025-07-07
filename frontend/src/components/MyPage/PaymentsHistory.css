@@ -192,20 +192,22 @@
 }
 
 .content-area .history-item:hover .ticket-name {
-  color: #6366f1;
+  color: #6D4C41;
 }
 
 /* 상태 배지 */
 .content-area .status-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 6px 20px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
   letter-spacing: 0.025em;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .content-area .status-paid {
@@ -214,8 +216,7 @@
   border: 1px solid #a7f3d0;
 }
 
-.content-area .status-cancelled,
-.content-area .status-refunded {
+.content-area .status-canceled {
   background: #fee2e2;
   color: #991b1b;
   border: 1px solid #fca5a5;
@@ -227,6 +228,14 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.content-area .item-body-bottom-row {
+  display: flex; /* flex 컨테이너로 만듭니다. */
+  justify-content: flex-end; /* ⭐ 자식 요소를 오른쪽 끝으로 정렬 */
+  align-items: center; /* 세로 중앙 정렬 (필요하다면) */
+  width: 100%; /* 부모(item-body)의 전체 너비를 차지하도록 */
+  margin-top: 10px; /* P 태그들과의 간격 */
 }
 
 .content-area .item-body p {
@@ -243,13 +252,21 @@
   color: #1e293b;
   min-width: 80px;
 }
+/* 아이템 상태 */
+.content-area .items-status {
+  width: fit-content;
+  flex-shrink: 0;
+}
 
 /* 아이템 푸터 */
 .content-area .item-footer {
   padding-top: 16px;
   border-top: 1px solid #f1f5f9;
-  text-align: right;
   margin: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
 }
 
 .content-area .item-footer span {
@@ -265,6 +282,154 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* 모달/메시지 박스 오버레이 (배경) */
+.custom-modal-overlay,
+.custom-message-box-overlay {
+  position: fixed; /* 뷰포트에 고정 */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* 반투명 검은색 배경 */
+  display: flex;
+  justify-content: center; /* 가로 중앙 정렬 */
+  align-items: center; /* 세로 중앙 정렬 */
+  z-index: 1000; /* 다른 요소 위에 표시 */
+}
+
+/* 모달/메시지 박스 내용 컨테이너 */
+.custom-modal-content,
+.custom-message-box-content {
+  background-color: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
+  width: 90%; /* 모바일에서 너비 */
+  max-width: 450px; /* 최대 너비 */
+  display: flex;
+  flex-direction: column; /* 세로 방향으로 요소 배치 */
+  gap: 20px; /* 요소 간 간격 */
+  position: relative; /* 내부 요소 위치 지정을 위한 기준 */
+}
+
+/* 모달/메시지 박스 헤더 */
+.custom-modal-content .modal-header,
+.custom-message-box-content .message-header {
+  display: flex;
+  justify-content: space-between; /* 제목과 닫기 버튼을 양 끝으로 */
+  align-items: center;
+  border-bottom: 1px solid #eee; /* 하단 구분선 */
+  padding-bottom: 15px;
+  margin-bottom: 10px;
+}
+
+.custom-modal-content .modal-header h3,
+.custom-message-box-content .message-header h4 {
+  margin: 0; /* 기본 마진 제거 */
+  font-size: 1.2em;
+  color: #333;
+}
+
+/* 닫기 버튼 */
+.custom-modal-content .close-button,
+.custom-message-box-content .close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: #888;
+  border-radius: 50%; /* 원형 버튼 */
+  transition: background-color 0.2s; /* 호버 시 부드러운 전환 */
+}
+
+.custom-modal-content .close-button:hover,
+.custom-message-box-content .close-button:hover {
+  background-color: #f0f0f0;
+}
+
+/* 모달 바디 (내용) */
+.custom-modal-content .modal-body {
+  font-size: 0.95em;
+  color: #555;
+}
+
+/* 취소 사유 입력 텍스트 영역 */
+.custom-modal-content .cancel-reason-input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9em;
+  resize: vertical; /* 세로 크기 조절 가능 */
+  min-height: 80px;
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+}
+
+/* 모달/메시지 박스 푸터 (버튼 영역) */
+.custom-modal-content .modal-footer,
+.custom-message-box-content .message-footer {
+  display: flex;
+  justify-content: flex-end; /* 버튼을 오른쪽으로 정렬 */
+  gap: 10px; /* 버튼 간 간격 */
+  padding-top: 15px;
+  border-top: 1px solid #eee; /* 상단 구분선 */
+  margin-top: 10px;
+}
+
+/* 모달/메시지 박스 버튼 공통 스타일 */
+.custom-modal-content .modal-cancel-btn,
+.custom-modal-content .modal-confirm-btn,
+.custom-message-box-content .message-ok-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* 모달 취소 버튼 */
+.custom-modal-content .modal-cancel-btn {
+  background-color: #e0e0e0;
+  color: #555;
+}
+
+.custom-modal-content .modal-cancel-btn:hover {
+  background-color: #d0d0d0;
+}
+
+/* 모달 확인 버튼 */
+.custom-modal-content .modal-confirm-btn {
+  background-color: #007bff; /* 기본 파란색 */
+  color: white;
+}
+
+.custom-modal-content .modal-confirm-btn:hover {
+  background-color: #0056b3;
+}
+
+/* 메시지 박스 타입별 헤더 색상 */
+.custom-message-box-overlay.success .custom-message-box-content .message-header h4 {
+  color: #28a745; /* 성공 (녹색) */
+}
+.custom-message-box-overlay.error .custom-message-box-content .message-header h4 {
+  color: #dc3545; /* 오류 (빨간색) */
+}
+.custom-message-box-overlay.info .custom-message-box-content .message-header h4 {
+  color: #17a2b8; /* 정보 (하늘색) */
+}
+
+/* 메시지 박스 확인 버튼 */
+.custom-message-box-content .message-ok-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.custom-message-box-content .message-ok-btn:hover {
+  background-color: #0056b3;
 }
 
 /* 반응형 디자인 */

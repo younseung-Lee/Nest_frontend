@@ -20,9 +20,13 @@
 
 /* 모달 컨테이너 */
 .mentor-profile-registration-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
   background: white;
   border-radius: 24px;
-  width: 100%;
+  width: 400px;
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
@@ -60,7 +64,8 @@
   -webkit-text-fill-color: transparent;
   margin: 0 0 32px 0;
   text-align: center;
-  padding: 32px 32px 0 32px;
+  padding-left: 32px;
+  padding-right: 32px;
   position: relative;
 }
 
@@ -99,25 +104,25 @@
 .mentor-profile-registration-modal input[type="url"],
 .mentor-profile-registration-modal textarea,
 .mentor-profile-registration-modal select {
-  padding: 16px !important;
-  border: 2px solid #6b7280 !important;
-  border-radius: 12px !important;
-  font-size: 16px !important;
-  transition: all 0.3s ease !important;
-  background: white !important;
-  color: #374151 !important;
-  outline: none !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  padding: 16px;
+  border: 2px solid #6b7280;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: white;
+  color: #374151;
+  outline: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .mentor-profile-registration-modal input[type="text"]:focus,
 .mentor-profile-registration-modal input[type="url"]:focus,
 .mentor-profile-registration-modal textarea:focus,
 .mentor-profile-registration-modal select:focus {
-  border-color: #3b82f6 !important;
-  background: white !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-  transform: translateY(-1px) !important;
+  border-color: #3b82f6;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  transform: translateY(-1px);
 }
 
 /* 텍스트에어리어 특별 스타일 */
@@ -260,6 +265,23 @@
   transform: translateY(-1px);
 }
 
+/* 취소 버튼 비활성화 스타일 */
+.modal-btns button[type="button"]:disabled {
+  background: #f1f5f9 !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  border-color: #d1d5db !important;
+  transform: none !important;
+  pointer-events: none !important;
+}
+
+.modal-btns button[type="button"]:disabled:hover {
+  background: #f1f5f9 !important;
+  color: #9ca3af !important;
+  transform: none !important;
+  cursor: not-allowed !important;
+}
+
 /* 등록 버튼 */
 .modal-btns button[type="submit"] {
   background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
@@ -277,19 +299,135 @@
   transform: translateY(0);
 }
 
+/* 에러 메시지 스타일 */
+.error-message {
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 4px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(220, 38, 38, 0.05));
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.error-message::before {
+  content: '⚠️';
+  font-size: 14px;
+}
+
+/* 카테고리 에러 메시지 스타일 */
+.category-error-message {
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(220, 38, 38, 0.08));
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 8px;
+  border-left: 4px solid #ef4444;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.category-error-message::before {
+  content: '⚠️';
+  font-size: 14px;
+}
+
+/* 백엔드 에러 메시지 스타일 */
+.submit-error-message {
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(185, 28, 28, 0.1));
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 8px;
+  border-left: 4px solid #dc2626;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.submit-error-message::before {
+  content: '❌';
+  font-size: 14px;
+}
+
+/* 로딩 중 버튼 스타일 */
+.modal-btns button[type="submit"]:disabled {
+  position: relative;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(156, 163, 175, 0.3);
+  border-top: 2px solid #6b7280;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 6px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 비활성화된 버튼 스타일 */
+.modal-btns button[type="submit"].disabled,
+.modal-btns button[type="submit"]:disabled {
+  background: #e5e7eb !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+  border: 1px solid #d1d5db !important;
+  pointer-events: none !important;
+}
+
+.modal-btns button[type="submit"].disabled:hover,
+.modal-btns button[type="submit"]:disabled:hover {
+  background: #e5e7eb !important;
+  color: #9ca3af !important;
+  transform: none !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+}
+
+/* 에러가 있는 카테고리 선택박스 스타일 */
+.mentor-profile-registration-modal select.error {
+  border-color: #ef4444 !important;
+  background-color: rgba(254, 242, 242, 0.7) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.mentor-profile-registration-modal select.error:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+}
+
 /* 폼 유효성 검사 스타일 제거/덮어쓰기 */
 .mentor-profile-registration-modal input:invalid,
 .mentor-profile-registration-modal textarea:invalid,
 .mentor-profile-registration-modal select:invalid {
-  border-color: #6b7280 !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  border-color: #6b7280;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .mentor-profile-registration-modal input:invalid:focus,
 .mentor-profile-registration-modal textarea:invalid:focus,
 .mentor-profile-registration-modal select:invalid:focus {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 /* 애니메이션 */
@@ -383,5 +521,72 @@
   .mentor-profile-registration-modal textarea,
   .mentor-profile-registration-modal select {
     padding: 12px;
+  }
+}
+
+/* 간단한 알림 스타일 */
+.simple-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  animation: slideInNotification 0.3s ease-out;
+  min-width: 250px;
+}
+
+.simple-notification.success {
+  border-left: 4px solid #10b981;
+}
+
+.simple-notification.error {
+  border-left: 4px solid #ef4444;
+}
+
+.simple-notification.warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.simple-notification.success .notification-content {
+  color: #10b981;
+}
+
+.simple-notification.error .notification-content {
+  color: #ef4444;
+}
+
+.simple-notification.warning .notification-content {
+  color: #f59e0b;
+}
+
+@keyframes slideInNotification {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 알림 반응형 */
+@media (max-width: 640px) {
+  .simple-notification {
+    top: 16px;
+    right: 16px;
+    left: 16px;
+    min-width: auto;
   }
 }

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { inquiryAPI } from '../services/api';
+import React, {useState, useEffect} from 'react';
+import {inquiryAPI, reservationAPI, userAPI} from '../services/api';
 import './Inquiry.css';
+import {useNavigate} from 'react-router-dom';
 
 // 카테고리 한글 매핑 객체
 const CATEGORY_LABELS = {
@@ -172,7 +173,8 @@ const NOTICE_LIST = [
   }
 ];
 
-const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
+const Inquiry = ({onBack, initialTab = 'inquiries'}) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(initialTab); // 'faq', 'inquiries', 'myInquiries', 'create', 'notice'
   const [inquiries, setInquiries] = useState([]);
   const [selectedInquiry, setSelectedInquiry] = useState(null);
@@ -180,10 +182,112 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
   const [formData, setFormData] = useState({
     title: '',
     category: '',
-    content: ''
+    content: '',
+    reservationId: ''
   });
   const [loading, setLoading] = useState(false);
   const [faqOpenIndex, setFaqOpenIndex] = useState(null); // FAQ 오픈된 항목 인덱스
+  const [reservations, setReservations] = useState([]); // 사용자 예약 목록
+
+  // 사용자 예약 목록 조회
+  const fetchReservations = async () => {
+    try {
+      console.log('🔍 예약 목록 조회 시작...');
+      const response = await reservationAPI.getReservations();
+      console.log('📋 예약 목록 원본 응답:', response);
+
+      if (response.data) {
+        let reservationList = response.data.data?.content || response.data.data
+            || response.data;
+        console.log('📋 파싱된 예약 목록:', reservationList);
+
+        if (Array.isArray(reservationList) && reservationList.length > 0) {
+          console.log('📋 첫 번째 예약 데이터 구조:', reservationList[0]);
+
+          // 각 예약에 대해 멘토 이름을 가져와서 표시용 데이터 생성
+          const enrichedReservations = await Promise.all(
+              reservationList.map(async (reservation) => {
+                try {
+                  console.log(`🔍 예약 ${reservation.id} 처리 중...`, reservation);
+
+                  // 멘토 이름 가져오기
+                  let mentorName = '멘토 정보 없음';
+                  if (reservation.mentor && typeof reservation.mentor
+                      === 'number') {
+                    try {
+                      console.log(
+                          `👤 멘토 ID ${reservation.mentor}로 사용자 정보 조회 중...`);
+                      const mentorResponse = await userAPI.getUserById(
+                          reservation.mentor);
+                      console.log(`👤 멘토 정보 응답:`, mentorResponse);
+
+                      if (mentorResponse.data?.data) {
+                        const mentorData = mentorResponse.data.data;
+                        mentorName = mentorData.name || mentorData.nickName
+                            || `멘토 ${reservation.mentor}`;
+                        console.log(`✅ 멘토 이름 조회 성공: ${mentorName}`);
+                      }
+                    } catch (mentorError) {
+                      console.warn(
+                          `⚠️ 멘토 정보 조회 실패 (ID: ${reservation.mentor}):`,
+                          mentorError);
+                      mentorName = `멘토 ${reservation.mentor}`;
+                    }
+                  }
+
+                  // 날짜 및 시간 파싱
+                  let reservationDate = '날짜 미정';
+                  let startTime = '시간 미정';
+
+                  if (reservation.reservationStartAt) {
+                    try {
+                      // "2025-06-27 09:00:00" 형식에서 날짜와 시간 추출
+                      const [datePart, timePart] = reservation.reservationStartAt.split(
+                          ' ');
+                      reservationDate = datePart; // "2025-06-27"
+                      startTime = timePart ? timePart.substring(0, 5) : '시간 미정'; // "09:00"
+                      console.log(
+                          `📅 날짜 파싱 결과: ${reservationDate}, 시간: ${startTime}`);
+                    } catch (dateError) {
+                      console.warn('⚠️ 날짜 파싱 실패:', dateError);
+                    }
+                  }
+
+                  const enrichedReservation = {
+                    ...reservation,
+                    mentorName,
+                    reservationDate,
+                    startTime
+                  };
+
+                  console.log(`✅ 예약 ${reservation.id} 처리 완료:`,
+                      enrichedReservation);
+                  return enrichedReservation;
+                } catch (error) {
+                  console.error(`❌ 예약 ${reservation.id} 처리 실패:`, error);
+                  // 처리 실패시 기본 데이터 사용
+                  return {
+                    ...reservation,
+                    mentorName: '멘토 정보 없음',
+                    reservationDate: '날짜 미정',
+                    startTime: '시간 미정'
+                  };
+                }
+              })
+          );
+
+          console.log('✅ 최종 예약 목록 (멘토 이름 포함):', enrichedReservations);
+          setReservations(enrichedReservations);
+        } else {
+          console.log('⚠️ 예약 목록이 비어있음');
+          setReservations([]);
+        }
+      }
+    } catch (error) {
+      console.error('❌ 예약 목록 조회 실패:', error);
+      setReservations([]);
+    }
+  };
 
   // 문의 목록 조회
   const fetchInquiries = async () => {
@@ -191,7 +295,8 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
       setLoading(true);
       const response = await inquiryAPI.getAllComplaints();
       if (response.data) {
-        let list = response.data.data?.content || response.data.data || response.data;
+        let list = response.data.data?.content || response.data.data
+            || response.data;
         setInquiries(list);
       }
     } catch (error) {
@@ -207,11 +312,12 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
       setLoading(true);
       const response = await inquiryAPI.getUserInquiries();
       if (response.data) {
-        let list = response.data.data?.content || response.data.data || response.data;
+        let list = response.data.data?.content || response.data.data
+            || response.data;
         setInquiries(list);
       }
     } catch (error) {
-      alert('내 문의 내역을 불러오는데 오류가 발생했습니다.');
+
     } finally {
       setLoading(false);
     }
@@ -223,7 +329,26 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
       setLoading(true);
       const response = await inquiryAPI.getUserInquiryDetail(complaintId);
       if (response.data) {
-        setSelectedInquiry(response.data.data || response.data);
+        let inquiryDetail = response.data.data || response.data;
+
+        // 답변이 있는 경우 답변 조회
+        if (inquiryDetail.status?.toLowerCase() === 'resolved'
+            || inquiryDetail.status?.toLowerCase() === 'answered') {
+          try {
+            const answerResponse = await inquiryAPI.getUserAnswer(complaintId);
+            if (answerResponse.data) {
+              const answerData = answerResponse.data.data
+                  || answerResponse.data;
+              inquiryDetail.answer = answerData.contents || answerData.answer;
+              inquiryDetail.answeredAt = answerData.createdAt;
+            }
+          } catch (answerError) {
+            console.error('답변 조회 실패:', answerError);
+            // 답변 조회 실패해도 문의 상세는 표시
+          }
+        }
+
+        setSelectedInquiry(inquiryDetail);
       }
     } catch (error) {
       alert('문의 상세 정보를 불러오는데 오류가 발생했습니다.');
@@ -234,12 +359,17 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
 
   // 문의 삭제
   const deleteInquiry = async (complaintId) => {
-    if (!window.confirm('정말로 이 문의를 삭제하시겠습니까?')) return;
+    if (!window.confirm('정말로 이 문의를 삭제하시겠습니까?')) {
+      return;
+    }
     try {
       setLoading(true);
       await inquiryAPI.deleteUserInquiry(complaintId);
       setInquiries(prev => prev.filter(inquiry => inquiry.id !== complaintId));
-      if (selectedInquiry && selectedInquiry.id === complaintId) setSelectedInquiry(null);
+      if (selectedInquiry && selectedInquiry.id
+          === complaintId) {
+        setSelectedInquiry(null);
+      }
       alert('문의가 성공적으로 삭제되었습니다.');
     } catch (error) {
       alert('문의 삭제 중 오류가 발생했습니다.');
@@ -261,43 +391,61 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
 
   // 문의 종류
   const categories = [
-    { value: '', label: '문의 종류를 선택해주세요' },
-    { value: 'COMPLAINT', label: '민원' },
-    { value: 'INQUIRY_ACCOUNT', label: '계정 관련 문의' },
-    { value: 'INQUIRY_CHAT', label: '채팅 관련 문의' },
-    { value: 'INQUIRY_PAY', label: '결제 관련 문의' },
-    { value: 'INQUIRY_RESERVATION', label: '예약 관련 문의' },
-    { value: 'INQUIRY_TICKET', label: '이용권 관련 문의' },
-    { value: 'INQUIRY_PROFILE', label: '프로필 관련 문의' }
+    {value: '', label: '문의 종류를 선택해주세요'},
+    {value: 'COMPLAINT', label: '민원'},
+    {value: 'INQUIRY_ACCOUNT', label: '계정 관련 문의'},
+    {value: 'INQUIRY_CHAT', label: '채팅 관련 문의'},
+    {value: 'INQUIRY_PAY', label: '결제 관련 문의'},
+    {value: 'INQUIRY_RESERVATION', label: '예약 관련 문의'},
+    {value: 'INQUIRY_TICKET', label: '이용권 관련 문의'},
+    {value: 'INQUIRY_PROFILE', label: '프로필 관련 문의'}
   ];
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const {name, value} = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+
+    // 문의 종류가 "민원"으로 변경되면 예약 목록 조회
+    if (name === 'category' && value === 'COMPLAINT') {
+      fetchReservations();
+    }
   };
 
   // 문의 등록
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title.trim()) return alert('제목을 입력해주세요.');
-    if (!formData.category) return alert('문의 종류를 선택해주세요.');
-    if (!formData.content.trim()) return alert('문의 내용을 입력해주세요.');
-    if (formData.title.trim().length < 2) return alert('제목은 2글자 이상 입력해주세요.');
-    if (formData.content.trim().length < 10) return alert('문의 내용은 10글자 이상 입력해주세요.');
+    if (!formData.title.trim()) {
+      return alert('제목을 입력해주세요.');
+    }
+    if (!formData.category) {
+      return alert('문의 종류를 선택해주세요.');
+    }
+    if (!formData.content.trim()) {
+      return alert('문의 내용을 입력해주세요.');
+    }
+    if (formData.title.trim().length < 2) {
+      return alert('제목은 2글자 이상 입력해주세요.');
+    }
+    if (formData.content.trim().length < 10) {
+      return alert(
+          '문의 내용은 10글자 이상 입력해주세요.');
+    }
 
     try {
       setLoading(true);
       const requestData = {
         title: formData.title.trim(),
         type: formData.category,
-        contents: formData.content.trim()
+        contents: formData.content.trim(),
+        ...(formData.category === 'COMPLAINT'
+            && {reservationId: formData.reservationId})
       };
       const response = await inquiryAPI.createInquiry(requestData);
       if (response.data) {
-        setFormData({ title: '', category: '', content: '' });
+        setFormData({title: '', category: '', content: '', reservationId: ''});
         setActiveTab('myInquiries');
         alert('문의가 성공적으로 등록되었습니다.');
         fetchMyInquiries();
@@ -311,19 +459,37 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
 
   // 상태 텍스트/클래스
   const getStatusText = (status) => {
-    switch (status) {
-      case 'ANSWERED': case 'answered': return '답변완료';
-      case 'PENDING': case 'pending': default: return '답변대기';
+    switch (status?.toLowerCase()) {
+      case 'resolved':
+        return '답변완료';
+      case 'answered':
+        return '답변완료';
+      case 'pending':
+        return '답변대기';
+      case 'closed':
+        return '종료';
+      default:
+        return status || '답변대기';
     }
   };
   const getStatusClass = (status) => {
-    switch (status) {
-      case 'ANSWERED': case 'answered': return 'status-answered';
-      case 'PENDING': case 'pending': default: return 'status-pending';
+    switch (status?.toLowerCase()) {
+      case 'resolved':
+        return 'status-answered';
+      case 'answered':
+        return 'status-answered';
+      case 'pending':
+        return 'status-pending';
+      case 'closed':
+        return 'status-closed';
+      default:
+        return 'status-pending';
     }
   };
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) {
+      return '';
+    }
     const date = new Date(dateString);
     return date.toISOString().split('T')[0];
   };
@@ -337,56 +503,63 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
   const toggleFaq = (idx) => setFaqOpenIndex(faqOpenIndex === idx ? null : idx);
 
   return (
-      <div className="inquiry-page">
-        {/* 사이드바 */}
-        <div className="inquiry-sidebar">
-          <div className="sidebar-header"><h2>고객센터</h2></div>
-          <div className="sidebar-menu">
-            <div
-                className={`menu-item ${activeTab === 'faq' ? 'current' : ''}`}
-                onClick={() => { setActiveTab('faq'); setSelectedInquiry(null); }}
-                style={{ cursor: 'pointer' }}
-            >자주 묻는 질문</div>
-            <div
-                className={`menu-item ${activeTab === 'inquiries' ? 'current' : ''}`}
-                onClick={() => { setActiveTab('inquiries'); setSelectedInquiry(null); }}
-            >문의 사항</div>
-            <div
-                className={`menu-item ${activeTab === 'myInquiries' ? 'current' : ''}`}
-                onClick={() => { setActiveTab('myInquiries'); setSelectedInquiry(null); }}
-            >내 문의 내역</div>
-            <div
-                className={`menu-item ${activeTab === 'create' ? 'current' : ''}`}
+      <div className="inquiry-page-new">
+        {/* 탭 네비게이션 */}
+        <div className="inquiry-nav-tabs">
+          <div className="tab-buttons">
+            <button
+                className={`tab-button ${activeTab === 'faq' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveTab('faq');
+                  setSelectedInquiry(null);
+                }}
+            >
+              자주 묻는 질문
+            </button>
+            <button
+                className={`tab-button ${activeTab === 'inquiries' ? 'active'
+                    : ''}`}
+                onClick={() => {
+                  setActiveTab('inquiries');
+                  setSelectedInquiry(null);
+                }}
+            >
+              문의 사항
+            </button>
+            <button
+                className={`tab-button ${activeTab === 'myInquiries' ? 'active'
+                    : ''}`}
+                onClick={() => {
+                  setActiveTab('myInquiries');
+                  setSelectedInquiry(null);
+                }}
+            >
+              내 문의 내역
+            </button>
+            <button
+                className={`tab-button ${activeTab === 'create' ? 'active'
+                    : ''}`}
                 onClick={() => setActiveTab('create')}
-            >문의하기</div>
-            <div
-                className={`menu-item ${activeTab === 'notice' ? 'current' : ''}`}
-                onClick={() => { setActiveTab('notice'); setSelectedInquiry(null); setSelectedNotice(null); }}
-                style={{ cursor: 'pointer' }}
-            >공지사항</div>
+            >
+              문의하기
+            </button>
+            <button
+                className={`tab-button ${activeTab === 'notice' ? 'active'
+                    : ''}`}
+                onClick={() => {
+                  setActiveTab('notice');
+                  setSelectedInquiry(null);
+                  setSelectedNotice(null);
+                }}
+            >
+              공지사항
+            </button>
           </div>
         </div>
 
         {/* 메인 컨텐츠 */}
-        <div className="inquiry-main">
-          <div className="inquiry-header">
-            <button className="back-button" onClick={onBack}>← 돌아가기</button>
-            <h1>
-              {activeTab === 'faq'
-                  ? '자주 묻는 질문'
-                  : activeTab === 'notice'
-                      ? (selectedNotice ? '공지사항 상세' : '공지사항')
-                      : selectedInquiry
-                          ? '문의 상세'
-                          : activeTab === 'myInquiries'
-                              ? '내 문의 내역'
-                              : activeTab === 'inquiries'
-                                  ? '문의 사항'
-                                  : '문의하기'}
-            </h1>
-          </div>
-
-          <div className="tab-content">
+        <div className="inquiry-main-content">
+          <div className="inquiry-content-container">
             {/* 공지사항 탭 */}
             {activeTab === 'notice' && (
                 <div className="notice-container">
@@ -394,7 +567,8 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
                       // 공지사항 상세
                       <div className="notice-detail">
                         <div className="detail-header">
-                          <button className="back-button" onClick={handleBackToNoticeList}>
+                          <button className="inquiry-back-button"
+                                  onClick={handleBackToNoticeList}>
                             <i className="arrow-icon">←</i> 목록으로
                           </button>
                         </div>
@@ -412,11 +586,13 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
                             <div className="detail-meta">
                               <div className="meta-item">
                                 <span className="meta-label">작성일</span>
-                                <span className="meta-value">{selectedNotice.date}</span>
+                                <span
+                                    className="meta-value">{selectedNotice.date}</span>
                               </div>
                               <div className="meta-item">
                                 <span className="meta-label">조회수</span>
-                                <span className="meta-value">{selectedNotice.views?.toLocaleString()}</span>
+                                <span
+                                    className="meta-value">{selectedNotice.views?.toLocaleString()}</span>
                               </div>
                             </div>
                           </div>
@@ -428,7 +604,8 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
                                 <div className="content-icon">📢</div>
                               </div>
                               <div className="content-body">
-                                <pre className="notice-content">{selectedNotice.content}</pre>
+                                <pre
+                                    className="notice-content">{selectedNotice.content}</pre>
                               </div>
                             </div>
                           </div>
@@ -438,25 +615,30 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
                       // 공지사항 목록
                       <div className="notice-list">
                         <h3>공지사항</h3>
-                        <p className="notice-description">Nest.dev의 새로운 소식과 중요한 공지사항을 확인하세요.</p>
+                        <p className="notice-description">Nest.dev의 새로운 소식과 중요한
+                          공지사항을 확인하세요.</p>
 
                         <div className="notice-items">
                           {NOTICE_LIST.map(notice => (
                               <div
                                   key={notice.id}
-                                  className={`notice-item ${notice.important ? 'important' : ''}`}
+                                  className={`notice-item ${notice.important
+                                      ? 'important' : ''}`}
                                   onClick={() => handleNoticeClick(notice)}
                               >
                                 <div className="notice-header">
                                   <div className="notice-title-section">
                                     {notice.important && (
-                                        <span className="important-badge">중요</span>
+                                        <span
+                                            className="important-badge">중요</span>
                                     )}
                                     <h4 className="notice-title">{notice.title}</h4>
                                   </div>
                                   <div className="notice-meta">
-                                    <span className="notice-date">{notice.date}</span>
-                                    <span className="notice-views">조회 {notice.views?.toLocaleString()}</span>
+                                    <span
+                                        className="notice-date">{notice.date}</span>
+                                    <span
+                                        className="notice-views">조회 {notice.views?.toLocaleString()}</span>
                                   </div>
                                 </div>
                                 <div className="notice-preview">
@@ -484,26 +666,30 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
                                 className="faq-question"
                                 onClick={() => toggleFaq(idx)}
                             >
-                              <span className="faq-question-text">{faq.question}</span>
+                              <span
+                                  className="faq-question-text">{faq.question}</span>
                               <svg
-                                  className={`faq-toggle-icon ${faqOpenIndex === idx ? 'open' : ''}`}
+                                  className={`faq-toggle-icon ${faqOpenIndex
+                                  === idx ? 'open' : ''}`}
                                   viewBox="0 0 16 16"
                                   fill="none"
                                   xmlns="http://www.w3.org/2000/svg"
                               >
-                                <path 
-                                    d="M13.3334 5.33317L8.00008 10.6665L2.66675 5.33317" 
-                                    stroke="#555" 
-                                    strokeWidth="1.33333" 
-                                    strokeLinecap="round" 
-                                    strokeLinejoin="round" 
+                                <path
+                                    d="M13.3334 5.33317L8.00008 10.6665L2.66675 5.33317"
+                                    stroke="#555"
+                                    strokeWidth="1.33333"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
                                 />
                               </svg>
                             </div>
-                            <div className={`faq-answer ${faqOpenIndex === idx ? 'open' : ''}`}>
+                            <div className={`faq-answer ${faqOpenIndex === idx
+                                ? 'open' : ''}`}>
                               <div className="faq-answer-content">
                                 <span className="faq-answer-bullet">·</span>
-                                <span className="faq-answer-text">{faq.answer}</span>
+                                <span
+                                    className="faq-answer-text">{faq.answer}</span>
                               </div>
                             </div>
                           </div>
@@ -515,20 +701,22 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
 
             {/* FAQ가 아닌 탭들만 문의/폼/상세 노출 */}
             {activeTab !== 'faq' && activeTab !== 'notice' && (
-                <>
+                <React.Fragment>
                   {selectedInquiry ? (
                       // 문의 상세
                       <div className="inquiry-detail">
                         {/* ...문의 상세 기존 코드 붙이기... */}
                         <div className="detail-header">
-                          <button className="back-button" onClick={handleBackToList}>
+                          <button className="inquiry-back-button"
+                                  onClick={handleBackToList}>
                             <i className="arrow-icon">←</i> 목록으로
                           </button>
                           <div className="detail-actions">
                             {activeTab === 'myInquiries' && (
                                 <button
                                     className="delete-button"
-                                    onClick={() => deleteInquiry(selectedInquiry.id)}
+                                    onClick={() => deleteInquiry(
+                                        selectedInquiry.id)}
                                     disabled={loading}
                                     title="문의 삭제"
                                 >
@@ -544,9 +732,11 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
                               <h2 className="detail-title">{selectedInquiry.title}</h2>
                               <div className="detail-badges">
                           <span className="category-badge">
-                            {getCategoryLabel(selectedInquiry.category || selectedInquiry.type)}
+                            {getCategoryLabel(selectedInquiry.category
+                                || selectedInquiry.type)}
                           </span>
-                                <span className={`status-badge ${getStatusClass(selectedInquiry.status)}`}>
+                                <span className={`status-badge ${getStatusClass(
+                                    selectedInquiry.status)}`}>
                             {getStatusText(selectedInquiry.status)}
                           </span>
                               </div>
@@ -554,12 +744,15 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
                             <div className="detail-meta">
                               <div className="meta-item">
                                 <span className="meta-label">작성일</span>
-                                <span className="meta-value">{formatDate(selectedInquiry.createdAt || selectedInquiry.created_at)}</span>
+                                <span className="meta-value">{formatDate(
+                                    selectedInquiry.createdAt
+                                    || selectedInquiry.created_at)}</span>
                               </div>
                               {selectedInquiry.answeredAt && (
                                   <div className="meta-item">
                                     <span className="meta-label">답변일</span>
-                                    <span className="meta-value">{formatDate(selectedInquiry.answeredAt)}</span>
+                                    <span className="meta-value">{formatDate(
+                                        selectedInquiry.answeredAt)}</span>
                                   </div>
                               )}
                             </div>
@@ -569,10 +762,10 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
                             <div className="content-section">
                               <div className="content-header">
                                 <h3>문의 내용</h3>
-                                <div className="content-icon">💬</div>
                               </div>
                               <div className="content-body">
-                                <p>{selectedInquiry.contents || selectedInquiry.content}</p>
+                                <p>{selectedInquiry.contents
+                                    || selectedInquiry.content}</p>
                               </div>
                             </div>
 
@@ -580,11 +773,19 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
                                 <div className="answer-section">
                                   <div className="answer-header">
                                     <h3>답변</h3>
-                                    <div className="answer-icon">✅</div>
                                   </div>
                                   <div className="answer-content">
-                                    <p>{selectedInquiry.answer}</p>
+                                    <pre
+                                        className="answer-text">{selectedInquiry.answer}</pre>
                                   </div>
+                                </div>
+                            ) : (selectedInquiry.status?.toLowerCase()
+                                === 'resolved'
+                                || selectedInquiry.status?.toLowerCase()
+                                === 'answered') ? (
+                                <div className="loading-answer-section">
+                                  <div className="loading-answer-icon">🔄</div>
+                                  <p>답변을 불러오는 중입니다...</p>
                                 </div>
                             ) : (
                                 <div className="no-answer-section">
@@ -595,94 +796,190 @@ const Inquiry = ({ onBack, initialTab = 'inquiries' }) => {
                           </div>
                         </div>
                       </div>
-                  ) : (activeTab === 'inquiries' || activeTab === 'myInquiries') ? (
-                      // 문의 목록
-                      <div className="inquiries-list">
-                        <h3>{activeTab === 'myInquiries' ? '내 문의 내역' : '문의 사항'}</h3>
-                        {loading ? (
-                            <div className="loading-state"><p>문의 목록을 불러오고 있습니다...</p></div>
-                        ) : inquiries.length === 0 ? (
-                            <div className="empty-state">
-                              <p>등록된 문의가 없습니다.</p>
-                              {activeTab === 'myInquiries' && (
-                                  <button className="create-inquiry-btn" onClick={() => setActiveTab('create')}>문의하기</button>
-                              )}
-                            </div>
-                        ) : (
-                            <div className="inquiries-table">
-                              <div className={`table-header ${activeTab === 'myInquiries' ? 'with-actions' : ''}`}>
-                                <div className="header-cell category">종류</div>
-                                <div className="header-cell title">제목</div>
-                                <div className="header-cell date">작성일</div>
-                                <div className="header-cell status">상태</div>
-                                {activeTab === 'myInquiries' && <div className="header-cell actions">관리</div>}
-                              </div>
-                              {inquiries.map(inquiry => (
-                                  <div key={inquiry.id} className={`table-row ${activeTab === 'myInquiries' ? 'with-actions' : ''}`}>
-                                    <div className="table-cell category">
-                                      <span className="category-badge">{getCategoryLabel(inquiry.category || inquiry.type)}</span>
+                  ) : (activeTab === 'inquiries' || activeTab === 'myInquiries')
+                      ? (
+                          // 문의 목록
+                          <div className="inquiries-list">
+                            <h3>{activeTab === 'myInquiries' ? '내 문의 내역'
+                                : '문의 사항'}</h3>
+                            {loading ? (
+                                <div className="loading-state"><p>문의 목록을 불러오고
+                                  있습니다...</p></div>
+                            ) : inquiries.length === 0 ? (
+                                <div className="empty-state">
+                                  <p>등록된 문의가 없습니다.</p>
+                                  {activeTab === 'myInquiries' && (
+                                      <button className="create-inquiry-btn"
+                                              onClick={() => setActiveTab(
+                                                  'create')}>문의하기</button>
+                                  )}
+                                </div>
+                            ) : (
+                                <div className="inquiries-table">
+                                  <div
+                                      className={`inquiry-table-header ${activeTab
+                                      === 'myInquiries' ? 'with-actions'
+                                          : ''}`}>
+                                    <div
+                                        className="inquiry-header-cell category">종류
                                     </div>
-                                    <div className="table-cell title clickable" onClick={() => handleInquiryClick(inquiry)}>
-                                      {inquiry.title}
+                                    <div
+                                        className="inquiry-header-cell title">제목
                                     </div>
-                                    <div className="table-cell date">
-                                      {formatDate(inquiry.createdAt || inquiry.created_at || inquiry.date)}
+                                    <div
+                                        className="inquiry-header-cell date">작성일
                                     </div>
-                                    <div className="table-cell status">
-                                      <span className={`status-badge ${getStatusClass(inquiry.status)}`}>{getStatusText(inquiry.status)}</span>
+                                    <div
+                                        className="inquiry-header-cell status">상태
                                     </div>
-                                    {activeTab === 'myInquiries' && (
-                                        <div className="table-cell actions">
-                                          <button
-                                              className="action-button delete-action"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                deleteInquiry(inquiry.id);
-                                              }}
-                                              disabled={loading}
-                                              title="문의 삭제"
-                                          >
-                                            🗑️
-                                          </button>
-                                        </div>
-                                    )}
+                                    {activeTab === 'myInquiries' && <div
+                                        className="inquiry-header-cell actions">삭제</div>}
                                   </div>
-                              ))}
-                            </div>
-                        )}
-                      </div>
-                  ) : (
-                      // 문의 등록 폼
-                      <div className="inquiry-form-container">
-                        <h3>새 문의 등록</h3>
-                        <form onSubmit={handleSubmit} className="inquiry-form">
-                          <div className="form-group">
-                            <label htmlFor="title">제목 *</label>
-                            <input type="text" id="title" name="title" value={formData.title}
-                                   onChange={handleInputChange} placeholder="문의 제목을 입력해주세요 (2글자 이상)" required disabled={loading} maxLength={100} minLength={2} />
+                                  {inquiries.map(inquiry => (
+                                      <div key={inquiry.id}
+                                           className={`inquiry-table-row ${activeTab
+                                           === 'myInquiries' ? 'with-actions'
+                                               : ''}`}>
+                                        <div
+                                            className="inquiry-table-cell category">
+                                          <span
+                                              className="category-badge">{getCategoryLabel(
+                                              inquiry.category
+                                              || inquiry.type)}</span>
+                                        </div>
+                                        <div
+                                            className="inquiry-table-cell title clickable"
+                                            onClick={() => handleInquiryClick(
+                                                inquiry)}>
+                                          {inquiry.title}
+                                        </div>
+                                        <div
+                                            className="inquiry-table-cell date">
+                                          {formatDate(inquiry.createdAt
+                                              || inquiry.created_at
+                                              || inquiry.date)}
+                                        </div>
+                                        <div
+                                            className="inquiry-table-cell status">
+                                          <span
+                                              className={`status-badge ${getStatusClass(
+                                                  inquiry.status)}`}>{getStatusText(
+                                              inquiry.status)}</span>
+                                        </div>
+                                        {activeTab === 'myInquiries' && (
+                                            <div
+                                                className="inquiry-table-cell actions">
+                                              <button
+                                                  className="action-button delete-action"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    deleteInquiry(inquiry.id);
+                                                  }}
+                                                  disabled={loading}
+                                                  title="문의 삭제"
+                                              >
+                                                🗑️
+                                              </button>
+                                            </div>
+                                        )}
+                                      </div>
+                                  ))}
+                                </div>
+                            )}
                           </div>
-                          <div className="form-group">
-                            <label htmlFor="category">종류 *</label>
-                            <select id="category" name="category" value={formData.category} onChange={handleInputChange} required disabled={loading}>
-                              {categories.map(category => (
-                                  <option key={category.value} value={category.value} disabled={!category.value}>{category.label}</option>
-                              ))}
-                            </select>
+                      ) : (
+                          // 문의 등록 폼
+                          <div className="inquiry-form-container">
+                            <h3>새 문의 등록</h3>
+                            <form onSubmit={handleSubmit}
+                                  className="inquiry-form">
+                              <div className="form-group">
+                                <label htmlFor="title">제목 *</label>
+                                <input type="text" id="title" name="title"
+                                       value={formData.title}
+                                       onChange={handleInputChange}
+                                       placeholder="문의 제목을 입력해주세요 (2글자 이상)"
+                                       required disabled={loading}
+                                       maxLength={100} minLength={2}/>
+                              </div>
+                              <div className="form-group">
+                                <label htmlFor="category">종류 *</label>
+                                <select id="category" name="category"
+                                        value={formData.category}
+                                        onChange={handleInputChange} required
+                                        disabled={loading}>
+                                  <option value="">문의 종류를 선택해주세요</option>
+                                  <option value="COMPLAINT">민원</option>
+                                  <option value="INQUIRY_ACCOUNT">계정 관련 문의
+                                  </option>
+                                  <option value="INQUIRY_CHAT">채팅 관련 문의</option>
+                                  <option value="INQUIRY_PAY">결제 관련 문의</option>
+                                  <option value="INQUIRY_RESERVATION">예약 관련 문의
+                                  </option>
+                                  <option value="INQUIRY_TICKET">이용권 관련 문의
+                                  </option>
+                                  <option value="INQUIRY_PROFILE">프로필 관련 문의
+                                  </option>
+                                </select>
+                              </div>
+                              {formData.category === 'COMPLAINT' && (
+                                  <div className="form-group">
+                                    <label htmlFor="reservation">관련 예약 내역
+                                      *</label>
+                                    <select id="reservation"
+                                            name="reservationId"
+                                            value={formData.reservationId || ''}
+                                            onChange={handleInputChange}
+                                            required>
+                                      <option value="">예약 내역을 선택해주세요</option>
+                                      {reservations.map(reservation => {
+                                        const mentorName = reservation.mentorName
+                                            || '멘토 정보 없음';
+                                        const reservationDate = reservation.reservationDate
+                                            || '날짜 미정';
+                                        const startTime = reservation.startTime
+                                            || '시간 미정';
+
+                                        return (
+                                            <option key={reservation.id}
+                                                    value={reservation.id}>
+                                              {mentorName} - {reservationDate} {startTime}
+                                            </option>
+                                        );
+                                      })}
+                                      {reservations.length === 0 && (
+                                          <option value="" disabled>예약 내역이
+                                            없습니다</option>
+                                      )}
+                                    </select>
+                                  </div>
+                              )}
+                              <div className="form-group">
+                                <label htmlFor="content">내용 *</label>
+                                <textarea id="content" name="content"
+                                          value={formData.content}
+                                          onChange={handleInputChange}
+                                          placeholder="문의 내용을 상세히 입력해주세요 (10글자 이상)"
+                                          rows="8" required disabled={loading}
+                                          maxLength={1000} minLength={10}/>
+                                <div
+                                    className="char-count">{formData.content.length}/1000
+                                </div>
+                              </div>
+                              <div className="form-actions">
+                                <button type="button" className="cancel-btn"
+                                        onClick={() => setActiveTab(
+                                            'myInquiries')}
+                                        disabled={loading}>취소
+                                </button>
+                                <button type="submit" className="submit-btn"
+                                        disabled={loading}>{loading ? '등록 중...'
+                                    : '문의 등록'}</button>
+                              </div>
+                            </form>
                           </div>
-                          <div className="form-group">
-                            <label htmlFor="content">내용 *</label>
-                            <textarea id="content" name="content" value={formData.content}
-                                      onChange={handleInputChange} placeholder="문의 내용을 상세히 입력해주세요 (10글자 이상)" rows="8" required disabled={loading} maxLength={1000} minLength={10} />
-                            <div className="char-count">{formData.content.length}/1000</div>
-                          </div>
-                          <div className="form-actions">
-                            <button type="button" className="cancel-btn" onClick={() => setActiveTab('myInquiries')} disabled={loading}>취소</button>
-                            <button type="submit" className="submit-btn" disabled={loading}>{loading ? '등록 중...' : '문의 등록'}</button>
-                          </div>
-                        </form>
-                      </div>
-                  )}
-                </>
+                      )}
+                </React.Fragment>
             )}
           </div>
         </div>

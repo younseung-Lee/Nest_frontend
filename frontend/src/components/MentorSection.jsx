@@ -243,7 +243,7 @@ const MentorSection = ({onCategorySelect, onMentorSelect}) => {
                             <div className="mentor-card-shimmer"></div>
                             <div className="mentor-card-content">
                               <div>
-                                <div className="mentor-avatar">
+                                <div className="re-mentor-avatar">
                                   {mentor.imgUrl ? (
                                       <img
                                           src={mentor.imgUrl}
@@ -258,7 +258,7 @@ const MentorSection = ({onCategorySelect, onMentorSelect}) => {
                                       />
                                   ) : null}
                                   <div
-                                      className={`mentor-avatar-text ${!mentor.imgUrl
+                                      className={`re-mentor-avatar-text ${!mentor.imgUrl
                                           ? getMentorGradientClass(mentor.id, 8)
                                           : ''}`}
                                       style={{
@@ -277,8 +277,8 @@ const MentorSection = ({onCategorySelect, onMentorSelect}) => {
                                 {mentor.tags && Array.isArray(mentor.tags)
                                     && mentor.tags.map((tag, tagIndex) => (
                                         <span key={tagIndex}
-                                              className="mentor-tag">
-                            {tag}
+                                              className="mentor-section-tag">
+                            #{tag}
                           </span>
                                     ))}
                               </div>

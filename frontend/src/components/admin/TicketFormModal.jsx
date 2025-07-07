@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import './CouponFormModal.css';
+import { CreditCard, DollarSign, Clock, FileText, RefreshCw } from 'lucide-react';
+import './AdminCommon.css';
 
-const TicketFormModal = ({ ticket, onSave, onClose, saving }) => {
+const TicketFormModal = ({ ticket, onSave, onClose, saving, isDarkMode }) => {
   const [form, setForm] = useState({
     name: '',
     price: '',
@@ -75,84 +76,111 @@ const TicketFormModal = ({ ticket, onSave, onClose, saving }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
+    <div className={`form-modal-overlay ${isDarkMode ? 'dark-mode' : ''}`} onClick={onClose}>
+      <div className="form-modal-content admin-ticket-form-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="form-modal-header">
           <h3>{ticket ? '이용권 수정' : '새 이용권 등록'}</h3>
-          <button className="modal-close" onClick={onClose}>
-            ×
-          </button>
+          <button className="form-modal-close" onClick={onClose}>×</button>
         </div>
-
-        <form onSubmit={handleSubmit} className="modal-form">
-          <div className="form-group">
-            <label>이용권 이름 *</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="예: 1회 상담권"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>가격 *</label>
-            <input
-              type="number"
-              name="price"
-              value={form.price}
-              onChange={handleChange}
-              placeholder="30000"
-              min="0"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>시간 *</label>
-            <select
-              name="ticketTime"
-              value={form.ticketTime}
-              onChange={handleChange}
-              required
-            >
-              <option value="">시간을 선택하세요</option>
-              <option value="MINUTES_20">20분</option>
-              <option value="MINUTES_30">30분</option>
-              <option value="MINUTES_40">40분</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>설명</label>
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              placeholder="이용권에 대한 상세 설명을 입력하세요"
-              rows="4"
-            />
-          </div>
-
-          <div className="modal-actions">
+        <div className="form-modal-body">
+          {saving ? (
+            <div className="loading-state">
+              <RefreshCw className="spinning" size={24} />
+              <p>저장 중...</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="admin-ticket-form">
+              <div className="info-section">
+                <h4>이용권 정보</h4>
+                <div className="info-grid">
+                  <div className="info-item">
+                    <label>이용권 이름</label>
+                    <div className="info-value">
+                      <CreditCard size={16} />
+                      <input
+                        type="text"
+                        name="name"
+                        value={form.name}
+                        onChange={handleChange}
+                        placeholder="예: 1회 상담권"
+                        className="coffee-form-input"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="info-item">
+                    <label>가격</label>
+                    <div className="info-value">
+                      <DollarSign size={16} />
+                      <input
+                        type="number"
+                        name="price"
+                        value={form.price}
+                        onChange={handleChange}
+                        placeholder="30000"
+                        min="0"
+                        className="coffee-form-input"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="info-item">
+                    <label>시간</label>
+                    <div className="info-value">
+                      <Clock size={16} />
+                      <select
+                        name="ticketTime"
+                        value={form.ticketTime}
+                        onChange={handleChange}
+                        className="coffee-form-select"
+                        required
+                      >
+                        <option value="">시간을 선택하세요</option>
+                        <option value="MINUTES_20">20분</option>
+                        <option value="MINUTES_30">30분</option>
+                        <option value="MINUTES_40">40분</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="info-item">
+                    <label>설명</label>
+                    <div className="info-value">
+                      <FileText size={16} />
+                      <textarea
+                        name="description"
+                        value={form.description}
+                        onChange={handleChange}
+                        placeholder="이용권에 대한 상세 설명을 입력하세요"
+                        rows="4"
+                        className="coffee-form-textarea"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          )}
+        </div>
+        <div className="form-modal-actions">
+          <div className="status-actions">
             <button 
               type="button" 
-              className="btn-secondary" 
+              className="coffee-btn coffee-btn-secondary" 
               onClick={onClose}
+              disabled={saving}
             >
               취소
             </button>
             <button 
               type="submit" 
-              className="btn-primary" 
+              className="coffee-btn coffee-btn-primary" 
               disabled={saving}
+              onClick={handleSubmit}
             >
               {saving ? '저장 중...' : (ticket ? '수정' : '등록')}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

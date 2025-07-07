@@ -41,7 +41,7 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
             .company-name {
               font-size: 20px;
               font-weight: bold;
-              color: #1f2937;
+              color: #6d4c41;
               margin-bottom: 5px;
             }
             .company-info {
@@ -58,7 +58,7 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
             .section-title {
               font-size: 13px;
               font-weight: bold;
-              color: #1f2937;
+              color: #6d4c41;
               margin-bottom: 10px;
               border-bottom: 1px solid #eee;
               padding-bottom: 5px;
@@ -80,7 +80,7 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
             }
             .info-value {
               font-weight: bold;
-              color: #1f2937;
+              color: #6d4c41;
               flex: 1;
               text-align: right;
             }
@@ -93,10 +93,10 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
               font-weight: bold;
             }
             .total-amount {
-              color: #059669;
+              color: #ff8f00;
             }
             .discount {
-              color: #059669;
+              color: #ffcc02;
             }
             .footer {
               text-align: center;
@@ -136,7 +136,7 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
             </div>
             <div class="info-row">
               <span class="info-label">결제상태</span>
-              <span class="info-value" style="color: #059669;">${paymentData.status || '결제완료'}</span>
+              <span class="info-value" style="color: #ff8f00;">${paymentData.status || '결제완료'}</span>
             </div>
           </div>
 
@@ -245,19 +245,19 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
     printContent.innerHTML = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #1f2937; margin-bottom: 10px;">MentorConnect</h1>
-          <p style="color: #4b5563; margin: 0;">온라인 멘토링 플랫폼</p>
-          <p style="color: #4b5563; margin: 0;">사업자등록번호: 123-45-67890</p>
+          <h1 style="color: #6d4c41; margin-bottom: 10px;">MentorConnect</h1>
+          <p style="color: #6d4c41; margin: 0;">온라인 멘토링 플랫폼</p>
+          <p style="color: #6d4c41; margin: 0;">사업자등록번호: 123-45-67890</p>
         </div>
         
         <hr style="border: 1px dashed #d1d5db; margin: 20px 0;">
         
         <div style="margin-bottom: 20px;">
           <table style="width: 100%; font-size: 14px;">
-            <tr><td style="color: #4b5563; padding: 5px 0;">거래일시</td><td style="text-align: right; font-weight: bold; color: #1f2937;">${new Date(paymentData.approvedAt).toLocaleString('ko-KR')}</td></tr>
-            <tr><td style="color: #4b5563; padding: 5px 0;">주문번호</td><td style="text-align: right; font-weight: bold; color: #1f2937;">${paymentData.orderId}</td></tr>
-            <tr><td style="color: #4b5563; padding: 5px 0;">결제방법</td><td style="text-align: right; font-weight: bold; color: #1f2937;">${paymentData.method || '토스페이'}</td></tr>
-            <tr><td style="color: #4b5563; padding: 5px 0;">결제상태</td><td style="text-align: right; font-weight: bold; color: #059669;">${paymentData.status || '결제완료'}</td></tr>
+            <tr><td style="color: #6d4c41; padding: 5px 0;">거래일시</td><td style="text-align: right; font-weight: bold; color: #6d4c41;">${new Date(paymentData.approvedAt).toLocaleString('ko-KR')}</td></tr>
+            <tr><td style="color: #6d4c41; padding: 5px 0;">주문번호</td><td style="text-align: right; font-weight: bold; color: #6d4c41;">${paymentData.orderId}</td></tr>
+            <tr><td style="color: #6d4c41; padding: 5px 0;">결제방법</td><td style="text-align: right; font-weight: bold; color: #6d4c41;">${paymentData.method || '토스페이'}</td></tr>
+            <tr><td style="color: #6d4c41; padding: 5px 0;">결제상태</td><td style="text-align: right; font-weight: bold; color: #ff8f00;">${paymentData.status || '결제완료'}</td></tr>
           </table>
         </div>
 
@@ -265,25 +265,25 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
 
         ${paymentData.customerInfo ? `
         <div style="margin-bottom: 20px;">
-          <h3 style="color: #1f2937; margin-bottom: 10px;">고객 정보</h3>
-          <div style="background: #f9fafb; padding: 15px; border-radius: 8px;">
-            <p style="margin: 3px 0; color: #1f2937;"><strong>이름:</strong> ${paymentData.customerInfo.name}</p>
-            <p style="margin: 3px 0; color: #1f2937;"><strong>이메일:</strong> ${paymentData.customerInfo.email}</p>
-            <p style="margin: 3px 0; color: #1f2937;"><strong>전화번호:</strong> ${paymentData.customerInfo.phone}</p>
+          <h3 style="color: #6d4c41; margin-bottom: 10px;">고객 정보</h3>
+          <div style="background: #fff8e1; padding: 15px; border-radius: 8px;">
+            <p style="margin: 3px 0; color: #6d4c41;"><strong>이름:</strong> ${paymentData.customerInfo.name}</p>
+            <p style="margin: 3px 0; color: #6d4c41;"><strong>이메일:</strong> ${paymentData.customerInfo.email}</p>
+            <p style="margin: 3px 0; color: #6d4c41;"><strong>전화번호:</strong> ${paymentData.customerInfo.phone}</p>
           </div>
         </div>
         <hr style="border: 1px dashed #d1d5db; margin: 20px 0;">
         ` : ''}
 
         <div style="margin-bottom: 20px;">
-          <h3 style="color: #1f2937; margin-bottom: 10px;">서비스 정보</h3>
-          <div style="background: #f9fafb; padding: 15px; border-radius: 8px;">
-            <p style="margin: 3px 0; color: #1f2937;"><strong>멘토:</strong> ${bookingInfo.mentorName || '멘토 정보 없음'}</p>
-            <p style="margin: 3px 0; color: #1f2937;"><strong>서비스:</strong> ${bookingInfo.ticketName || '멘토링 서비스'}</p>
-            <p style="margin: 3px 0; color: #1f2937;"><strong>예약일:</strong> ${bookingInfo.reservationDate || '날짜 미정'}</p>
-            <p style="margin: 3px 0; color: #1f2937;"><strong>시간:</strong> ${bookingInfo.reservationTime || '시간 미정'}</p>
-            ${paymentData.reservationId ? `<p style="margin: 3px 0; color: #1f2937;"><strong>예약번호:</strong> ${paymentData.reservationId}</p>` : ''}
-            ${paymentData.ticketId ? `<p style="margin: 3px 0; color: #1f2937;"><strong>티켓번호:</strong> ${paymentData.ticketId}</p>` : ''}
+          <h3 style="color: #6d4c41; margin-bottom: 10px;">서비스 정보</h3>
+          <div style="background: #fff8e1; padding: 15px; border-radius: 8px;">
+            <p style="margin: 3px 0; color: #6d4c41;"><strong>멘토:</strong> ${bookingInfo.mentorName || '멘토 정보 없음'}</p>
+            <p style="margin: 3px 0; color: #6d4c41;"><strong>서비스:</strong> ${bookingInfo.ticketName || '멘토링 서비스'}</p>
+            <p style="margin: 3px 0; color: #6d4c41;"><strong>예약일:</strong> ${bookingInfo.reservationDate || '날짜 미정'}</p>
+            <p style="margin: 3px 0; color: #6d4c41;"><strong>시간:</strong> ${bookingInfo.reservationTime || '시간 미정'}</p>
+            ${paymentData.reservationId ? `<p style="margin: 3px 0; color: #6d4c41;"><strong>예약번호:</strong> ${paymentData.reservationId}</p>` : ''}
+            ${paymentData.ticketId ? `<p style="margin: 3px 0; color: #6d4c41;"><strong>티켓번호:</strong> ${paymentData.ticketId}</p>` : ''}
           </div>
         </div>
 
@@ -291,18 +291,18 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
 
         <div style="margin-bottom: 20px;">
           <table style="width: 100%; font-size: 14px;">
-            <tr><td style="color: #1f2937; padding: 5px 0;">서비스 이용료</td><td style="text-align: right; color: #1f2937;">${Number(bookingInfo.originalAmount || paymentData.amount).toLocaleString()}원</td></tr>
-            ${bookingInfo.discountAmount > 0 ? `<tr><td style="color: #059669; padding: 5px 0;">🎫 쿠폰 할인</td><td style="text-align: right; color: #059669;">-${Number(bookingInfo.discountAmount).toLocaleString()}원</td></tr>` : ''}
+            <tr><td style="color: #6d4c41; padding: 5px 0;">서비스 이용료</td><td style="text-align: right; color: #6d4c41;">${Number(bookingInfo.originalAmount || paymentData.amount).toLocaleString()}원</td></tr>
+            ${bookingInfo.discountAmount > 0 ? `<tr><td style="color: #ffcc02; padding: 5px 0;">🎫 쿠폰 할인</td><td style="text-align: right; color: #ffcc02;">-${Number(bookingInfo.discountAmount).toLocaleString()}원</td></tr>` : ''}
             <tr style="border-top: 1px solid #d1d5db; padding-top: 10px;">
-              <td style="color: #1f2937; padding: 10px 0 5px 0; font-size: 16px;"><strong>총 결제금액</strong></td>
-              <td style="text-align: right; color: #059669; font-size: 16px; font-weight: bold; padding: 10px 0 5px 0;">${Number(paymentData.amount).toLocaleString()}원</td>
+              <td style="color: #6d4c41; padding: 10px 0 5px 0; font-size: 16px;"><strong>총 결제금액</strong></td>
+              <td style="text-align: right; color: #ff8f00; font-size: 16px; font-weight: bold; padding: 10px 0 5px 0;">${Number(paymentData.amount).toLocaleString()}원</td>
             </tr>
           </table>
         </div>
 
         <hr style="border: 1px dashed #d1d5db; margin: 20px 0;">
 
-        <div style="text-align: center; font-size: 12px; color: #6b7280;">
+        <div style="text-align: center; font-size: 12px; color: #6d4c41;">
           <p>문의: 고객센터 1588-1234</p>
           <p>이메일: support@mentorconnect.com</p>
           <p style="margin-top: 15px;">이 영수증은 전자상거래법에 따른 정식 영수증입니다.</p>
@@ -368,12 +368,12 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
       <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* 헤더 */}
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-bold" style={{ color: '#1f2937' }}>영수증</h2>
+          <h2 className="text-xl font-bold" style={{ color: '#6d4c41' }}>영수증</h2>
           <button 
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <X className="w-5 h-5" style={{ color: '#1f2937' }} />
+            <X className="w-5 h-5" style={{ color: '#6d4c41' }} />
           </button>
         </div>
 
@@ -382,9 +382,9 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
           <div className="bg-white p-6 rounded-lg shadow-sm border-2 border-dashed border-gray-200">
             {/* 회사 정보 */}
             <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold mb-2" style={{ color: '#1f2937' }}>MentorConnect</h3>
-              <p className="text-sm" style={{ color: '#4b5563' }}>온라인 멘토링 플랫폼</p>
-              <p className="text-sm" style={{ color: '#4b5563' }}>사업자등록번호: 123-45-67890</p>
+              <h3 className="text-2xl font-bold mb-2" style={{ color: '#6d4c41' }}>MentorConnect</h3>
+              <p className="text-sm" style={{ color: '#6d4c41' }}>온라인 멘토링 플랫폼</p>
+              <p className="text-sm" style={{ color: '#6d4c41' }}>사업자등록번호: 123-45-67890</p>
             </div>
 
             {/* 구분선 */}
@@ -393,24 +393,24 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
             {/* 거래 정보 */}
             <div className="space-y-3 mb-6">
               <div className="flex justify-between text-sm">
-                <span style={{ color: '#4b5563' }}>거래일시</span>
-                <span className="font-medium" style={{ color: '#1f2937' }}>{new Date(paymentData.approvedAt).toLocaleString('ko-KR')}</span>
+                <span style={{ color: '#6d4c41' }}>거래일시</span>
+                <span className="font-medium" style={{ color: '#6d4c41' }}>{new Date(paymentData.approvedAt).toLocaleString('ko-KR')}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span style={{ color: '#4b5563' }}>주문번호</span>
-                <span className="font-medium" style={{ color: '#1f2937' }}>{paymentData.orderId}</span>
+                <span style={{ color: '#6d4c41' }}>주문번호</span>
+                <span className="font-medium" style={{ color: '#6d4c41' }}>{paymentData.orderId}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span style={{ color: '#4b5563' }}>결제키</span>
-                <span className="font-medium text-xs" style={{ color: '#1f2937' }}>{paymentData.paymentKey}</span>
+                <span style={{ color: '#6d4c41' }}>결제키</span>
+                <span className="font-medium text-xs" style={{ color: '#6d4c41' }}>{paymentData.paymentKey}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span style={{ color: '#4b5563' }}>결제방법</span>
-                <span className="font-medium" style={{ color: '#1f2937' }}>{paymentData.method || '토스페이'}</span>
+                <span style={{ color: '#6d4c41' }}>결제방법</span>
+                <span className="font-medium" style={{ color: '#6d4c41' }}>{paymentData.method || '토스페이'}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span style={{ color: '#4b5563' }}>결제상태</span>
-                <span className="font-medium" style={{ color: '#059669' }}>{paymentData.status || '결제완료'}</span>
+                <span style={{ color: '#6d4c41' }}>결제상태</span>
+                <span className="font-medium" style={{ color: '#ff8f00' }}>{paymentData.status || '결제완료'}</span>
               </div>
             </div>
 
@@ -421,12 +421,12 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
             {paymentData.customerInfo && (
               <>
                 <div className="mb-6">
-                  <h4 className="font-semibold mb-3" style={{ color: '#1f2937' }}>고객 정보</h4>
+                  <h4 className="font-semibold mb-3" style={{ color: '#6d4c41' }}>고객 정보</h4>
                   <div className="bg-gray-50 p-3 rounded">
                     <div className="text-sm space-y-1">
-                      <div style={{ color: '#1f2937' }}><strong>이름:</strong> {paymentData.customerInfo.name}</div>
-                      <div style={{ color: '#1f2937' }}><strong>이메일:</strong> {paymentData.customerInfo.email}</div>
-                      <div style={{ color: '#1f2937' }}><strong>전화번호:</strong> {paymentData.customerInfo.phone}</div>
+                      <div style={{ color: '#6d4c41' }}><strong>이름:</strong> {paymentData.customerInfo.name}</div>
+                      <div style={{ color: '#6d4c41' }}><strong>이메일:</strong> {paymentData.customerInfo.email}</div>
+                      <div style={{ color: '#6d4c41' }}><strong>전화번호:</strong> {paymentData.customerInfo.phone}</div>
                     </div>
                   </div>
                 </div>
@@ -438,18 +438,18 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
 
             {/* 서비스 정보 */}
             <div className="mb-6">
-              <h4 className="font-semibold mb-3" style={{ color: '#1f2937' }}>서비스 정보</h4>
+              <h4 className="font-semibold mb-3" style={{ color: '#6d4c41' }}>서비스 정보</h4>
               <div className="bg-gray-50 p-3 rounded">
                 <div className="text-sm space-y-1">
-                  <div style={{ color: '#1f2937' }}><strong>멘토:</strong> {bookingInfo.mentorName || '멘토 정보 없음'}</div>
-                  <div style={{ color: '#1f2937' }}><strong>서비스:</strong> {bookingInfo.ticketName || '멘토링 서비스'}</div>
-                  <div style={{ color: '#1f2937' }}><strong>예약일:</strong> {bookingInfo.reservationDate || '날짜 미정'}</div>
-                  <div style={{ color: '#1f2937' }}><strong>시간:</strong> {bookingInfo.reservationTime || '시간 미정'}</div>
+                  <div style={{ color: '#6d4c41' }}><strong>멘토:</strong> {bookingInfo.mentorName || '멘토 정보 없음'}</div>
+                  <div style={{ color: '#6d4c41' }}><strong>서비스:</strong> {bookingInfo.ticketName || '멘토링 서비스'}</div>
+                  <div style={{ color: '#6d4c41' }}><strong>예약일:</strong> {bookingInfo.reservationDate || '날짜 미정'}</div>
+                  <div style={{ color: '#6d4c41' }}><strong>시간:</strong> {bookingInfo.reservationTime || '시간 미정'}</div>
                   {paymentData.reservationId && (
-                    <div style={{ color: '#1f2937' }}><strong>예약번호:</strong> {paymentData.reservationId}</div>
+                    <div style={{ color: '#6d4c41' }}><strong>예약번호:</strong> {paymentData.reservationId}</div>
                   )}
                   {paymentData.ticketId && (
-                    <div style={{ color: '#1f2937' }}><strong>티켓번호:</strong> {paymentData.ticketId}</div>
+                    <div style={{ color: '#6d4c41' }}><strong>티켓번호:</strong> {paymentData.ticketId}</div>
                   )}
                 </div>
               </div>
@@ -461,19 +461,19 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
             {/* 결제 내역 */}
             <div className="space-y-2 mb-6">
               <div className="flex justify-between text-sm">
-                <span style={{ color: '#1f2937' }}>서비스 이용료</span>
-                <span style={{ color: '#1f2937' }}>{Number(bookingInfo.originalAmount || paymentData.amount).toLocaleString()}원</span>
+                <span style={{ color: '#6d4c41' }}>서비스 이용료</span>
+                <span style={{ color: '#6d4c41' }}>{Number(bookingInfo.originalAmount || paymentData.amount).toLocaleString()}원</span>
               </div>
               {bookingInfo.discountAmount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: '#059669' }}>🎫 쿠폰 할인</span>
-                  <span style={{ color: '#059669' }}>-{Number(bookingInfo.discountAmount).toLocaleString()}원</span>
+                  <span style={{ color: '#ffcc02' }}>🎫 쿠폰 할인</span>
+                  <span style={{ color: '#ffcc02' }}>-{Number(bookingInfo.discountAmount).toLocaleString()}원</span>
                 </div>
               )}
               <div className="border-t border-gray-300 pt-2 mt-3">
                 <div className="flex justify-between font-bold text-lg">
-                  <span style={{ color: '#1f2937' }}>총 결제금액</span>
-                  <span style={{ color: '#059669' }}>{Number(paymentData.amount).toLocaleString()}원</span>
+                  <span style={{ color: '#6d4c41' }}>총 결제금액</span>
+                  <span style={{ color: '#ff8f00' }}>{Number(paymentData.amount).toLocaleString()}원</span>
                 </div>
               </div>
             </div>
@@ -482,7 +482,7 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
             <div className="border-t border-dashed border-gray-300 my-4"></div>
 
             {/* 하단 정보 */}
-            <div className="text-center text-xs space-y-1" style={{ color: '#6b7280' }}>
+            <div className="text-center text-xs space-y-1" style={{ color: '#6d4c41' }}>
               <p>문의: 고객센터 1588-1234</p>
               <p>이메일: support@mentorconnect.com</p>
               <p className="pt-2">이 영수증은 전자상거래법에 따른 정식 영수증입니다.</p>
@@ -502,9 +502,9 @@ const ReceiptModal = ({ isOpen, onClose, paymentData, bookingInfo }) => {
                 downloadReceiptAsPDF();
               }
             }}
-            className="w-full flex items-center justify-center gap-2 text-white py-3 rounded-lg font-medium transition-colors hover:bg-green-700"
+            className="w-full flex items-center justify-center gap-2 text-white py-3 rounded-lg font-medium transition-colors hover:bg-orange-700"
             style={{ 
-              backgroundColor: '#15803D'
+              backgroundColor: '#ff8f00'
             }}
           >
             <Download className="w-4 h-4" />

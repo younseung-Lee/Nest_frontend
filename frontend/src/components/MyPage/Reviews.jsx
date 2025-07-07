@@ -1,28 +1,44 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { reviewAPI, userAPI } from "../../services/api.js";
 import { userInfoUtils } from "../../utils/tokenUtils.js"
 import { Star, MessageSquare, User, Calendar, PenTool, Edit3, Trash2, MoreVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 import './Reviews.css';
 
 const Reviews = () => {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [reviews, setReviews] = useState([]);
   const [mentorNames, setMentorNames] = useState({});
   const [loading, setLoading] = useState(true);
   const [editingReview, setEditingReview] = useState(null);
   const [editContent, setEditContent] = useState('');
   const [showDropdown, setShowDropdown] = useState(null);
+  // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrevious, setHasPrevious] = useState(false);
+
+  useEffect(() => {
+    const pageFromUrl = parseInt(searchParams.get('page') || '0', 10);
+    if (pageFromUrl !== currentPage) {
+      setCurrentPage(pageFromUrl);
+    }
+  }, [searchParams]); // searchParams가 변경될 때마다 실행
 
   // 리뷰 목록 + 멘토 이름 동시 갱신 함수
-  const fetchReviews = async (page = 0) => {
+  const fetchReviews = async (page) => {
     try {
-      const response = await reviewAPI.getMyReviews({ page: page, size: 10, sort: 'createdAt,desc' });
+      const response = await reviewAPI.getMyReviews({ page: page, size: 10 });
       const pageData = response.data.data;
 
       setReviews(pageData.content);
       setTotalPages(pageData.totalPages);
-      setCurrentPage(pageData.number);
+      setTotalElements(pageData.totalElements);
+      setHasNext(pageData.hasNext);
+      setHasPrevious(pageData.hasPrevious);
 
       // 멘토 id 리스트 추출 및 이름 매핑
       const mentorIds = [...new Set(pageData.content.map(r => r.mentor))];
@@ -45,6 +61,15 @@ const Reviews = () => {
       setReviews([]);
     }
   };
+
+  useEffect(() => {
+    const userInfo = userInfoUtils.getUserInfo();
+    if (!userInfo) {
+      setLoading(false);
+      return;
+    }
+    fetchReviews(currentPage);
+  }, [currentPage])
 
   useEffect(() => {
     const userInfo = userInfoUtils.getUserInfo();
@@ -76,6 +101,7 @@ const Reviews = () => {
     try {
       await reviewAPI.deleteReview(reviewId);
       setReviews(reviews.filter(review => review.id !== reviewId));
+      await fetchReviews(currentPage);
       setShowDropdown(null);
       alert('리뷰가 성공적으로 삭제되었습니다.');
     } catch (error) {
@@ -119,9 +145,35 @@ const Reviews = () => {
   // 페이지 변경 핸들러
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
-      setLoading(true);
-      fetchReviews(newPage).finally(() => setLoading(false));
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.set('page', newPage.toString());
+      setSearchParams(newSearchParams);
     }
+  };
+
+  const generatePageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      // 총 페이지가 5개 이하면 모두 표시
+      for (let i = 0; i < totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // 총 페이지가 5개 초과면 현재 페이지 기준으로 표시
+      let startPage = Math.max(0, currentPage - 2);
+      let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
+
+      if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(0, endPage - maxVisiblePages + 1);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+    }
+    return pages;
   };
 
   // 상태에 따른 배지 스타일
@@ -192,7 +244,7 @@ const Reviews = () => {
         <div className="reviews-stats">
           <div className="stat-item">
             <MessageSquare className="stat-icon" />
-            <span className="stat-value">{reviews.length}개의 리뷰</span>
+            <span className="stat-value">{totalElements.toLocaleString()}개의 리뷰</span>
           </div>
         </div>
       </div>

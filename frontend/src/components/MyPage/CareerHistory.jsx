@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Briefcase, Edit3, Trash2, Plus } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Briefcase, Edit3, Trash2, Plus, ChevronLeft, ChevronRight, BadgeCheck } from 'lucide-react';
 import { careerAPI, profileAPI } from '../../services/api';
 import CareerDetailModal from './CareerDetailModal';
 import CareerEditModal from './CareerEditModal';
@@ -7,15 +8,25 @@ import './CareerHistory.css';
 
 // 경력 아이템 표시 컴포넌트
 const CareerItem = ({ career, onEdit, onDelete }) => (
-  <div className="info-card">
-    <div className="info-card-icon"><Briefcase /></div>
-    <div className="info-card-content">
-      <span className="info-card-label">{career.company}</span>
-      <p className="info-card-value">
+  <div className="careers-info-card">
+    <div className="careers-info-card-icon"><Briefcase color="white" /></div>
+    <div className="careers-info-card-content">
+      <span className="careers-info-card-label">
+        {career.company}
+        {career.careerStatus === 'AUTHORIZED' && (
+            <BadgeCheck
+                size={16}
+                color="black"
+                fill="gold"
+                style={{ marginLeft: '8px', verticalAlign: 'middle' }}
+            />
+        )}
+      </span>
+      <p className="careers-info-card-value">
         {career.startAt?.slice(0, 10)} ~ {career.endAt ? career.endAt.slice(0, 10) : '재직중'}
       </p>
     </div>
-    <div className="info-card-actions">
+    <div className="careers-info-card-actions">
       <button 
         onClick={(e) => {
           e.stopPropagation();
@@ -53,29 +64,70 @@ const CareerHistory = ({ userInfo }) => {
   const [profiles, setProfiles] = useState([]);
   const [selectedProfileId, setSelectedProfileId] = useState('');
 
-  useEffect(() => {
-    if (userInfo?.userRole === 'MENTOR') {
-      fetchCareers();
-    }
-  }, [userInfo]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
-  const fetchCareers = async () => {
+  // ⭐ 페이지네이션 상태 추가
+  const [currentPage, setCurrentPage] = useState(0); // API는 0-indexed 페이지 사용
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalCareers, setTotalCareers] = useState(0); // 전체 경력 개수
+  const [pageSize] = useState(10); // 한 페이지에 보여줄 경력 개수
+
+  const hasAnyCareer = totalCareers > 0;
+
+  useEffect(() => {
+    if (userInfo?.userRole !== 'MENTOR') {
+      return;
+    }
+
+    const pageParam = searchParams.get('page');
+    const sizeParam = searchParams.get('size'); // URL에서 size 파라미터도 읽기
+
+    // URL의 page를 0-indexed로 파싱 (page 파라미터가 없으면 0으로 기본값)
+    const pageToFetch = pageParam ? parseInt(pageParam, 10) : 0;
+    // URL의 size를 파싱하거나, 유효하지 않으면 기본 pageSize 사용
+    const sizeToFetch = sizeParam ? parseInt(sizeParam, 10) : pageSize;
+
+    // 유효한 페이지 번호인지 확인 (음수 방지)
+    const validPageToFetch = Math.max(0, pageToFetch);
+
+    // 데이터 불러오기
+    fetchCareers(validPageToFetch, sizeToFetch);
+
+  }, [searchParams, userInfo, pageSize]);
+
+  const fetchCareers = async (page, size) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await careerAPI.getAllCareers();
+      const response = await careerAPI.getAllCareers({page, size});
+      const paginationData = response.data?.data;
       const rawCareers = response.data?.data?.content || [];
       setCareers(rawCareers);
+      setTotalPages(paginationData?.totalPages || 0);
+      setTotalCareers(paginationData?.totalElements || 0);
     } catch (err) {
       setError("경력 정보를 불러오는데 실패했습니다.");
+      setCareers([]);
+      setTotalPages(0);
+      setTotalCareers(0);
     } finally {
       setLoading(false);
     }
   };
 
+  // ⭐ 페이지 변경 핸들러
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setCurrentPage(newPage);
+      setSearchParams({ page: newPage, size: pageSize });
+    }
+  };
+
   const handleSave = async () => {
-    // 새로고침만 처리 (실제 저장은 CareerEditModal에서 처리)
-    fetchCareers();
+
+    const currentPageFromUrl = searchParams.get('page') ? parseInt(searchParams.get('page'), 10) : 0;
+    setSearchParams({ page: currentPageFromUrl, size: pageSize });
     closeEditModal();
     setSelectedProfileId('');
   };
@@ -83,10 +135,16 @@ const CareerHistory = ({ userInfo }) => {
   const handleDelete = async (id) => {
     if (window.confirm("정말 삭제하시겠습니까?")) {
       try {
-        // await careerAPI.deleteCareer(id);
-        fetchCareers();
+        await careerAPI.deleteCareer(id);
+        alert("경력이 삭제되었습니다.");
+        if (careers.length === 1 && currentPage > 0) {
+          setSearchParams({ page: currentPageFromUrl - 1, size: pageSize });
+        } else {
+          setSearchParams({ page: currentPageFromUrl - 1, size: pageSize });
+        }
       } catch (err) {
         console.error("경력 삭제 실패:", err);
+        alert("경력 삭제에 실패했습니다.");
       }
     }
   };
@@ -138,7 +196,12 @@ const CareerHistory = ({ userInfo }) => {
       careerAPI.deleteCareer(career.id)
         .then(() => {
           alert("경력이 삭제되었습니다.");
-          fetchCareers(); // 목록 새로고침
+          const currentPageFromUrl = searchParams.get('page') ? parseInt(searchParams.get('page'), 10) : 0; // ⭐ 0으로 기본값
+          if (careers.length === 1 && currentPageFromUrl > 0) { // ⭐ 0페이지보다 클 때만 이전 페이지로
+            setSearchParams({ page: currentPageFromUrl - 1, size: pageSize });
+          } else {
+            setSearchParams({ page: currentPageFromUrl, size: pageSize });
+          }
         })
         .catch(err => {
           console.error("경력 삭제 실패:", err);
@@ -170,7 +233,8 @@ const CareerHistory = ({ userInfo }) => {
         );
         alert('자격증이 성공적으로 수정되었습니다.');
         setCareerDetail(null);
-        fetchCareers();
+        const currentPageFromUrl = searchParams.get('page') ? parseInt(searchParams.get('page'), 10) : 0; // ⭐ 0으로 기본값
+        setSearchParams({ page: currentPageFromUrl, size: pageSize });
       } catch (err) {
         console.error("자격증 수정 실패:", err);
         alert("자격증 수정에 실패했습니다.");
@@ -195,6 +259,57 @@ const CareerHistory = ({ userInfo }) => {
       alert('프로필 목록을 불러오지 못했습니다.');
     }
   };
+  // ⭐ 페이지네이션 렌더링 로직
+  const renderPagination = () => {
+    if (totalPages <= 1) return null; // 페이지가 1개 이하면 페이지네이션을 표시하지 않습니다.
+
+    const pageNumbers = [];
+    let startPage = Math.max(0, currentPage - 2);
+    let endPage = Math.min(totalPages - 1, currentPage + 2);
+
+    if (endPage - startPage < 4) {
+      if (startPage === 0) {
+        endPage = Math.min(totalPages - 1, 4);
+      } else if (endPage === totalPages - 1) {
+        startPage = Math.max(0, totalPages - 5);
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(
+          <button
+              key={i}
+              className={`career-pagination-button ${i === currentPage ? 'active' : ''}`}
+              onClick={() => handlePageChange(i)}
+          >
+            {i + 1} {/* 사용자에게는 1부터 시작하는 페이지 번호를 표시합니다. */}
+          </button>
+      );
+    }
+    return ( // ⭐ renderPagination 함수의 return 문 시작
+        <div className="career-pagination-controls">
+          <button
+              className="career-pagination-button"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 0}
+          >
+            <ChevronLeft size={16} />
+            이전
+          </button>
+          {startPage > 0 && <span>...</span>} {/* 시작 페이지 이전에 페이지가 더 있다면 ... 표시 */}
+          {pageNumbers}
+          {endPage < totalPages - 1 && <span>...</span>} {/* 끝 페이지 이후에 페이지가 더 있다면 ... 표시 */}
+          <button
+              className="career-pagination-button"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages - 1}
+          >
+            다음
+            <ChevronRight size={16} />
+          </button>
+        </div>
+    );
+  }; // ⭐ renderPagination 함수의 닫는 중괄호
 
   if (userInfo?.userRole !== 'MENTOR') return null;
   if (loading) return <div className="loading-spinner">로딩 중...</div>;
@@ -211,19 +326,29 @@ const CareerHistory = ({ userInfo }) => {
         multiple
       />
       
-      <h3>경력 목록</h3>
-      
-      <div className="career-list">
-        {careers.map(career => (
-          <div key={career.id} onClick={() => handleCardClick(career)} style={{ cursor: 'pointer' }}>
-            <CareerItem 
-              career={career} 
-              onEdit={handleEditCareer}
-              onDelete={handleDelete}
-            />
+      <h3>경력 목록 ({totalCareers}개)</h3>
+
+      {hasAnyCareer ? (
+          <>
+            <div className="career-list">
+              {careers.map(career => (
+                  <div key={career.id} onClick={() => handleCardClick(career)} style={{ cursor: 'pointer' }}>
+                    <CareerItem
+                        career={career}
+                        onEdit={handleEditCareer}
+                        onDelete={handleDelete}
+                    />
+                  </div>
+              ))}
+            </div>
+            {renderPagination()}
+          </>
+      ) : (
+          <div className="empty-career-list">
+            <p>등록된 경력이 없습니다. 새로운 경력을 추가해보세요!</p>
           </div>
-        ))}
-      </div>
+      )
+      }
       
       <button onClick={handleAddCareer} className="add-career-btn">
         <Plus size={18} /> 새 경력 추가
@@ -234,7 +359,7 @@ const CareerHistory = ({ userInfo }) => {
         career={editModal.career}
         isOpen={editModal.isOpen}
         onClose={closeEditModal}
-        onSave={fetchCareers}
+        onSave={handleSave}
         profiles={profiles}
         selectedProfileId={selectedProfileId}
         setSelectedProfileId={setSelectedProfileId}

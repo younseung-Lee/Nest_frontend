@@ -1,29 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { BookOpen, Clock, FileText } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { BookOpen, Clock, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { reservationAPI, userAPI, ticketAPI } from '../../services/api';
 import './BookingHistory.css';
 
 const BookingHistory = ({ userInfo }) => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
+  
+  // 페이지네이션 상태
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrevious, setHasPrevious] = useState(false);
 
   useEffect(() => {
-    if (!dataLoaded) {
-      fetchReservations();
-    }
-  }, [dataLoaded]);
+      fetchReservations(currentPage);
+  }, [currentPage]);
 
-  const fetchReservations = async () => {
+  useEffect(() => {
+    const pageFromUrl = parseInt(searchParams.get('page') || '0', 10);
+    if (pageFromUrl !== currentPage) {
+      setCurrentPage(pageFromUrl);
+    }
+  }, [searchParams]); // searchParams가 변경될 때마다 실행
+
+  const fetchReservations = async (page = 0) => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await reservationAPI.getReservations();
-      const rawReservations = response.data.data.content;
+      const response = await reservationAPI.getReservations({
+        page: page,
+        size: 10
+      });
+      
+      const responseData = response.data.data;
+      const rawReservations = responseData.content;
+      
+      // 페이지네이션 정보 업데이트
+      setCurrentPage(page);
+      setTotalPages(responseData.totalPages);
+      setTotalElements(responseData.totalElements);
+      setHasNext(responseData.hasNext);
+      setHasPrevious(responseData.hasPrevious);
 
       // 1. 필요한 모든 멘토, 멘티, 티켓 ID를 수집
       const uniqueMentorIds = new Set();
@@ -93,7 +118,6 @@ const BookingHistory = ({ userInfo }) => {
       });
 
       setReservations(fetchedReservations);
-      setDataLoaded(true);
     } catch (err) {
       console.error("예약 내역을 불러오는 데 실패했습니다:", err);
       setError("예약 내역을 불러오는 중 오류가 발생했습니다. 다시 시도해 주세요.");
@@ -110,9 +134,44 @@ const BookingHistory = ({ userInfo }) => {
   };
 
   const handleRetry = () => {
-    setDataLoaded(false);
     setError(null);
-    fetchReservations();
+    fetchReservations(0);
+  };
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages && newPage !== currentPage) {
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.set('page', newPage.toString());
+      setSearchParams(newSearchParams);
+    }
+  };
+
+  // 페이지 번호 생성 로직
+  const generatePageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      // 총 페이지가 5개 이하면 모두 표시
+      for (let i = 0; i < totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // 총 페이지가 5개 초과면 현재 페이지 기준으로 표시
+      let startPage = Math.max(0, currentPage - 2);
+      let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
+      
+      if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(0, endPage - maxVisiblePages + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+    }
+    
+    return pages;
   };
 
   // 리뷰 작성 페이지로 이동
@@ -161,101 +220,185 @@ const BookingHistory = ({ userInfo }) => {
             ? '예정된 멘토링 세션을 확인하고 관리하세요'
             : '멘토링 예약 및 이용 내역을 확인하세요'}
         </p>
+        {totalElements > 0 && (
+          <div className="total-count">
+            총 <span className="count-number">{totalElements.toLocaleString()}</span>개의 예약
+          </div>
+        )}
       </div>
 
       {reservations.length > 0 ? (
-        <div className="reservations-scroll-container">
-          <div className="reservations-container">
-            {reservations.map((reservation) => (
-              <div key={reservation.id} className="reservation-card">
-                <div className="reservation-header">
-                  <div className="reservation-title">
-                    <h4>{reservation.ticketName}</h4>
-                    <span
-                      className={`status-badge ${reservation.status.toLowerCase()}`}
-                    >
-                      {reservation.status === 'CONFIRMED' ? '확정' :
-                       reservation.status === 'PENDING' ? '대기중' :
-                       reservation.status === 'COMPLETED' ? '완료' :
-                       reservation.status === 'CANCELLED' ? '취소됨' :
-                       reservation.status}
-                    </span>
-                  </div>
-                  <div className="reservation-price">
-                    ₩{reservation.ticketPrice.toLocaleString()}
-                  </div>
-                </div>
-
-                <div className="reservation-body">
-                  <div className="reservation-info">
-                    <div className="info-row">
-                      <span className="info-label">
-                        {userInfo.userRole === 'MENTOR' ? '멘티' : '멘토'}
-                      </span>
-                      <span className="info-value">
-                        {userInfo.userRole === 'MENTOR' 
-                          ? reservation.mentee 
-                          : reservation.mentor}
+        <>
+          <div className="reservations-scroll-container">
+            <div className="reservations-container">
+              {reservations.map((reservation) => (
+                <div key={reservation.id} className="reservation-card">
+                  <div className="reservation-header">
+                    <div className="reservation-title">
+                      <h4>{reservation.ticketName}</h4>
+                      <span
+                        className={`status-badge ${reservation.status.toLowerCase()}`}
+                      >
+                        {reservation.status === 'PAID' ? '예약 확정' :
+                         reservation.status === 'COMPLETED' ? '예약 완료' :
+                         reservation.status === 'CANCELED' ? '예약 취소' :
+                         reservation.status}
                       </span>
                     </div>
-                    <div className="info-row">
-                      <span className="info-label">이용 시간</span>
-                      <span className="info-value">{formatTicketTime(reservation.ticketTime)}분</span>
+                    <div className="reservation-price">
+                      ₩{reservation.ticketPrice.toLocaleString()}
                     </div>
                   </div>
 
-                  <div className="reservation-schedule">
-                    <div className="schedule-item">
-                      <Clock className="schedule-icon" />
-                      <div className="schedule-details">
-                        <div className="schedule-date">
-                          {new Date(reservation.startTime).toLocaleDateString('ko-KR', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            weekday: 'short'
-                          })}
-                        </div>
-                        <div className="schedule-time">
-                          {new Date(reservation.startTime).toLocaleTimeString('ko-KR', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })} ~ {new Date(reservation.endTime).toLocaleTimeString('ko-KR', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
+                  <div className="reservation-body">
+                    <div className="reservation-info">
+                      <div className="info-row">
+                        <span className="info-label">
+                          {userInfo.userRole === 'MENTOR' ? '멘티' : '멘토'}
+                        </span>
+                        <span className="info-value">
+                          {userInfo.userRole === 'MENTOR' 
+                            ? reservation.mentee 
+                            : reservation.mentor}
+                        </span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">이용 시간</span>
+                        <span className="info-value">{formatTicketTime(reservation.ticketTime)}분</span>
+                      </div>
+                    </div>
+
+                    <div className="reservation-schedule">
+                      <div className="schedule-item">
+                        <Clock className="schedule-icon" />
+                        <div className="schedule-details">
+                          <div className="schedule-date">
+                            {new Date(reservation.startTime).toLocaleDateString('ko-KR', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              weekday: 'short'
+                            })}
+                          </div>
+                          <div className="schedule-time">
+                            {new Date(reservation.startTime).toLocaleTimeString('ko-KR', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })} ~ {new Date(reservation.endTime).toLocaleTimeString('ko-KR', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="reservation-actions">
-                  {reservation.status === 'CONFIRMED' && (
-                    <button className="action-btn primary">
-                      <BookOpen size={16} />
-                      상담 시작
-                    </button>
+                  <div className="reservation-actions">
+                    {reservation.status === 'CONFIRMED' && (
+                      <button className="action-btn primary">
+                        <BookOpen size={16} />
+                        상담 시작
+                      </button>
+                    )}
+                    {reservation.status === 'COMPLETED' && (
+                      <button 
+                        className="action-btn secondary"
+                        onClick={() => handleWriteReview(reservation)}
+                      >
+                        <FileText size={16} />
+                        리뷰 작성
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 고급스러운 페이지네이션 */}
+          {totalPages > 1 && (
+            <div className="pagination-wrapper">
+              <div className="pagination-container">
+                {/* 이전 페이지 버튼 */}
+                <button
+                  className={`pagination-btn prev-btn ${!hasPrevious ? 'disabled' : ''}`}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={!hasPrevious}
+                >
+                  <ChevronLeft size={18} />
+                  <span>이전</span>
+                </button>
+
+                {/* 페이지 번호들 */}
+                <div className="pagination-numbers">
+                  {/* 첫 페이지로 가는 버튼 (현재 페이지가 3 이상일 때만) */}
+                  {currentPage > 2 && totalPages > 5 && (
+                    <>
+                      <button
+                        className="pagination-number"
+                        onClick={() => handlePageChange(0)}
+                      >
+                        1
+                      </button>
+                      {currentPage > 3 && <span className="pagination-ellipsis">...</span>}
+                    </>
                   )}
-                  {reservation.status === 'COMPLETED' && (
-                    <button 
-                      className="action-btn secondary"
-                      onClick={() => handleWriteReview(reservation)}
+
+                  {/* 메인 페이지 번호들 */}
+                  {generatePageNumbers().map(pageNum => (
+                    <button
+                      key={pageNum}
+                      className={`pagination-number ${currentPage === pageNum ? 'active' : ''}`}
+                      onClick={() => {
+                        console.log('버튼 클릭!')
+                        handlePageChange(pageNum)
+                      }}
                     >
-                      <FileText size={16} />
-                      리뷰 작성
+                      {pageNum + 1}
                     </button>
+                  ))}
+
+                  {/* 마지막 페이지로 가는 버튼 (현재 페이지가 끝에서 3번째 이전일 때만) */}
+                  {currentPage < totalPages - 3 && totalPages > 5 && (
+                    <>
+                      {currentPage < totalPages - 4 && <span className="pagination-ellipsis">...</span>}
+                      <button
+                        className="pagination-number"
+                        onClick={() => handlePageChange(totalPages - 1)}
+                      >
+                        {totalPages}
+                      </button>
+                    </>
                   )}
                 </div>
-              </div>
-            ))}
-          </div>
 
-          {/* 스크롤 가이드 */}
-          <div className="scroll-guide">
-            <span>더 많은 예약 내역을 보려면 스크롤하세요</span>
-          </div>
-        </div>
+                {/* 다음 페이지 버튼 */}
+                <button
+                  className={`pagination-btn next-btn ${!hasNext ? 'disabled' : ''}`}
+                  onClick={() => {
+                    console.log('버튼 클릭!')
+                    handlePageChange(currentPage + 1)
+                  }}
+                  disabled={!hasNext}
+                >
+                  <span>다음</span>
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+
+              {/* 페이지 정보 */}
+              <div className="pagination-info">
+                <span>
+                  {currentPage + 1} / {totalPages} 페이지 
+                  <span className="total-items">
+                    (총 {totalElements.toLocaleString()}개)
+                  </span>
+                </span>
+              </div>
+            </div>
+          )}
+        </>
       ) : (
         <div className="empty-state">
           <BookOpen className="empty-icon" />

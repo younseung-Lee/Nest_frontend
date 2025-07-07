@@ -177,7 +177,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+  background: linear-gradient(135deg, #FFB300, #FF8F00);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -437,6 +437,161 @@
   box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
 }
 
+/* 전체 카운트 */
+.content-area .total-count {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.content-area .count-number {
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+/* 페이지네이션 래퍼 */
+.content-area .pagination-wrapper {
+  background: white;
+  border-top: 1px solid #e2e8f0;
+  padding: 24px;
+  margin-top: auto;
+  flex-shrink: 0;
+  border-radius: 0 0 16px 16px;
+}
+
+/* 페이지네이션 컨테이너 */
+.content-area .pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+/* 페이지네이션 버튼 (이전/다음) */
+.content-area .pagination-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  min-width: 80px;
+  justify-content: center;
+}
+
+.content-area .pagination-btn:hover:not(.disabled) {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-color: #cbd5e1;
+  color: #475569;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.content-area .pagination-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #f8fafc;
+  color: #94a3b8;
+}
+
+/* 페이지 번호 컨테이너 */
+.content-area .pagination-numbers {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+}
+
+/* 페이지 번호 버튼 */
+.content-area .pagination-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.content-area .pagination-number::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.content-area .pagination-number:hover:not(.active) {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-color: #cbd5e1;
+  color: #475569;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.content-area .pagination-number:hover::before {
+  left: 100%;
+}
+
+.content-area .pagination-number.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  border-color: #3b82f6;
+  color: white;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  transform: translateY(-2px);
+}
+
+.content-area .pagination-number.active::before {
+  display: none;
+}
+
+/* 생략 표시 */
+.content-area .pagination-ellipsis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 600;
+  user-select: none;
+}
+
+/* 페이지네이션 정보 */
+.content-area .pagination-info {
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.content-area .total-items {
+  color: #94a3b8;
+  font-size: 13px;
+  margin-left: 8px;
+}
+
 /* 스크롤 가이드 */
 .content-area .scroll-guide {
   position: sticky;
@@ -451,6 +606,23 @@
   font-size: 12px;
   color: #94a3b8;
   font-style: italic;
+}
+
+/* 페이지네이션 호버 애니메이션 */
+@keyframes pageButtonPulse {
+  0% {
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  }
+  100% {
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  }
+}
+
+.content-area .pagination-number.active {
+  animation: pageButtonPulse 2s ease-in-out infinite;
 }
 
 /* 애니메이션 */
@@ -493,7 +665,7 @@
 
 /* 호버 시 글로우 효과 */
 .content-area .reservation-card:hover .reservation-title h4 {
-  color: #6366f1;
+  color: #6D4C41;
   transition: color 0.3s ease;
 }
 
@@ -543,5 +715,46 @@
 
   .content-area .info-label {
     min-width: auto;
+  }
+
+  /* 모바일 페이지네이션 조정 */
+  .content-area .pagination-wrapper {
+    padding: 16px;
+  }
+
+  .content-area .pagination-container {
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .content-area .pagination-btn {
+    padding: 8px 12px;
+    min-width: 70px;
+    font-size: 13px;
+  }
+
+  .content-area .pagination-numbers {
+    padding: 0 8px;
+    gap: 3px;
+  }
+
+  .content-area .pagination-number {
+    width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
+
+  .content-area .pagination-ellipsis {
+    width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
+
+  .content-area .pagination-info {
+    font-size: 13px;
+  }
+
+  .content-area .total-items {
+    font-size: 12px;
   }
 }

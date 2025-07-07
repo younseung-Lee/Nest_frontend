@@ -13,9 +13,6 @@ const CTASection = () => {
         <p className="cta-description">
           전문가들과의 특별한 만남이 당신의 인생을 바꿀 첫 번째 단계가 될 것입니다
         </p>
-        <button className="cta-button">
-          무료로 시작하기
-        </button>
       </div>
     </section>
   );

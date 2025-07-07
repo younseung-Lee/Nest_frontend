@@ -1,0 +1,116 @@
+:root {
+  /* About 페이지 전용 색상 팔레트 */
+  --about-primary-amber: #FFB300;
+  --about-primary-orange: #FF8F00;
+  --about-primary-deep: #E65100;
+  --about-growth-green: #81C784;
+  --about-growth-success: #4CAF50;
+  --about-growth-mint: #A5D6A7;
+  --about-energy-peach: #FFAB40;
+  --about-energy-yellow: #FFC107;
+  --about-energy-bright: #FF9800;
+  --about-bg-cream: #FFF8E1;
+  --about-bg-warm: #FFF3C4;
+  --about-text-coffee: #6D4C41;
+  --about-bg-light: #F5F5F5;
+  
+  /* About 페이지 전용 공통 값들 */
+  --about-section-padding: 4rem 0;
+  --about-container-max-width: 1200px;
+  --about-border-radius: 16px;
+  --about-box-shadow: 0 4px 20px rgba(255, 179, 0, 0.1);
+  --about-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.about-page {
+  background: linear-gradient(135deg, var(--about-bg-cream) 0%, var(--about-bg-warm) 100%);
+  min-height: 100vh;
+  color: var(--about-text-coffee);
+  overflow-x: hidden;
+}
+
+/* 스크롤 애니메이션 전용 스타일 추가 */
+.about-page .scroll-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.about-page .scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 공통 섹션 스타일 */
+.about-section {
+  padding: var(--about-section-padding);
+  position: relative;
+}
+
+.about-container {
+  max-width: var(--about-container-max-width);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.about-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--about-border-radius);
+  box-shadow: var(--about-box-shadow);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 179, 0, 0.1);
+  transition: var(--about-transition);
+}
+
+.about-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(255, 179, 0, 0.15);
+}
+
+/* About 페이지 전용 타이틀 스타일 */
+.about-section-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--about-text-coffee);
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.about-section-subtitle {
+  text-align: center;
+  font-size: 1.125rem;
+  color: var(--about-text-coffee);
+  opacity: 0.8;
+  margin-bottom: 3rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  :root {
+    --about-section-padding: 2.5rem 0;
+  }
+  
+  .about-container {
+    padding: 0 1rem;
+  }
+  
+  .about-section-title {
+    font-size: 2rem;
+  }
+  
+  .about-section-subtitle {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-section-title {
+    font-size: 1.75rem;
+  }
+}

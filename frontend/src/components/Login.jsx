@@ -65,7 +65,7 @@ const Login = ({ onLoginSuccess }) => {
         navigate('/');
       }
     } catch (err) {
-      setError('로그인 중 오류가 발생했습니다.');
+      setError('이메일 또는 비밀번호를 다시 확인하세요!');
     } finally {
       setIsLoading(false);
     }
@@ -140,7 +140,7 @@ const Login = ({ onLoginSuccess }) => {
           </div>
           <button type="submit" className="login-submit" disabled={isLoading}>
             {isLoading ? (
-              <span className="loading-spinner">
+              <span className="login-loading-spinner">
                 <span className="spinner"></span>
                 로그인 중...
               </span>
@@ -161,8 +161,8 @@ const Login = ({ onLoginSuccess }) => {
             </button>
             <button onClick={handleNaverLogin}
                 className="social-button naver">
-              <div className="naver-logo">N</div>
-              <span>네이버로 시작하기</span>
+              <img className="naver-logo" src={"src/image/naver.png"} alt={"네이버로 시작하기"}/>
+              <span style={{ color: 'white' }}>네이버로 시작하기</span>
             </button>
           </div>
         </div>

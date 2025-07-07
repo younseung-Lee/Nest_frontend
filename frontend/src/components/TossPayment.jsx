@@ -4,6 +4,7 @@ import './TossPayment.css'; // 토스 전용 CSS 추가
 import TossPaymentSuccess from './TossPaymentSuccess';
 import TossPaymentFail from './TossPaymentFail';
 import { userInfoUtils } from '../utils/tokenUtils'; // 사용자 정보 유틸 추가
+import { paymentAPI } from '../services/api'; // API 서비스 추가
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -117,8 +118,8 @@ function TossPaymentComponent({
     const initializeCustomerInfo = async () => {
       if (bookingData) {
 
-        // ❌ 하드코딩 제거: DB 값만 사용
-        const dbAmount = bookingData.servicePrice || bookingData.totalPrice;
+        // ✅ 할인된 최종 금액 사용 (Payment.jsx에서 전달된 servicePrice는 이미 할인 적용됨)
+        const dbAmount = bookingData.servicePrice || bookingData.finalPrice || bookingData.totalPrice;
         const dbOrderName = bookingData.serviceName || bookingData.orderName;
 
         if (!dbAmount) {
@@ -387,44 +388,24 @@ function TossPaymentComponent({
           || bookingData.reservation?.id;
       const ticketId = bookingData.ticketId || bookingData.ticket?.id;
 
-      // 🔥 1. 먼저 결제 준비 API 호출
-      const tokenFromStorage = localStorage?.getItem("accessToken")
-          || sessionStorage?.getItem("accessToken");
-      if (!tokenFromStorage) {
-        throw new Error("로그인이 필요합니다.");
+      // 🔥 1. 먼저 결제 준비 API 호출 (api.js 사용)
+      try {
+        const prepareData = await paymentAPI.preparePayment({
+          reservationId: Number(reservationId),
+          ticketId: Number(ticketId),
+          amount: Number(amount), // 이미 할인된 최종 금액
+          couponId: bookingData?.selectedCoupon?.id ? Number(
+              bookingData.selectedCoupon.id) : null
+        });
+
+        console.log('결제 준비 성공:', prepareData);
+      } catch (error) {
+        console.error('결제 준비 실패:', error);
+        
+        // API 에러 메시지 처리
+        const errorMessage = error.response?.data?.message || error.message || "결제 준비 실패";
+        throw new Error(errorMessage);
       }
-
-      const prepareResponse = await fetch(`${BASE_URL}/api/v1/payments/prepare`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${tokenFromStorage}`,
-            },
-            body: JSON.stringify({
-              reservationId: Number(reservationId),
-              ticketId: Number(ticketId),
-              amount: Number(amount),
-              couponId: bookingData?.selectedCoupon?.id ? Number(
-                  bookingData.selectedCoupon.id) : null
-            }),
-          });
-
-      if (!prepareResponse.ok) {
-        const errorText = await prepareResponse.text();
-
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch (e) {
-          errorData = {message: errorText || "결제 준비 실패"};
-        }
-
-        throw new Error(
-            errorData.message || `HTTP ${prepareResponse.status}: 결제 준비 실패`);
-      }
-
-      const prepareData = await prepareResponse.json();
 
       // 결제 데이터를 sessionStorage에 임시 저장
       const paymentData = {

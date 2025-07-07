@@ -258,36 +258,6 @@ const ProfileEditModal = ({ profile, categories, keywords, onClose, onUpdate, on
                 </>
               )}
             </div>
-
-            <div className="form-group">
-              <label>🖼️ 프로필 이미지</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageFileChange}
-                className="form-input file-input"
-                id="profile-image-input"
-              />
-              <label htmlFor="profile-image-input" className="file-input-label">
-                이미지 선택
-              </label>
-              {editProfileData.imageUrl && (
-                <div className="image-preview">
-                  <img
-                    src={editProfileData.imageUrl}
-                    alt="프로필 미리보기"
-                    className="preview-image"
-                  />
-                  <button
-                    type="button"
-                    onClick={removeSelectedImage}
-                    className="remove-image-btn"
-                  >
-                    이미지 제거
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
         </div>
 

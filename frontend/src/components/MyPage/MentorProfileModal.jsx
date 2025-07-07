@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import  {categoryAPI, keywordAPI} from '../../services/api';
 import './MentorProfileModal.css';
 
-const MentorProfileModal = ({ onClose, onSubmit }) => {
+const MentorProfileModal = ({ onClose, onSubmit, existingProfiles = [] }) => {
   const [title, setTitle] = useState('');
   const [introduction, setIntroduction] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -10,23 +10,22 @@ const MentorProfileModal = ({ onClose, onSubmit }) => {
   const [categoryId, setCategoryId] = useState('');
   const [categories, setCategories] = useState([]);
   const [keywords, setKeywords] = useState([]);
+  const [categoryError, setCategoryError] = useState('');
+  const [submitError, setSubmitError] = useState(''); // 백엔드 에러용
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 카테고리 목록 가져오기
   const fetchCategories = async () => {
     try {
-      console.log('📂 카테고리 목록 가져오는 중...');
       const response = await categoryAPI.getCategories();
       const fetchedCategories = response.data.data.content;
 
       if (Array.isArray(fetchedCategories)) {
         setCategories(fetchedCategories);
-        console.log('✅ 카테고리 목록 로딩 완료:', fetchedCategories.length, '개');
       } else {
-        console.warn('⚠️ 카테고리 데이터가 배열이 아님:', fetchedCategories);
         setCategories([]);
       }
     } catch (error) {
-      console.error('❌ 카테고리 로딩 실패:', error);
       setCategories([]);
       alert('카테고리 목록을 불러오는데 실패했습니다.');
     }
@@ -68,15 +67,88 @@ const MentorProfileModal = ({ onClose, onSubmit }) => {
   };
 
   const handleCategoryChange = (e) => {
+    const selectedCategoryId = parseInt(e.target.value);
     setCategoryId(e.target.value);
-  }
+    setCategoryError('');
 
-  const handleSubmit = (e) => {
+    // 중복 카테고리 체크
+    if (selectedCategoryId && existingProfiles.length > 0 && categories.length > 0) {
+      // 선택된 카테고리의 이름 찾기
+      const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
+      const selectedCategoryName = selectedCategory?.name;
+
+      if (selectedCategoryName) {
+        // 기존 프로필에서 같은 카테고리 이름을 가진 것이 있는지 확인
+        const existingProfile = existingProfiles.find(profile => {
+          const profileCategoryName = typeof profile.category === 'string'
+            ? profile.category
+            : profile.category?.name;
+
+          return profileCategoryName === selectedCategoryName;
+        });
+
+        if (existingProfile) {
+          setCategoryError('이미 존재하는 카테고리입니다');
+        }
+      }
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit({ title, introduction, imageUrl, keywordId, categoryId});
-    alert("멘토 등록이 완료되었습니다.")
-    onClose();
-    window.location.reload();
+    
+    // 기존 에러 초기화
+    setSubmitError('');
+
+    // 입력 데이터 유효성 검사
+    if (!title.trim()) {
+      alert('프로필 제목을 입력해주세요.');
+      return;
+    }
+
+    if (!introduction.trim()) {
+      alert('프로필 소개를 입력해주세요.');
+      return;
+    }
+
+    if (!categoryId) {
+      alert('카테고리를 선택해주세요.');
+      return;
+    }
+
+    // 프론트엔드 중복 카테고리 체크
+    if (categoryError) {
+      return; // 이미 에러가 표시되어 있으면 제출하지 않음
+    }
+
+    // 요청 데이터 준비
+    const submitData = {
+      title: title.trim(),
+      introduction: introduction.trim(),
+      imageUrl: imageUrl.trim(),
+      keywordId,
+      categoryId: parseInt(categoryId)
+    };
+
+    try {
+      setIsSubmitting(true);
+      await onSubmit(submitData); // ✅ 한 번만 호출
+      onClose(); // ✅ 성공 시에만 모달 닫기
+    } catch (error) {
+      // 백엔드에서 에러가 발생한 경우 모달 내부에서 처리
+      if (error?.response?.status === 400) {
+        const errorData = error.response?.data;
+        if (errorData?.message && errorData.message.includes('이미')) {
+          setSubmitError('서버에서 중복 카테고리가 감지되었습니다. 다른 카테고리를 선택해주세요.');
+        } else {
+          setSubmitError(errorData?.message || '입력 정보를 확인해주세요.');
+        }
+      } else {
+        setSubmitError('프로필 등록 중 오류가 발생했습니다.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -91,10 +163,6 @@ const MentorProfileModal = ({ onClose, onSubmit }) => {
             <label>
               소개
               <textarea value={introduction} onChange={e => setIntroduction(e.target.value)} required />
-            </label>
-            <label>
-              이미지 URL
-              <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} />
             </label>
             {/* ⭐️ 계좌 번호 입력 필드 제거 */}
             <label>
@@ -119,7 +187,12 @@ const MentorProfileModal = ({ onClose, onSubmit }) => {
             </label>
             <label>
               카테고리
-              <select value={categoryId} onChange={handleCategoryChange} required>
+              <select
+                value={categoryId}
+                onChange={handleCategoryChange}
+                required
+                className={categoryError ? 'error' : ''}
+              >
                 <option value="">선택</option>
                 {categories.length > 0 ? (
                     categories.map(c => (
@@ -130,9 +203,28 @@ const MentorProfileModal = ({ onClose, onSubmit }) => {
                 )}
               </select>
             </label>
+            {categoryError && (
+              <div className="category-error-message">
+                {categoryError}
+              </div>
+            )}
+            {submitError && (
+              <div className="submit-error-message">
+                {submitError}
+              </div>
+            )}
             <div className="modal-btns">
-              <button type="button" onClick={onClose}>취소</button>
-              <button type="submit">등록</button>
+              <button type="button" onClick={onClose} disabled={isSubmitting}>
+                취소
+              </button>
+              <button
+                type="submit"
+                disabled={!!categoryError || isSubmitting}
+                className={categoryError || isSubmitting ? 'disabled' : ''}
+              >
+                {isSubmitting && <span className="loading-spinner"></span>}
+                {isSubmitting ? '등록 중...' : '등록'}
+              </button>
             </div>
           </form>
         </div>

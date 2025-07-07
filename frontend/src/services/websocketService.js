@@ -223,11 +223,15 @@ class WebSocketService {
       content: messageData.content || messageData.text,
       chatRoomId: messageData.chatRoomId,
       senderId: messageData.senderId,
-      mine: messageData.mine,
+      receiverId: messageData.receiverId, // 백엔드 MessageResponseDto의 receiverId 필드 추가
+      mine: messageData.isMine, // isMine 필드도 지원
       sentAt: messageData.sentAt || messageData.timestamp
           || new Date().toISOString(),
       type: messageData.type || 'MESSAGE'
     };
+    
+    // 등록된 모든 메시지 핸들러에게 전달
+    this.handleMessage(normalizedMessage);
   }
   // JWT 토큰에서 사용자 ID 추출
   getCurrentUserId() {
@@ -321,13 +325,6 @@ class WebSocketService {
     });
   }
 
-  // 자동 재연결 처리 (비활성화)
-  handleReconnect() {
-    console.log('🚫 자동 재연결이 비활성화되었습니다');
-    console.log('💡 채팅방 진입 시 수동으로 연결하거나 페이지를 새로고침하세요');
-    return;
-  }
-
   // 디버그 정보 반환 (useWebSocket 훅 호환용)
   getDebugInfo() {
     return {
@@ -343,29 +340,6 @@ class WebSocketService {
     };
   }
 
-  // 연결 상태 정보 반환 (useWebSocket 훅 호환용)
-  getConnectionStatus() {
-    return {
-      connected: this.isConnected(),
-      authenticationFailed: false, // 기존 서비스에서는 미구현
-      lastTokenError: null,
-      reconnectAttempts: this.reconnectAttempts,
-      isManualDisconnect: false
-    };
-  }
-
-  // 이벤트 리스너 등록
-  on(event, callback) {
-    if (typeof callback !== 'function') {
-      console.error('❌ 콜백은 함수여야 합니다');
-      return;
-    }
-    
-    if (!this.listeners.has(event)) {
-      this.listeners.set(event, []);
-    }
-    this.listeners.get(event).push(callback);
-  }
 
   // 이벤트 리스너 제거
   off(event, callback) {
@@ -382,20 +356,6 @@ class WebSocketService {
     return false;
   }
 
-  // 이벤트 발송
-  emit(event, data) {
-    if (!this.listeners.has(event)) {
-      return;
-    }
-    
-    this.listeners.get(event).forEach((callback, index) => {
-      try {
-        callback(data);
-      } catch (error) {
-        console.error(`Error in event listener #${index} for ${event}:`, error);
-      }
-    });
-  }
 }
 
 // 싱글톤 인스턴스

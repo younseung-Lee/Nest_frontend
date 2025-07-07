@@ -113,6 +113,14 @@ const Signup = () => {
     }
   };
 
+  // 전화번호 입력 시 자동 포커스 이동
+  const handlePhoneInput = (value, setter, nextRef, maxLength) => {
+    setter(value);
+    if (value.length === maxLength && nextRef) {
+      nextRef.current?.focus();
+    }
+  };
+
   return (
     <div className="login-overlay" onClick={() => navigate('/')}>
       <div className="login-modal signup-mode" onClick={e => e.stopPropagation()}>
@@ -249,7 +257,10 @@ const Signup = () => {
                 type="tel"
                 placeholder="010"
                 value={phone1}
-                onChange={e => setPhone1(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '').slice(0, 3);
+                  handlePhoneInput(value, setPhone1, phone2Ref, 3);
+                }}
                 className="phone-input"
                 maxLength={3}
                 style={{ width: '70px', textAlign: 'center' }}
@@ -260,22 +271,30 @@ const Signup = () => {
                 type="tel"
                 placeholder="0000"
                 value={phone2}
-                onChange={e => setPhone2(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                  handlePhoneInput(value, setPhone2, phone3Ref, 4);
+                }}
                 className="phone-input"
                 maxLength={4}
                 style={{ width: '90px', textAlign: 'center' }}
                 required
+                ref={phone2Ref}
               />
               <span className="phone-divider">-</span>
               <input
                 type="tel"
                 placeholder="0000"
                 value={phone3}
-                onChange={e => setPhone3(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                  setPhone3(value);
+                }}
                 className="phone-input"
                 maxLength={4}
                 style={{ width: '90px', textAlign: 'center' }}
                 required
+                ref={phone3Ref}
               />
             </div>
           </div>

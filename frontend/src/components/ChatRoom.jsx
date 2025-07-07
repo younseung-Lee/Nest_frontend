@@ -485,7 +485,9 @@ const ChatRoom = ({
       console.log('🔍 채팅방 ID 비교:', {
         received: receivedChatRoomId,
         current: currentChatRoomId,
-        match: receivedChatRoomId === currentChatRoomId
+        match: receivedChatRoomId === currentChatRoomId,
+        receiverId: messageData.receiverId,
+        currentUserId: userId
       });
 
       // 채팅방 ID가 일치하는 경우에만 메시지 추가
@@ -493,7 +495,8 @@ const ChatRoom = ({
         const newMessage = {
           id: messageData.id || messageData.messageId || `ws-${Date.now()}`,
           text: messageData.content,
-          sender: messageData.isMine ? 'user' : 'other',
+          sender: messageData.isMine  ? 'user' : 'other',
+          isMine: messageData.isMine ,
           timestamp: messageData.sentAt || new Date().toISOString(),
           status: messageData.isMine ? 'sent' : 'received'
         };
@@ -1434,6 +1437,11 @@ const ChatRoom = ({
                     <>
                       <div className="status-indicator-closed"></div>
                       <span>멘토링 완료</span>
+                    </>
+                  ) : !isConnected ? (
+                    <>
+                      <div className="status-indicator-disconnected"></div>
+                      <span>연결 중...</span>
                     </>
                   ) : (
                     <>

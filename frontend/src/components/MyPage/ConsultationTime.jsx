@@ -49,6 +49,8 @@ const ConsultationTime = ({ userInfo }) => {
   const [editStart, setEditStart] = useState('09:00');
   const [editEnd, setEditEnd] = useState('24:00');
 
+  const [refreshTime, setRefreshTime] = useState(false);
+
   // 상담 가능 시간 불러오기 (API 응답 구조에 맞게 변환)
   useEffect(() => {
     if (!userInfo?.userRole || userInfo.userRole !== 'MENTOR') return;
@@ -74,7 +76,7 @@ const ConsultationTime = ({ userInfo }) => {
       .catch(err => {
         console.error('상담 가능 시간 불러오기 실패:', err);
       });
-  }, [userInfo]);
+  }, [userInfo, refreshTime]);
 
   // 수정 버튼 클릭
   const handleEdit = (day) => {
@@ -93,6 +95,7 @@ const ConsultationTime = ({ userInfo }) => {
     }
     try {
       await consultationAPI.deleteConsultation(consultationId);
+      setRefreshTime(prev => !prev);
       setConsultationTimes(prev => ({ ...prev, [day]: { start: '', end: '' } }));
       if (editDay === day) setEditDay(null);
     } catch (err) {
@@ -111,6 +114,7 @@ const ConsultationTime = ({ userInfo }) => {
     try {
       await consultationAPI.createConsultation({ dayOfWeek, startAt, endAt });
       // 성공 시 알림 등 추가 가능
+      setRefreshTime(prev => !prev);
     } catch (err) {
       console.error('상담 가능 시간 등록 실패:', err);
       // 에러 처리

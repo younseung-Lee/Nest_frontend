@@ -346,11 +346,11 @@ input[type="number"]:focus {
 .toss-test-info {
   margin-top: 1rem;
   padding: 1rem;
-  background: rgba(21, 128, 61, 0.05);
+  background: #FFF8E1;
   border-radius: 8px;
-  border-left: 4px solid #15803D;
+  border-left: 4px solid #FF8F00;
   font-size: 0.9rem;
-  color: #6b7280;
+  color: #6D4C41;
 }
 
 .toss-test-info div {

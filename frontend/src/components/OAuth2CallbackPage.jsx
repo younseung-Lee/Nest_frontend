@@ -26,19 +26,11 @@ const OAuth2CallbackPage = () => {
             id,
             email,
             nickName,
+            userRole,
             accessToken,
             refreshToken,
             newUser: isNewUser
           } = responseBody; // 백엔드로부터 받은 응답 (accessToken, refreshToken, isNewUser 등)
-
-          // ⭐️ userRole 추출 로직 ⭐️
-          let userRoleFromToken = null;
-          if (accessToken) { // accessToken이 존재할 때만 디코딩 시도
-            const tokenPayload = decodeJWT(accessToken);
-            console.log('🔓 JWT 토큰 디코딩 결과:', tokenPayload);
-            userRoleFromToken = tokenPayload?.userRole; // JWT 페이로드에서 userRole 추출
-            console.log('🔐 토큰에서 추출한 userRole:', userRoleFromToken);
-          }
 
           // 사용자 정보 구성
           const userInfo = {
@@ -46,7 +38,7 @@ const OAuth2CallbackPage = () => {
             nickName: nickName,
             email: email,
             profileImage: null,
-            userRole: userRoleFromToken,
+            userRole: userRole,
             joinDate: null,
             token: accessToken
           };
