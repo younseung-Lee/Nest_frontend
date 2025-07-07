@@ -54,8 +54,8 @@ api.interceptors.request.use(
         '/api/auth/login',
         '/api/auth/signup',
         '/api/mentors/profiles', // 멘토 목록 조회 (로그인 없이도 볼 수 있음)
-        '/api/oauth2/login',
-        '/api/oauth2/callback',
+        '/oauth2/login',
+        '/oauth2/callback',
         '/api/auth/token/refresh',
       ];
 
