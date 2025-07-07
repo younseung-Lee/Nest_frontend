@@ -193,7 +193,7 @@ const Inquiry = ({onBack, initialTab = 'inquiries'}) => {
   const fetchReservations = async () => {
     try {
       console.log('🔍 예약 목록 조회 시작...');
-      const response = await reservationAPI.getReservations();
+      const response = await reservationAPI.getReservationList();
       console.log('📋 예약 목록 원본 응답:', response);
 
       if (response.data) {

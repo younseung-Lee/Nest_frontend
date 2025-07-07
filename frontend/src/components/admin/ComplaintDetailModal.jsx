@@ -205,8 +205,11 @@ const ComplaintDetailModal = ({
       setIsEditing(false); // 저장 완료 후 읽기 모드로 전환
       console.log('✅ 답변 제출 및 상태 업데이트 완료');
       
-      // 성공 메시지 표시
-      alert(adminAnswer ? '답변이 성공적으로 수정되었습니다.' : '답변이 성공적으로 등록되었습니다.');
+      // 성공 메시지 표시 (답변 수정 시에만)
+      if (adminAnswer) {
+        alert('답변이 성공적으로 수정되었습니다.');
+      }
+      // 답변 생성 시에는 상위 컴포넌트에서 alert 표시하므로 여기서는 표시하지 않음
       
     } catch (error) {
       console.error('❌ 답변 제출 실패:', error);

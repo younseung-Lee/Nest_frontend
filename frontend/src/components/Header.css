@@ -12,7 +12,7 @@
 .header-content {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 1rem 1.5rem; /* 1.5rem에서 1rem으로 줄임 */
+  padding: 1rem 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -23,6 +23,7 @@
   align-items: center;
   gap: 1rem;
   position: relative;
+  flex: 0 0 auto; /* 고정 크기로 설정 */
 }
 
 /* 햄버거 메뉴 버튼 */
@@ -460,26 +461,35 @@
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
+  margin-left: auto;
+  flex: 0 0 auto; /* 고정 크기로 설정 */
 }
 
-/* 로그인 버튼 글씨 */
+/* 로그인 버튼 */
 .login-button {
-  padding: 0.625rem 1.25rem; /* 0.75rem 1.5rem에서 줄임 */
-  border-radius: 0.75rem; /* 1rem에서 0.75rem으로 줄임 */
+  padding: 0.75rem 2rem;
+  border-radius: 50px;
   font-weight: 600;
   color: black;
-  background: #ffc815;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
   cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 0.9rem; /* 폰트 크기도 약간 줄임 */
+  transition: all 0.3s ease;
+  border: none;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* 로그인 버튼 마우스 올리면 */
+/* 로그인 버튼 호버 */
 .login-button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, #FFA500, #FF8C00);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 165, 0, 0.4);
+  scale: 1.05;
 }
 
 .notification-button,
@@ -578,6 +588,33 @@
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
+  .header-content {
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo-section {
+    flex: 0 0 auto;
+    gap: 0.75rem;
+  }
+
+  .header-actions {
+    flex: 0 0 auto;
+    margin-left: auto;
+    gap: 1rem;
+  }
+
+  .logo-text {
+    font-size: 1.25rem;
+  }
+
+  .login-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+
   .inquiry-sidebar {
     width: 200px;
   }

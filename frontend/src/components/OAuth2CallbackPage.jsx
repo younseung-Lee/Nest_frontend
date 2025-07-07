@@ -1,4 +1,4 @@
-// src/pages/OAuth2CallbackPage.js (예시)
+// ../OAuth2CallbackPage.js
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom'; // React Router v6 기준
 import { authUtils } from '../utils/tokenUtils'; // 토큰 저장 유틸리티

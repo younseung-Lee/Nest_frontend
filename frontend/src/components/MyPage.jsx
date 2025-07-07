@@ -420,10 +420,10 @@ const MyPage = ({ onBack, onLogout }) => {
               <span className="user-level">
               {userInfo.userRole === 'MENTOR' ? '멘토' : '멘티'}
             </span>
-              <span className={`user-grade ${userInfo.userGrade.toLowerCase()}`}>
+              {userInfo.userRole === 'MENTEE' && (<span className={`user-grade ${userInfo.userGrade.toLowerCase()}`}>
                 {GradeIcon && <GradeIcon size={16} className="grade-icon"/>}
                 {currentUserGrade.name}
-              </span>
+              </span>)}
             </div>
           </div>
         </div>

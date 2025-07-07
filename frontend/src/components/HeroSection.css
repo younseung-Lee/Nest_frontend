@@ -107,34 +107,37 @@
 
 .primary-button {
   position: relative;
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.75rem;
-  padding: 1.25rem 2.5rem;
-  background: var(--gradient-primary);
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #FF8A00, #FFB000);
   color: white;
-  font-weight: 700;
-  font-size: 1.125rem;
+  font-weight: 600;
+  font-size: 1rem;
   border: none;
   border-radius: 50px;
   cursor: pointer;
-  box-shadow: 0 8px 30px rgba(255, 179, 0, 0.3);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 6px 20px rgba(255, 138, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  text-decoration: none;
+  min-width: 200px;
+  max-width: 280px;
   outline: none;
 }
 
 .primary-button:focus {
   outline: none;
-  box-shadow: 0 8px 30px rgba(255, 179, 0, 0.4);
+  box-shadow: 0 6px 20px rgba(255, 138, 0, 0.4), 0 0 0 3px rgba(255, 138, 0, 0.2);
 }
 
 .primary-button:hover {
-  background: var(--gradient-energy);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 12px 40px rgba(255, 179, 0, 0.4);
+  background: linear-gradient(135deg, #FF7A00, #FF9500);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 138, 0, 0.4);
+  scale: 1.02;
 }
 
 primary-button:active {
@@ -198,32 +201,37 @@ primary-button:active {
 }
 
 .hero-secondary-button {
-  padding: 1.25rem 2.5rem;
-  font-weight: 700;
-  font-size: 1.125rem;
+  padding: 1rem 2rem;
+  font-weight: 600;
+  font-size: 1rem;
   border-radius: 50px;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  color: var(--primary-orange);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #FF8A00;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(20px);
-  border: 2px solid var(--primary-amber);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  border: 2px solid #FF8A00;
   outline: none;
+  min-width: 200px;
+  max-width: 280px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .hero-secondary-button:focus {
   outline: none;
-  box-shadow: 0 4px 20px rgba(255, 179, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(255, 138, 0, 0.2), 0 0 0 3px rgba(255, 138, 0, 0.2);
 }
 
 .hero-secondary-button:hover {
-  background: var(--gradient-primary);
+  background: linear-gradient(135deg, #FF8A00, #FFB000);
   color: white;
-  border-color: var(--primary-orange);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 12px 40px rgba(255, 179, 0, 0.3);
+  border-color: #FF8A00;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 138, 0, 0.3);
+  scale: 1.02;
 }
 
 /* Modern ripple effect */
@@ -295,12 +303,12 @@ primary-button:active {
   }
   
   .primary-button,
-  .secondary-button,
+  .hero-secondary-button,
   .reservation-button {
     width: 100%;
-    max-width: 20rem;
-    padding: 1rem 2rem;
-    font-size: 1rem;
+    max-width: 18rem;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.95rem;
   }
   
   .hero-badge {
@@ -324,10 +332,10 @@ primary-button:active {
   }
   
   .primary-button,
-  .secondary-button,
+  .hero-secondary-button,
   .reservation-button {
-    padding: 0.875rem 1.5rem;
-    font-size: 0.95rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -349,10 +357,10 @@ primary-button:active {
 
 /* Focus states for accessibility - 더 부드러운 포커스 효과 */
 .primary-button:focus-visible,
-.secondary-button:focus-visible,
+.hero-secondary-button:focus-visible,
 .reservation-button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.3);
+  box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.3);
 }
 
 /* High contrast mode support */

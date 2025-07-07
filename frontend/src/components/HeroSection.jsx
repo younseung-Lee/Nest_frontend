@@ -29,7 +29,7 @@ const HeroSection = () => {
         </div>
         
         <h1 className="hero-title">
-          <span className="gradient-text animated-gradient">
+          <span className="gradient-text">
             최고의 전문가들과<br />
             함께 성장하세요
           </span>

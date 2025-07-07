@@ -356,6 +356,9 @@ export const reservationAPI = {
   // 예약 목록 조회
   getReservations: ({ page, size }) => api.get(`/api/reservations?page=${page}&size=${size}`),
 
+  // 민원용 예약 목록 조회
+  getReservationList: (params) => api.get('/api/reservations', {params}),
+
   // 예약 단건 조회
   getReservation: (reservationId) => api.get(
       `/api/reservations/${reservationId}`),
